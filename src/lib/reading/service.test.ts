@@ -36,6 +36,66 @@ describe("reading service integration", () => {
     expect(reading.artwork!.sun.source).toBe("placeholder");
   });
 
+  it("is marked demo when mock providers and fixture symbols are used", async () => {
+    const service = createReadingService();
+    const reading = await service.create({
+      displayName: "Demo Marker",
+      birthDate: "1990-06-15",
+      birthTime: "14:30",
+      timeKnown: true,
+      placeId: "london-uk",
+      consent: true,
+    });
+    await repo.delete(reading.id);
+    expect(reading.isDemo).toBe(true);
+    expect(reading.providers.interpretation).toMatch(/mock/i);
+    expect(reading.providers.image).toMatch(/mock/i);
+    expect(reading.providers.symbolDatasetIsDemo).toBe(true);
+  });
+
+  it("keeps the seven required story chapter titles", async () => {
+    const service = createReadingService();
+    const reading = await service.create({
+      displayName: "Chapter Check",
+      birthDate: "1990-06-15",
+      birthTime: "14:30",
+      timeKnown: true,
+      placeId: "london-uk",
+      consent: true,
+    });
+    await repo.delete(reading.id);
+    const titles = reading.interpretation!.story.map((c) => c.title);
+    expect(titles).toEqual([
+      "The First Image",
+      "The Inner Chamber",
+      "The Mask and the Threshold",
+      "Allies and Gifts",
+      "The Central Tension",
+      "The Road Ahead",
+      "A Closing Reflection",
+    ]);
+  });
+
+  it("produces a story of 1200–1800 words (deterministic)", async () => {
+    const service = createReadingService();
+    const reading = await service.create({
+      displayName: "Wordcount Check",
+      birthDate: "1990-06-15",
+      birthTime: "14:30",
+      timeKnown: true,
+      placeId: "london-uk",
+      consent: true,
+    });
+    await repo.delete(reading.id);
+    const words = reading
+      .interpretation!.story.map((c) => c.body)
+      .join(" ")
+      .split(/\s+/)
+      .filter(Boolean).length;
+    expect(words).toBeGreaterThanOrEqual(1200);
+    expect(words).toBeLessThanOrEqual(1800);
+  });
+
   it("persists and reloads the identical calculated placements", async () => {
     const service = createReadingService();
     const reloaded = await service.get(createdId);

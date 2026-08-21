@@ -99,10 +99,16 @@ export function migrate(db: Db): void {
       chart_json TEXT NOT NULL,
       interpretation_json TEXT,
       artwork_json TEXT,
+      providers_json TEXT,
       status TEXT NOT NULL,
       error TEXT,
       is_demo INTEGER NOT NULL DEFAULT 1
     );
     CREATE INDEX IF NOT EXISTS idx_readings_created ON readings (created_at);
   `);
+  // Migration: add providers_json to pre-existing databases.
+  const cols = db.all<{ name: string }>("PRAGMA table_info(readings)");
+  if (!cols.some((c) => c.name === "providers_json")) {
+    db.exec("ALTER TABLE readings ADD COLUMN providers_json TEXT;");
+  }
 }

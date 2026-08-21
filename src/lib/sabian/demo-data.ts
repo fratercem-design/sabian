@@ -2,164 +2,54 @@
  * DEMO fixture Sabian symbol dataset — clearly labeled development content.
  *
  * IMPORTANT: This is NOT an authorized or canonical set of 360 Sabian
- * symbol texts. It is a small, clearly-labeled development fixture used so
- * the complete engine and interface can be exercised without licensed
- * content. The records here are original editorial summaries written for
- * this project (licenseStatus: "demo-fixture"); they deliberately paraphrase
- * themes without reproducing any published wording.
+ * symbol texts, and it makes no claim to be. Every record uses an
+ * UNMISTAKABLY FICTIONAL placeholder title ("Demo image for Aries 1") so
+ * that no published or near-canonical wording (e.g. "A woman rises from the
+ * sea") is reproduced or implied. Nothing has been scraped or copied.
+ *
+ * Coverage: 120 records (degrees 1–10 of each sign) so the engine and
+ * interface can be exercised. All records have licenseStatus
+ * "demo-fixture"; licensedSourceText is empty; the editorial fields are
+ * original generic commentary written for this project.
  *
  * Required before production/commercial use: import an authorized 360-symbol
- * dataset via scripts/import-symbols and run `npm run validate:symbols`.
- * See README and docs/data-license.md.
+ * dataset and run `npm run validate:symbols`. See README and
+ * docs/data-license.md.
  */
 
 import { SabianSymbolSchema, type SabianSymbol } from "@/lib/sabian/model";
 import { SIGNS, type Sign } from "@/lib/types";
 
-const DEMO_ENTRIES: Array<{ sign: Sign; degree: number; title: string }> = [
-  { sign: "Aries", degree: 1, title: "A Woman Rises from the Sea" },
-  { sign: "Aries", degree: 2, title: "A Comedian Reveals Hidden Energies" },
-  { sign: "Aries", degree: 3, title: "A Cameo Profile of a Man" },
-  { sign: "Aries", degree: 4, title: "Two Lovers Serenade Each Other" },
-  { sign: "Aries", degree: 5, title: "A Triangle with Wings" },
-  { sign: "Aries", degree: 6, title: "A Square with a Square in the Center" },
-  { sign: "Aries", degree: 7, title: "A Man Expresses Himself in Two Realms" },
-  { sign: "Aries", degree: 8, title: "A Rock Crystal Reveals Itself Slowly" },
-  { sign: "Aries", degree: 9, title: "A Crystal Gazer Uses a Bowl of Water" },
-  { sign: "Aries", degree: 10, title: "A Teacher Gives New Direction" },
-  { sign: "Taurus", degree: 1, title: "A Clear Mountain Stream" },
-  { sign: "Taurus", degree: 2, title: "A Storm-Struck Steamer Landing" },
-  { sign: "Taurus", degree: 3, title: "An Archaic Clay Vessel" },
-  { sign: "Taurus", degree: 4, title: "The Pot of Gold at the Rainbow's End" },
-  { sign: "Taurus", degree: 5, title: "A Widow's Veil Lifted by a Wind" },
-  { sign: "Taurus", degree: 6, title: "A Bridge Builder Surveys the Work" },
-  { sign: "Taurus", degree: 7, title: "A Woman of Samaria at the Well" },
-  { sign: "Taurus", degree: 8, title: "A Sleigh With Bright Gifts on a Snowy Field" },
-  { sign: "Taurus", degree: 9, title: "A Christmas Tree with Gifts" },
-  { sign: "Taurus", degree: 10, title: "A Red Cross Nurse" },
-  { sign: "Gemini", degree: 1, title: "A Glass Bottomed Boat Reveals the Ocean Floor" },
-  { sign: "Gemini", degree: 2, title: "The Santa Fe Trail" },
-  { sign: "Gemini", degree: 3, title: "A Cafeteria Table in a School" },
-  { sign: "Gemini", degree: 4, title: "The Pot of Gold at the Rainbow's End" },
-  { sign: "Gemini", degree: 5, title: "Two Girls Playing with a Ouija Board" },
-  { sign: "Gemini", degree: 6, title: "A Boy With a Censor at a Shrine" },
-  { sign: "Gemini", degree: 7, title: "A Two-Headed Man" },
-  { sign: "Gemini", degree: 8, title: "A Black Slave Demands His Freedom" },
-  { sign: "Gemini", degree: 9, title: "A Quiver Filled with Arrows" },
-  { sign: "Gemini", degree: 10, title: "A Barn Dance" },
-  { sign: "Cancer", degree: 1, title: "A Ship's Captain, a Sailor, and a Passenger" },
-  { sign: "Cancer", degree: 2, title: "A Meeting of a Choir" },
-  { sign: "Cancer", degree: 3, title: "A Small Child Learning to Walk" },
-  { sign: "Cancer", degree: 4, title: "A Cat Arguing with a Mouse" },
-  { sign: "Cancer", degree: 5, title: "A Race Between a Yacht and a Motorboat" },
-  { sign: "Cancer", degree: 6, title: "A Woman Reading Tea Leaves" },
-  { sign: "Cancer", degree: 7, title: "Two Children in a Swing" },
-  { sign: "Cancer", degree: 8, title: "A Negro Girl Bred in Slavery" },
-  { sign: "Cancer", degree: 9, title: "A Red Cross Nurse" },
-  { sign: "Cancer", degree: 10, title: "A Large Diamond in a Crown" },
-  { sign: "Leo", degree: 1, title: "A Woman with a Horn of Plenty" },
-  { sign: "Leo", degree: 2, title: "An Epidemic of Measles" },
-  { sign: "Leo", degree: 3, title: "An Old Schoolmaster Teaching His Pupils" },
-  { sign: "Leo", degree: 4, title: "A Man Seated in a Buddha-like Pose" },
-  { sign: "Leo", degree: 5, title: "A Council of Ancestors" },
-  { sign: "Leo", degree: 6, title: "A Family Tree" },
-  { sign: "Leo", degree: 7, title: "A Constellation of Stars" },
-  { sign: "Leo", degree: 8, title: "A Racketeer and His Idealistic Self" },
-  { sign: "Leo", degree: 9, title: "A Crystal Gazer Uses a Bowl of Water" },
-  { sign: "Leo", degree: 10, title: "A Large Cameo of a Woman's Face" },
-  { sign: "Virgo", degree: 1, title: "A Man at a Windy Beach" },
-  { sign: "Virgo", degree: 2, title: "A Large White Cross in a Red Sky" },
-  { sign: "Virgo", degree: 3, title: "Two Guardians of the Peace" },
-  { sign: "Virgo", degree: 4, title: "An Eagle About to Take Flight" },
-  { sign: "Virgo", degree: 5, title: "A Wealthy Man Awakening from Sleep" },
-  { sign: "Virgo", degree: 6, title: "A Boy Playing a Flute" },
-  { sign: "Virgo", degree: 7, title: "A Man in a Garden Weeding" },
-  { sign: "Virgo", degree: 8, title: "A Red-Cross Nurse with a Blanket" },
-  { sign: "Virgo", degree: 9, title: "A Young Woman Feeding Chickens" },
-  { sign: "Virgo", degree: 10, title: "A Group of Pilgrims on a Hillside" },
-  { sign: "Libra", degree: 1, title: "A Butterfly Preserved in a Glass Case" },
-  { sign: "Libra", degree: 2, title: "The Light of the Sixth Race" },
-  { sign: "Libra", degree: 3, title: "An Artist at Work" },
-  { sign: "Libra", degree: 4, title: "A Man Seeking Lost Knowledge" },
-  { sign: "Libra", degree: 5, title: "A Man Teaching True Inner Knowledge" },
-  { sign: "Libra", degree: 6, title: "The Ideal of a Man Overdeveloped" },
-  { sign: "Libra", degree: 7, title: "A Man Riding a Horse with a Reins of Light" },
-  { sign: "Libra", degree: 8, title: "A Man Sowing Seeds" },
-  { sign: "Libra", degree: 9, title: "A Crowd on a Beach" },
-  { sign: "Libra", degree: 10, title: "A Man in a Cinema" },
-  { sign: "Scorpio", degree: 1, title: "A Sightseer Looks Into a Dark Cave" },
-  { sign: "Scorpio", degree: 2, title: "A Peaceful Harbor" },
-  { sign: "Scorpio", degree: 3, title: "A Woman Drawing Water from a Well" },
-  { sign: "Scorpio", degree: 4, title: "A Green Cross on a White Hill" },
-  { sign: "Scorpio", degree: 5, title: "A Labor Day Parade" },
-  { sign: "Scorpio", degree: 6, title: "A Bear Walking" },
-  { sign: "Scorpio", degree: 7, title: "A Man Watching His Ideals Take Form" },
-  { sign: "Scorpio", degree: 8, title: "A Rabbit Surrounded by Butterflies" },
-  { sign: "Scorpio", degree: 9, title: "A Fighter's Contest" },
-  { sign: "Scorpio", degree: 10, title: "A Fisherman Casts His Net" },
-  { sign: "Sagittarius", degree: 1, title: "An Old Man on a Mountainside" },
-  { sign: "Sagittarius", degree: 2, title: "A Woman Carrying a Cross" },
-  { sign: "Sagittarius", degree: 3, title: "A Tidal Wave of Birds" },
-  { sign: "Sagittarius", degree: 4, title: "A Youth and His Dog" },
-  { sign: "Sagittarius", degree: 5, title: "A Many-Colored Silk Robe" },
-  { sign: "Sagittarius", degree: 6, title: "A Glass Blower Shapes a Vase" },
-  { sign: "Sagittarius", degree: 7, title: "A Flight of Wild Geese" },
-  { sign: "Sagittarius", degree: 8, title: "A Child Sits in a Crib" },
-  { sign: "Sagittarius", degree: 9, title: "A Winged Archer" },
-  { sign: "Sagittarius", degree: 10, title: "A Mosque Against the Desert Sky" },
-  { sign: "Capricorn", degree: 1, title: "A Crowd on a Beach" },
-  { sign: "Capricorn", degree: 2, title: "A Four-Leaf Clover" },
-  { sign: "Capricorn", degree: 3, title: "A Sculptor's Workshop" },
-  { sign: "Capricorn", degree: 4, title: "A Pair of Gloves" },
-  { sign: "Capricorn", degree: 5, title: "A Man in Deep Meditation" },
-  { sign: "Capricorn", degree: 6, title: "A Ship Docked at a Pier" },
-  { sign: "Capricorn", degree: 7, title: "A Bird Flying in a Cage" },
-  { sign: "Capricorn", degree: 8, title: "A Mason Working on a Wall" },
-  { sign: "Capricorn", degree: 9, title: "A Woman in a Fur-Lined Coat" },
-  { sign: "Capricorn", degree: 10, title: "A Bridge Being Blown Up" },
-  { sign: "Aquarius", degree: 1, title: "An Old Adobe Mission" },
-  { sign: "Aquarius", degree: 2, title: "A Surprise Party" },
-  { sign: "Aquarius", degree: 3, title: "A Desert Wanderer" },
-  { sign: "Aquarius", degree: 4, title: "A Hindu Yoga Teacher" },
-  { sign: "Aquarius", degree: 5, title: "A Large Gate of an Ancient Temple" },
-  { sign: "Aquarius", degree: 6, title: "A Traffic Accident" },
-  { sign: "Aquarius", degree: 7, title: "An Ancient Pottery Bowl" },
-  { sign: "Aquarius", degree: 8, title: "A Waterfall in a Forest" },
-  { sign: "Aquarius", degree: 9, title: "A Volcano Erupting" },
-  { sign: "Aquarius", degree: 10, title: "A Man Teaching a Crowd" },
-  { sign: "Pisces", degree: 1, title: "A Public Market" },
-  { sign: "Pisces", degree: 2, title: "A Sculptor at Work" },
-  { sign: "Pisces", degree: 3, title: "A Soldier's Return" },
-  { sign: "Pisces", degree: 4, title: "A Child in a Garden" },
-  { sign: "Pisces", degree: 5, title: "A Rock Lizard on a Sunlit Wall" },
-  { sign: "Pisces", degree: 6, title: "A Boat Coming to Shore" },
-  { sign: "Pisces", degree: 7, title: "A Little White Lamb" },
-  { sign: "Pisces", degree: 8, title: "A Troupe of Actors" },
-  { sign: "Pisces", degree: 9, title: "A Seer Gazing into a Crystal" },
-  { sign: "Pisces", degree: 10, title: "The Last Judgment" },
-];
+const DEMO_COVERAGE = 10; // degrees 1..10 of each sign
 
-function demoEntry(entry: (typeof DEMO_ENTRIES)[number]): SabianSymbol {
-  const signIndex = SIGNS.indexOf(entry.sign);
-  const globalIndex = signIndex * 30 + entry.degree;
+/** Unmistakably fictional placeholder title — never canonical wording. */
+function demoTitle(sign: Sign, degree: number): string {
+  return `Demo image for ${sign} ${degree}`;
+}
+
+function demoEntry(sign: Sign, degree: number): SabianSymbol {
+  const signIndex = SIGNS.indexOf(sign);
+  const globalIndex = signIndex * 30 + degree;
+  const title = demoTitle(sign, degree);
   return SabianSymbolSchema.parse({
     globalIndex,
-    sign: entry.sign,
-    degree: entry.degree,
-    title: entry.title,
-    sourceVersion: "demo-fixture-1",
-    sourceAttribution: "Original editorial summaries written for The Sabian Story (demo fixture)",
+    sign,
+    degree,
+    title,
+    sourceVersion: "demo-fixture-2",
+    sourceAttribution:
+      "Original demo fixture written for The Sabian Story (fictional placeholder; not a Sabian symbol text)",
     licenseStatus: "demo-fixture",
     licensedSourceText: "",
-    originalEditorialInterpretation: `The image of "${entry.title}" invites a contemplative pause: what takes shape when ${entry.sign.toLowerCase()} ${entry.degree} is met with an open mind rather than a fixed answer.`,
-    keywords: ["reflection", "threshold", "emergence"],
-    lightExpression:
-      "A quality of awareness that can support clarity and grounded insight when approached gently.",
-    shadowExpression:
-      "The same image, unexamined, may pull toward rigidity or avoidance; noticing it is the first step.",
-    reflectionQuestion: `What part of your life does the image of "${entry.title}" most echo right now?`,
-    visualMotifs: ["celestial geometry", "threshold", "figures in quiet motion"],
+    originalEditorialInterpretation: `This is a demo placeholder for the Sabian degree ${sign} ${degree}. It deliberately carries no canonical or published meaning; it exists only to exercise the reading interface until an authorized dataset is imported.`,
+    keywords: ["demo", "placeholder"],
+    lightExpression: "A neutral demo placeholder with no interpretive claim.",
+    shadowExpression: "A neutral demo placeholder with no interpretive claim.",
+    reflectionQuestion: `This demo degree (${sign} ${degree}) is a placeholder with no authorized image. What would your own image for it be?`,
+    visualMotifs: ["celestial geometry"],
   });
 }
 
-export const demoSabianSymbols: SabianSymbol[] = DEMO_ENTRIES.map(demoEntry);
+export const demoSabianSymbols: SabianSymbol[] = SIGNS.flatMap((sign) =>
+  Array.from({ length: DEMO_COVERAGE }, (_, i) => demoEntry(sign, i + 1))
+);

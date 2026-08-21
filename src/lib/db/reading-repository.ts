@@ -38,6 +38,7 @@ interface ReadingRow {
   chart_json: string;
   interpretation_json: string | null;
   artwork_json: string | null;
+  providers_json: string | null;
   status: string;
   error: string | null;
   is_demo: number;
@@ -55,8 +56,8 @@ export class SqliteReadingRepository implements ReadingRepository {
       `INSERT INTO readings (
         id, created_at, display_name, birth_date, birth_time, time_known,
         time_notation, place_id, place_json, chart_json, interpretation_json,
-        artwork_json, status, error, is_demo
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        artwork_json, providers_json, status, error, is_demo
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         reading.id,
         reading.createdAt,
@@ -70,6 +71,7 @@ export class SqliteReadingRepository implements ReadingRepository {
         JSON.stringify(reading.chart),
         reading.interpretation ? JSON.stringify(reading.interpretation) : null,
         reading.artwork ? JSON.stringify(reading.artwork) : null,
+        JSON.stringify(reading.providers),
         reading.status,
         reading.error ?? null,
         reading.isDemo ? 1 : 0,
@@ -130,6 +132,9 @@ export class SqliteReadingRepository implements ReadingRepository {
       status: row.status as Reading["status"],
       error: row.error ?? undefined,
       isDemo: row.is_demo === 1,
+      providers: row.providers_json
+        ? JSON.parse(row.providers_json)
+        : { interpretation: "unknown", image: "unknown", symbolDatasetIsDemo: row.is_demo === 1 },
     };
   }
 }

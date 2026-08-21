@@ -92,6 +92,7 @@ export type InterpretationInput = {
     degree: number;
     title: string;
     licensedSourceText?: string;
+    licenseStatus?: string;
     keywords: string[];
     lightExpression: string;
     shadowExpression: string;

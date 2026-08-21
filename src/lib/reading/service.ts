@@ -30,7 +30,7 @@ import { createImageGenerationProvider, type ImageGenerationProvider } from "@/l
 import { hashPrompt } from "@/lib/art/art-cache";
 import { createReadingRepository, newReadingId, type ReadingRepository } from "@/lib/db/reading-repository";
 import { validateInterpretation, type InterpretationInput, type InterpretationOutput } from "@/lib/interpretation/contract";
-import { isTestingMode, seededRandom } from "@/lib/config";
+import { seededRandom } from "@/lib/config";
 import type { Reading, PlaceResult, ChartData, GeneratedArtwork } from "@/lib/types";
 
 export type PipelineStage =
@@ -127,6 +127,16 @@ export class ReadingService {
     this.emit("finding-symbols");
     const symbols = this.findSymbols(chart);
 
+    // isDemo is derived from the actual providers that ran and the symbol
+    // dataset used — not from a global "testing mode" flag. It is true
+    // whenever mock text, mock artwork, or the incomplete demo-fixture
+    // symbol dataset is used.
+    const symbolDatasetIsDemo = symbols.some((s) => s.licenseStatus === "demo-fixture");
+    const isDemo =
+      this.interpretation.name.includes("mock") ||
+      this.image.name.includes("mock") ||
+      symbolDatasetIsDemo;
+
     const reading: Reading = {
       id: newReadingId(),
       createdAt: new Date().toISOString(),
@@ -138,7 +148,12 @@ export class ReadingService {
       place,
       chart,
       status: "generating",
-      isDemo: !isTestingMode,
+      isDemo,
+      providers: {
+        interpretation: this.interpretation.name,
+        image: this.image.name,
+        symbolDatasetIsDemo,
+      },
     };
     await this.repo.create(reading);
 
@@ -193,6 +208,7 @@ export class ReadingService {
         degree: p.sabianDegree,
         title: symbol?.title ?? `${p.sign} ${p.sabianDegree} — an unrecorded image`,
         licensedSourceText: symbol?.licensedSourceText ?? "",
+        licenseStatus: symbol?.licenseStatus ?? "needs-licensed-content",
         keywords: symbol?.keywords ?? [],
         lightExpression: symbol?.lightExpression ?? "",
         shadowExpression: symbol?.shadowExpression ?? "",

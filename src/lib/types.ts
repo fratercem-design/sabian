@@ -198,7 +198,15 @@ export interface Reading {
   artwork?: Record<string, GeneratedArtwork>;
   status: "pending" | "generating" | "ready" | "failed";
   error?: string;
+  /** True whenever mock text, mock artwork, or incomplete fixture symbols were used. */
   isDemo: boolean;
+  /** Provider metadata for demo disclosure: which text/art providers ran. */
+  providers: {
+    interpretation: string;
+    image: string;
+    /** True when the symbol dataset is the demo fixture (incomplete). */
+    symbolDatasetIsDemo: boolean;
+  };
 }
 
 /** Entitlement tiers prepared for future monetization (never enforced in testing mode). */

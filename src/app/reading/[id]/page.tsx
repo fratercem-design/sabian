@@ -112,7 +112,7 @@ function ReadyReading({ reading }: { reading: Reading }) {
         </div>
       </section>
 
-      <DemoTextBadgeContainer />
+      <DemoBadgeContainer reading={reading} />
 
       {/* The Three Gates */}
       <section className="mx-auto max-w-5xl px-5 py-16" aria-labelledby="gates">
@@ -318,7 +318,7 @@ function GatePanel({
   );
 }
 
-function Artwork({ artwork, altText }: { artwork?: { imageUrl: string; altText: string }; altText: string }) {
+function Artwork({ artwork, altText }: { artwork?: { imageUrl: string; altText: string; source?: string }; altText: string }) {
   if (!artwork) {
     return (
       <div className="flex aspect-square items-center justify-center rounded-xl border border-gold/20 bg-midnight-900 text-sm text-silver-mist">
@@ -326,14 +326,13 @@ function Artwork({ artwork, altText }: { artwork?: { imageUrl: string; altText: 
       </div>
     );
   }
+  const isPlaceholder = artwork.source === "placeholder" || artwork.source === "failed";
   return (
     <div>
       {/* Demo artwork is an inline data-URL SVG; next/image adds no value here. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={artwork.imageUrl} alt={altText} className="aspect-square w-full rounded-xl object-cover" />
-      <div className="mt-2">
-        <DemoArtworkBadge />
-      </div>
+      <div className="mt-2">{isPlaceholder && <DemoArtworkBadge />}</div>
     </div>
   );
 }
@@ -350,10 +349,19 @@ function UnknownAscendant({ explanation }: { explanation: string }) {
   );
 }
 
-function DemoTextBadgeContainer() {
+function DemoBadgeContainer({ reading }: { reading: Reading }) {
+  const mockText = reading.providers?.interpretation?.includes("mock") ?? reading.isDemo;
+  const mockArt = reading.providers?.image?.includes("mock") ?? reading.isDemo;
+  if (!reading.isDemo && !mockText && !mockArt) return null;
   return (
-    <div className="mx-auto flex max-w-5xl justify-center px-5 pb-4">
-      <DemoTextBadge />
+    <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-2 px-5 pb-4">
+      {mockText && <DemoTextBadge />}
+      {mockArt && <DemoArtworkBadge />}
+      {reading.providers?.symbolDatasetIsDemo && (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-dust/40 bg-violet-deep/40 px-2.5 py-0.5 text-[11px] tracking-wideish text-silver-moon">
+          Demo symbol dataset — placeholders, not licensed Sabian texts
+        </span>
+      )}
     </div>
   );
 }
