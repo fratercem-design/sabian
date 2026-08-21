@@ -12,7 +12,8 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync
 import { join } from "node:path";
 import type { GeneratedArtwork } from "@/lib/types";
 
-export const ART_CACHE_DIR = join(process.cwd(), "data", "art-cache");
+export const ART_CACHE_DIR =
+  process.env.ART_CACHE_DIR ?? join(process.cwd(), "data", "art-cache");
 
 export interface ArtCache {
   get(key: string): GeneratedArtwork | null;

@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:integration": "vitest run --config vitest.integration.config.mts",
     "validate:symbols": "tsx scripts/validate-symbols.ts",
     "cleanup:readings": "tsx scripts/cleanup-readings.ts",
     "e2e": "playwright test",
@@ -43,6 +43,6 @@
     "tailwindcss": "^3.4.6",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.11"
   }
 }
