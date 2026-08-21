@@ -17,7 +17,7 @@ export default defineConfig({
     {
       name: "desktop-chromium",
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
-      testMatch: /journey\.spec\.ts/,
+      testMatch: /(journey|birth-time-integrity|browser-quality)\.spec\.ts/,
     },
     {
       name: "mobile-chromium",
@@ -35,5 +35,11 @@ export default defineConfig({
     url: "http://localhost:3100",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      // Isolated runtime state: the browser tests never touch the real
+      // database or artwork cache.
+      DATABASE_URL: "file:./.e2e-tmp/sabian.e2e.db",
+      ART_CACHE_DIR: "./.e2e-tmp/art-cache",
+    },
   },
 });

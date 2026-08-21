@@ -44,3 +44,4 @@ data/art-cache/
 /playwright/.cache/
 /.tmp-test/
 sabian-story-tests/
+/.e2e-tmp/
