@@ -102,13 +102,17 @@ export function migrate(db: Db): void {
       providers_json TEXT,
       status TEXT NOT NULL,
       error TEXT,
-      is_demo INTEGER NOT NULL DEFAULT 1
+      is_demo INTEGER NOT NULL DEFAULT 1,
+      saved INTEGER NOT NULL DEFAULT 0
     );
     CREATE INDEX IF NOT EXISTS idx_readings_created ON readings (created_at);
   `);
-  // Migration: add providers_json to pre-existing databases.
+  // Migration: add providers_json / saved to pre-existing databases.
   const cols = db.all<{ name: string }>("PRAGMA table_info(readings)");
   if (!cols.some((c) => c.name === "providers_json")) {
     db.exec("ALTER TABLE readings ADD COLUMN providers_json TEXT;");
+  }
+  if (!cols.some((c) => c.name === "saved")) {
+    db.exec("ALTER TABLE readings ADD COLUMN saved INTEGER NOT NULL DEFAULT 0;");
   }
 }

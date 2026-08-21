@@ -16,6 +16,8 @@ export interface ReadingRepository {
   /** Update an existing reading (used for status transitions). */
   update(reading: Reading): Promise<Reading>;
   getById(id: string): Promise<Reading | null>;
+  /** Explicit opt-in save of a generated reading. */
+  markSaved(id: string): Promise<boolean>;
   delete(id: string): Promise<boolean>;
   /** Remove readings older than `days` days; returns count removed. */
   cleanup(days: number): Promise<number>;
@@ -42,6 +44,7 @@ interface ReadingRow {
   status: string;
   error: string | null;
   is_demo: number;
+  saved: number;
 }
 
 export class SqliteReadingRepository implements ReadingRepository {
@@ -56,8 +59,8 @@ export class SqliteReadingRepository implements ReadingRepository {
       `INSERT INTO readings (
         id, created_at, display_name, birth_date, birth_time, time_known,
         time_notation, place_id, place_json, chart_json, interpretation_json,
-        artwork_json, providers_json, status, error, is_demo
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        artwork_json, providers_json, status, error, is_demo, saved
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         reading.id,
         reading.createdAt,
@@ -75,6 +78,7 @@ export class SqliteReadingRepository implements ReadingRepository {
         reading.status,
         reading.error ?? null,
         reading.isDemo ? 1 : 0,
+        reading.saved ? 1 : 0,
       ]
     );
     return reading;
@@ -102,6 +106,13 @@ export class SqliteReadingRepository implements ReadingRepository {
     return this.rowToReading(row);
   }
 
+  async markSaved(id: string): Promise<boolean> {
+    const row = this.db.get<ReadingRow>(`SELECT * FROM readings WHERE id = ?`, [id]);
+    if (!row) return false;
+    this.db.run(`UPDATE readings SET saved = 1 WHERE id = ?`, [id]);
+    return true;
+  }
+
   async delete(id: string): Promise<boolean> {
     this.db.run(`DELETE FROM readings WHERE id = ?`, [id]);
     return true;
@@ -109,8 +120,13 @@ export class SqliteReadingRepository implements ReadingRepository {
 
   async cleanup(days: number): Promise<number> {
     const cutoff = new Date(Date.now() - days * 86400000).toISOString();
+    // Stale failed/generating records (older than a day) are removed even if
+    // they are inside the retention window — an interrupted generation has no
+    // opt-in save and holds birth data that must not linger.
+    const staleCutoff = new Date(Date.now() - 86400000).toISOString();
     const before = this.db.get<{ n: number }>(`SELECT COUNT(*) AS n FROM readings`)?.n ?? 0;
     this.db.run(`DELETE FROM readings WHERE created_at < ?`, [cutoff]);
+    this.db.run(`DELETE FROM readings WHERE status IN ('failed', 'generating', 'pending') AND created_at < ?`, [staleCutoff]);
     const after = this.db.get<{ n: number }>(`SELECT COUNT(*) AS n FROM readings`)?.n ?? 0;
     return before - after;
   }
@@ -132,6 +148,7 @@ export class SqliteReadingRepository implements ReadingRepository {
       status: row.status as Reading["status"],
       error: row.error ?? undefined,
       isDemo: row.is_demo === 1,
+      saved: row.saved === 1,
       providers: row.providers_json
         ? JSON.parse(row.providers_json)
         : { interpretation: "unknown", image: "unknown", symbolDatasetIsDemo: row.is_demo === 1 },

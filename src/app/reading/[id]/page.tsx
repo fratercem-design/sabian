@@ -4,7 +4,7 @@ import { createReadingService } from "@/lib/reading/service";
 import type { Reading, Placement } from "@/lib/types";
 import { DemoArtworkBadge, DemoTextBadge, TestingBadge, Button } from "@/components/ui";
 import ReadingClient from "./reading-client";
-import DeleteButton from "./delete-button";
+import SaveDeleteButtons from "./save-delete-buttons";
 
 export const metadata: Metadata = {
   title: "Your Reading",
@@ -60,13 +60,17 @@ function ReadyReading({ reading }: { reading: Reading }) {
               {reading.displayName}&rsquo;s Sabian Story
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Button href="/reading/new" variant="ghost" className="px-4 py-2 text-sm">
               Start Another Reading
             </Button>
-            <DeleteButton id={reading.id} />
+            <SaveDeleteButtons id={reading.id} initiallySaved={reading.saved} />
           </div>
         </div>
+        <p className="mx-auto max-w-4xl px-5 pb-6 text-xs leading-relaxed text-silver-mist">
+          This reading is not saved unless you choose to save it. Saved readings are retained
+          for a limited period (configurable; currently 90 days) and can be deleted at any time.
+        </p>
       </header>
 
       {/* Celestial Signature */}

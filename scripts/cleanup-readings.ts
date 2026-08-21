@@ -2,10 +2,12 @@
  * Development cleanup command.
  *
  * Removes readings older than the configured retention period (or a
- * --days=N override). Run with: npm run cleanup:readings
+ * --days=N override), plus stale failed/generating records and old artwork
+ * cache entries. Run with: npm run cleanup:readings
  */
 
 import { createReadingRepository } from "@/lib/db/reading-repository";
+import { createArtCache } from "@/lib/art/art-cache";
 import { env } from "@/lib/config";
 
 async function main() {
@@ -17,7 +19,12 @@ async function main() {
   }
   const repo = createReadingRepository();
   const removed = await repo.cleanup(days);
-  console.log(`Cleanup complete: removed ${removed} reading(s) older than ${days} day(s).`);
+  const artCache = createArtCache();
+  const artRemoved = artCache.cleanup(days);
+  console.log(
+    `Cleanup complete: removed ${removed} reading(s) older than ${days} day(s), ` +
+      `plus stale failed/pending records, and ${artRemoved} artwork cache entr${artRemoved === 1 ? "y" : "ies"}.`
+  );
 }
 
 main().catch((err) => {

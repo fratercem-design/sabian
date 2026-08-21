@@ -200,6 +200,8 @@ export interface Reading {
   error?: string;
   /** True whenever mock text, mock artwork, or incomplete fixture symbols were used. */
   isDemo: boolean;
+  /** Whether the user explicitly chose to save this reading (opt-in). */
+  saved: boolean;
   /** Provider metadata for demo disclosure: which text/art providers ran. */
   providers: {
     interpretation: string;

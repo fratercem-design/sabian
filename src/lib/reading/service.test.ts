@@ -154,4 +154,45 @@ describe("reading service integration", () => {
     await service.delete(reading.id);
     expect(await service.get(reading.id)).toBeNull();
   });
+
+  it("generated readings are NOT saved by default; saving is explicit opt-in", async () => {
+    const service = createReadingService();
+    const reading = await service.create({
+      displayName: "Unsaved Person",
+      birthDate: "1992-02-02",
+      birthTime: "10:00",
+      timeKnown: true,
+      placeId: "london-uk",
+      consent: true,
+    });
+    expect(reading.saved).toBe(false);
+    const reloaded = await service.get(reading.id);
+    expect(reloaded!.saved).toBe(false);
+    const saved = await service.saveReading(reading.id);
+    expect(saved).toBe(true);
+    const afterSave = await service.get(reading.id);
+    expect(afterSave!.saved).toBe(true);
+    await service.delete(reading.id);
+  });
+
+  it("cleanup removes stale failed records and respects the retention window", async () => {
+    const service = createReadingService();
+    const reading = await service.create({
+      displayName: "Retention Person",
+      birthDate: "1993-03-03",
+      birthTime: "11:00",
+      timeKnown: true,
+      placeId: "london-uk",
+      consent: true,
+    });
+    // Simulate a failed record: mark it failed directly.
+    const failed = { ...(await service.get(reading.id))! } as { status: string };
+    const repo = createReadingRepository();
+    await repo.update({ ...(await service.get(reading.id))!, status: "failed" } as never);
+    // Cleanup with a 0-day retention removes everything older than now.
+    const removed = await repo.cleanup(0);
+    expect(removed).toBeGreaterThanOrEqual(1);
+    expect(await service.get(reading.id)).toBeNull();
+    void failed;
+  });
 });

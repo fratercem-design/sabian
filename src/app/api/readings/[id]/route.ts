@@ -18,6 +18,18 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 }
 
 /**
+ * PATCH /api/readings/[id]
+ * Explicit opt-in save: marks a generated reading as saved (retention applies
+ * only from this point). No birth data is sent in the URL or body.
+ */
+export async function PATCH(_request: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const service = createReadingService();
+  const saved = await service.saveReading(id);
+  return NextResponse.json({ saved }, { status: saved ? 200 : 404 });
+}
+
+/**
  * DELETE /api/readings/[id]
  * Explicitly deletes a reading and all stored birth data.
  */

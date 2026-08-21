@@ -149,6 +149,9 @@ export class ReadingService {
       chart,
       status: "generating",
       isDemo,
+      // Generated readings are NOT saved by default; saving is an explicit,
+      // opt-in user action with the retention period disclosed up front.
+      saved: false,
       providers: {
         interpretation: this.interpretation.name,
         image: this.image.name,
@@ -186,6 +189,11 @@ export class ReadingService {
 
   async get(id: string): Promise<Reading | null> {
     return this.repo.getById(id);
+  }
+
+  /** Explicit opt-in: mark a generated reading as saved. */
+  async saveReading(id: string): Promise<boolean> {
+    return this.repo.markSaved(id);
   }
 
   async delete(id: string): Promise<boolean> {
