@@ -6,10 +6,13 @@ databases, temporary artwork caches — see below). Dates: 2026-08-21.
 
 ## Isolated environment
 
-Every test run uses a unique per-run temporary database and artwork cache
-(`vitest.tmpdir.mts` + `vitest.setup.ts`); the Playwright dev server runs
-against `.e2e-tmp/`. No command in this verification touched `data/sabian.db`
-or the real artwork cache.
+The final verification ran in an **isolated fresh copy**: a detached git
+worktree of HEAD (`sabian-verify-copy`) with a clean `npm ci` from the
+committed lockfile, then removed afterward. Every test run uses a unique
+per-run temporary database and artwork cache (`vitest.tmpdir.mts` +
+`vitest.setup.ts`); the Playwright dev server runs against `.e2e-tmp/`. No
+command touched `data/sabian.db` or the real artwork cache in either the copy
+or the main repo.
 
 ## 1. Dependency installation from the committed lockfile
 
