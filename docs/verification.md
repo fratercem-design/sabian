@@ -1,7 +1,15 @@
 # Verification results
 
-All commands were run on **Windows, Node v24.18.0, npm 11.16.0** in the project root.
-Dates: 2026-08-21.
+All commands were run on **Windows, Node v24.18.0, npm 11.16.0** in the project
+root, against the **isolated verification copy** (fresh `npm ci`, temporary
+databases, temporary artwork caches — see below). Dates: 2026-08-21.
+
+## Isolated environment
+
+Every test run uses a unique per-run temporary database and artwork cache
+(`vitest.tmpdir.mts` + `vitest.setup.ts`); the Playwright dev server runs
+against `.e2e-tmp/`. No command in this verification touched `data/sabian.db`
+or the real artwork cache.
 
 ## 1. Dependency installation from the committed lockfile
 
@@ -9,11 +17,25 @@ Dates: 2026-08-21.
 npm ci
 ```
 
-> The lockfile (package-lock.json) is committed. The initial install was performed with
-> `npm install` and the resulting lockfile is the source of truth for `npm ci`.
-> **Result: passed** (440 packages installed, no audit findings reported).
+**Result: passed** — clean install from `package-lock.json`, 0 errors.
 
-## 2. Lint
+## 2. `npm audit`
+
+```bash
+npm audit
+```
+
+**Result: passed — 0 vulnerabilities** (full dependency tree).
+
+## 3. `npm audit --omit=dev`
+
+```bash
+npm audit --omit=dev
+```
+
+**Result: passed — 0 vulnerabilities** (production-only).
+
+## 4. Lint
 
 ```bash
 npm run lint        # eslint .
@@ -21,7 +43,7 @@ npm run lint        # eslint .
 
 **Result: passed** — 0 errors, 0 warnings.
 
-## 3. Type checking
+## 5. Strict typecheck
 
 ```bash
 npm run typecheck   # tsc --noEmit
@@ -29,30 +51,31 @@ npm run typecheck   # tsc --noEmit
 
 **Result: passed** — strict mode, no errors.
 
-## 4. Unit tests
+## 6. Unit tests
 
 ```bash
 npm test            # vitest run
 ```
 
-**Result: passed — 31/31 tests.**
+**Result: passed — 62/62 tests** across 5 files:
 
 | File | Tests | Coverage |
 | --- | --- | --- |
 | src/lib/chart/celestial.test.ts | 12 | longitude normalization, sign mapping, DMS, ΔT, sidereal time, obliquity, Sabian convention incl. 0°00′00″, 0°00′01″, fractional, 29°59′59″ of every sign, Aries↔Pisces boundary, trailing-edge |
-| src/lib/time/birthtime.test.ts | 11 | historical offsets (London BST/GMT, Poland 1920, US DST 1987, EST), timezone validation, unknown-time midnight, reference chart (JPII) |
-| src/lib/sabian/dataset.test.ts | 3 | dataset uniqueness, license labeling, global-index consistency |
-| src/lib/reading/service.test.ts | 5 | full pipeline, persistence/reload, unknown-time reduction, consent refusal, deletion |
+| src/lib/chart/reference-chart.test.ts | 18 | independent reference chart (JPII): Sun, Moon, 8 planets, North Node (osculating, never descending), Ascendant, MC, house placements, numerical Placidus cusp equations, node continuity/retrograde |
+| src/lib/time/birthtime.test.ts | 19 | historical offsets, calendar-date integrity (Feb 30 etc.), DST gap rejection, DST overlap with both offset choices, local-day bounds, moon-uncertainty window |
+| src/lib/sabian/dataset.test.ts | 3 | demo dataset uniqueness, license labeling, global-index consistency |
+| src/lib/reading/service.test.ts | 10 | full pipeline, persistence/reload, unknown-time reduction, consent refusal, deletion, opt-in save, cleanup, demo marking, chapter titles, story word count |
 
-## 5. Integration tests
+## 7. Integration tests (isolated SQLite)
 
 ```bash
 npm run test:integration
 ```
 
-**Result: passed — 5/5** (database-backed, real SQLite file `data/sabian.test.db`).
+**Result: passed — 10/10** (database-backed, isolated temp SQLite file).
 
-## 6. Dataset validation
+## 8. Symbol validation
 
 ```bash
 npm run validate:symbols
@@ -71,92 +94,107 @@ Licenses:      {"demo-fixture":120}
 Result:        INCOMPLETE (see above)
 ```
 
-Explicit statement: **an authorized complete 360-symbol dataset has not been imported**.
-All 120 demo records are original editorial summaries labeled `demo-fixture`; nothing was
-scraped or copied. The validator itself is proven: it detects duplicates, missing degrees,
-and inconsistent global indices, and would report PASS for a full authorized dataset.
+All 120 records use **unmistakably fictional placeholder titles** ("Demo image
+for Aries 1"), `licenseStatus: "demo-fixture"`, empty `licensedSourceText`, and
+fictional provenance fields. **No authorized 360-symbol dataset is imported.**
+The validator itself is proven: it detects duplicates, missing degrees, and
+inconsistent global indices, and would report PASS for a full authorized
+dataset.
 
-## 7. Production build
+## 9. Production build
 
 ```bash
 npm run build       # next build
 ```
 
-**Result: passed.** Routes: `/`, `/reading/new`, `/reading/[id]` (dynamic), `/about/method`,
-`/privacy`, `/api/places`, `/api/readings`, `/api/readings/[id]`.
+**Result: passed.** Routes: `/`, `/reading/new`, `/reading/[id]` (dynamic),
+`/about/method`, `/privacy`, `/api/places`, `/api/readings`,
+`/api/readings/[id]`, `/api/reading/review`.
 
-## 8. Playwright: main browser journey
+## 10. Full Playwright suite (390px and 1440px)
 
 ```bash
-npm run e2e
+npm run e2e         # playwright test
 ```
 
-**Result: passed — 4/4 tests** (1.7 workers, Chromium):
+**Result: passed — 13/13**:
 
 | Test | Viewport | Result |
 | --- | --- | --- |
-| complete journey (11 steps) | 1440×900 | ✅ |
-| landing page at 390px | 390×844 | ✅ |
-| full form + reading at 390px | 390×844 | ✅ |
-| unknown-time reading | 1440×900 | ✅ |
+| journey: saved-data comparison (landing → review → generation → JSON compare → reload → delete) | 1440×900 | ✅ |
+| birth-time integrity: timeKnown=true without time → 400 | 1440×900 | ✅ |
+| birth-time integrity: timeKnown=false with time → 400 | 1440×900 | ✅ |
+| birth-time integrity: invalid date (Feb 30) → 400 | 1440×900 | ✅ |
+| birth-time integrity: DST gap → 400 | 1440×900 | ✅ |
+| birth-time integrity: DST overlap → both offsets (05:30Z / 06:30Z) | 1440×900 | ✅ |
+| birth-time integrity: unknown time → no Asc/MC/houses in saved JSON | 1440×900 | ✅ |
+| unknown-time journey: UI + saved JSON omit Asc/MC/houses | 1440×900 | ✅ |
+| mobile: landing at 390px, no overflow | 390×844 | ✅ |
+| mobile: full form + reading at 390px | 390×844 | ✅ |
+| browser quality: no failed resources / console errors / overlays | 1440×900 | ✅ |
+| browser quality: keyboard navigation + visible focus | 1440×900 | ✅ |
+| browser quality: no horizontal overflow at 1440px and 390px | both | ✅ |
 
-The main journey verified, in order: landing hero + badge → begin reading → multi-step form
-(name/date/time/place/consent) → resolved place + timezone shown in review → generation →
-reading page renders → **displayed planetary degrees match the saved calculated data**
-(Gemini 24°11′ asserted against the ephemeris) → Sabian mappings displayed → story (7
-chapters) and artwork render → **reload produces the identical reading** → delete removes
-it and the URL returns 404.
+The journey test **fetches the saved reading JSON and compares displayed
+placements (sign, DMS, Sabian degree) against it**, verifies the internal
+consistency of longitude/sign/DMS/Sabian/global-index for every placement, and
+asserts coordinates, timezone, historical offset, and resolved UTC appear on
+the review step **before submission**.
 
-The unknown-time journey verified: **Ascendant/Midheaven/houses are never produced**, the
-Ascendant gate is replaced by an explanation, and time-independent placements remain.
+## 11. Live browser check for failed resources, console errors, overlays, keyboard navigation, visible focus
 
-## 9. Mobile 390px and desktop 1440px
+Covered by the browser-quality spec above: zero console errors, zero failed
+resources, zero React error overlays; Tab navigation reaches the primary CTA
+with a non-`none` computed outline (visible focus).
 
-Covered by the Playwright suite above (390×844 and 1440×900 projects) including a
-no-horizontal-overflow assertion at 390px.
-
-## 10. No private keys in the browser bundle
+## 12. Sentinel-secret scan of the client bundle
 
 ```bash
-npx next build   # then scan the client bundle
+npm run scan:client-secrets
 ```
 
-- Environment variables are read only in server modules (`src/lib/config.ts` is imported
-  only by server code; the server-side-only rule is documented and the reading-service and
-  API layers are the only consumers).
-- `DATABASE_URL`, provider keys, and retention settings never appear in client components.
-- The client bundle scan (grep of `.next/static` for `DATABASE_URL`, `API_KEY`, `secret`)
-  found **no matches**.
+**Result: passed — 14 client files scanned, 0 secret patterns found.**
+Environment variables are read only in server modules; the client bundle
+contains no DATABASE_URL, provider keys, or secret patterns.
 
-## 11. Fixture/demo results visibly labeled
+## 13. Unknown-time readings contain no Ascendant, Midheaven, or houses
 
-The reading page renders "Demo interpretation — deterministic text, not AI-generated" and
-"Demo artwork — deterministic emblem, not AI-generated" badges; the landing page carries
-the "Testing Preview" badge; the methodology page states the dataset is a demo fixture.
+Verified at three levels: unit tests (chart provider), integration tests
+(service output), and two Playwright journeys (UI + saved JSON).
 
-## 12. Unknown-time readings never produce an Ascendant
+## 14. `timeKnown=true` without a time is rejected
 
-Verified at three levels: unit tests (chart provider excludes ascendant/midheaven/houses
-when `timeKnown=false`), integration test (service output), and the Playwright
-unknown-time journey (UI shows "Not calculated" and an explanation).
+Verified in the API spec (HTTP 400 with a `birthTime` issue) and the
+unit-level schema tests.
 
-## 13. Authorized 360-symbol dataset
+## 15. DST gap/overlap handled explicitly
 
-**Not present** — explicitly stated in the README, docs/data-license.md, and the
-validation output above. The engine and interface are complete and validated against the
-demo fixture.
+Unit tests + API spec: gap times rejected; overlap times expose both candidate
+instants with a disclosed default (daylight) and an explicit standard-time
+override, and the review step discloses the choice.
+
+## 16. Story is 1,200–1,800 words
+
+Deterministic word-count test in the service suite (1,409 words in the test
+reading); the seven required chapter titles are asserted.
+
+## 17. All mock/incomplete readings store `isDemo=true`
+
+Service test asserts `isDemo` is derived from provider metadata (mock text,
+mock artwork, or demo-fixture symbols) and persists via `providers` metadata.
 
 ## What remains unproven (stated precisely)
 
-- **Live AI interpretation** — the `InterpretationProvider` interface and Zod contract are
-  implemented and tested only with the deterministic mock. A real provider call has not
-  been tested.
-- **Live image generation** — the `ImageGenerationProvider` interface and prompt-hash cache
-  are implemented and tested only with the deterministic SVG provider.
-- **Complete licensed Sabian content** — no authorized 360-entry dataset has been imported;
-  the app runs in labeled demo-data mode.
-- **Commercial licensing** — no licenses beyond MIT open-source dependencies are in use.
-- **Production deployment** — the app was verified locally only; no hosting, TLS, backups,
-  or load behavior were tested.
-- **PostgreSQL** — the adapter interface is provider-agnostic, but only SQLite is
-  implemented and tested.
+- **Live AI interpretation** — only the deterministic mock is tested; no real
+  provider call.
+- **Live image generation** — only the deterministic SVG provider is tested.
+- **Complete licensed Sabian content** — the app runs in labeled demo-data
+  mode (120 fictional placeholders); no authorized 360-entry dataset is
+  imported.
+- **Commercial licensing** — no licenses beyond MIT open-source dependencies.
+- **PostgreSQL** — the adapter interface is provider-agnostic; only SQLite
+  (node:sqlite via a CJS shim) is implemented and tested.
+- **Production deployment** — verified locally only; no hosting, TLS, backups,
+  or load behavior tested.
+- **npm audit claims** — 0 vulnerabilities at time of writing for both full and
+  production-only trees; this is a point-in-time result, not a guarantee.

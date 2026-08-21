@@ -9,13 +9,17 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "audit": "npm audit",
+    "audit:prod": "npm audit --omit=dev",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.mts",
     "validate:symbols": "tsx scripts/validate-symbols.ts",
     "cleanup:readings": "tsx scripts/cleanup-readings.ts",
+    "scan:client-secrets": "node scripts/scan-client-secrets.mjs",
     "e2e": "playwright test",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run validate:symbols && npm run build"
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run test:integration && npm run validate:symbols && npm run build",
+    "verify:full": "npm run verify && npm run e2e && npm run scan:client-secrets"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.0.0",

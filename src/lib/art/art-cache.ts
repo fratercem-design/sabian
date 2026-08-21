@@ -49,11 +49,13 @@ export function createArtCache(): ArtCache {
       const cutoff = Date.now() - days * 86400000;
       let removed = 0;
       try {
-        for (const f of readdirSync(ART_CACHE_DIR)) {
+        // Only ever used by the dev cleanup script, never at request time.
+        // turbopackIgnore keeps the build from tracing the whole project.
+        for (const f of readdirSync(/* turbopackIgnore: true */ ART_CACHE_DIR)) {
           if (!f.endsWith(".json")) continue;
-          const p = join(ART_CACHE_DIR, f);
+          const p = join(/* turbopackIgnore: true */ ART_CACHE_DIR, f);
           try {
-            if (statSync(p).mtimeMs < cutoff) {
+            if (statSync(/* turbopackIgnore: true */ p).mtimeMs < cutoff) {
               rmSync(p);
               removed++;
             }

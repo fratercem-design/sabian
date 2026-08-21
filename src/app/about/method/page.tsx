@@ -46,7 +46,8 @@ export default function MethodPage() {
               <li><strong className="text-gold-300">Sabian degree convention:</strong> {sabianConvention.label}. {sabianConvention.rule}</li>
               <li><strong className="text-gold-300">Boundaries:</strong> {sabianConvention.boundaries.exactSignStart} {sabianConvention.boundaries.fraction} {sabianConvention.boundaries.lastInstant} {sabianConvention.boundaries.globalWrap}</li>
               <li><strong className="text-gold-300">Ephemeris:</strong> {EPHEMERIS_LICENSE} — a deterministic, VSOP87-based geocentric ephemeris.</li>
-              <li><strong className="text-gold-300">Historical time:</strong> The local birth time is converted to UTC using the IANA time-zone database’s historical offsets for the exact birthplace and date — never a modern or assumed offset.</li>
+              <li><strong className="text-gold-300">North Node:</strong> the instantaneous osculating ascending node at the birth instant, derived from the Moon’s position and velocity vectors — never the descending node, and never a value sampled from a nearby node-crossing event.</li>
+              <li><strong className="text-gold-300">Historical time:</strong> The local birth time is converted to UTC using the IANA time-zone database’s historical offsets for the exact birthplace and date — never a modern or assumed offset. DST gaps are rejected; ambiguous fall-back times expose both offset choices.</li>
             </ul>
           </div>
 

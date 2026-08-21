@@ -37,8 +37,12 @@ North Node (and Ascendant/Midheaven when the time is known):
 - Exact ecliptic longitude normalized to [0, 360).
 - Zodiac sign, degree/minute/second within the sign.
 - Sabian degree (1–30) and global index (1–360) via the documented convention below.
-- **North Node**: the longitude of the Moon at the nearest ascending-node event
-  (`SearchMoonNode`), i.e. the true node.
+- **North Node**: the instantaneous OSCULATING ascending node at the birth instant,
+  computed from the Moon's geocentric state vectors (position and velocity) rotated into
+  the ecliptic frame: h = r × v, node vector n = k̂ × h, λ_node = atan2(n.y, n.x).
+  This is never the descending node and never a value sampled from a nearby
+  node-crossing event. Note: this is the osculating (true) node; published charts may
+  use the mean node, which differs by up to ~1.5°.
 
 ## 4. Ascendant, Midheaven, and houses (time-known only)
 
@@ -47,15 +51,18 @@ North Node (and Ascendant/Midheaven when the time is known):
   in (180°, 360°)), then bisecting. No approximate quadrant formulas.
 - **Midheaven**: the ecliptic longitude whose right ascension equals the local sidereal
   time.
-- **Houses**: Placidus (the MVP default, isolated in `lib/chart/houses.ts`). The
-  intermediate cusps are the points of the ecliptic whose hour angle equals a fraction of
-  their own semi-arc:
-  - cusp 11: H = −S/2 + S/3, cusp 12: H = −S/2 + S/6,
-  - cusp 2: H = S/2 + 5N/6, cusp 3: H = S/2 + 2N/3,
-  - with S the semi-diurnal arc and N the semi-nocturnal arc, computed from the cusp's own
-    declination; roots found by scan + bisection on the continuous hour-angle residual.
+- **Houses**: Placidus (the MVP default, isolated in `lib/chart/houses.ts`), following
+  the LibEphemeris / Swiss Ephemeris algorithm:
+  - SA = 90° + AD (diurnal semi-arc), AD = arcsin(tan φ · tan δ), tan δ = sin(RA)·tan ε;
+  - cusp 11: RA = ARMC + SA/3; cusp 12: RA = ARMC + 2·SA/3;
+  - cusp 2: RA = ARMC + 180° − 2·(90°−AD)/3; cusp 3: RA = ARMC + 180° − (90°−AD)/3;
+  - each cusp solved by fixed-point iteration on right ascension (convergent sequence);
+  - cusps 1, 4, 7, 10 are Ascendant, IC, Descendant, MC; 5/6/8/9 are the opposites of
+    11/12/2/3.
   - Above the polar circles, where semi-arcs are undefined, an equal-house fallback is
     used and recorded in the chart's house-system description.
+  - Verified: the defining equations hold to 1e-4° and the Sun/Moon house placements
+    match the Astrotheme Placidus reference (see reference-chart tests).
 
 ## 5. Sabian degree convention (explicit, tested, configurable)
 
@@ -81,9 +88,23 @@ A position within a degree corresponds to the **next numbered Sabian degree**:
   instant**: solar midnight of the local calendar date, converted with the historical
   offset. This is never presented as the birth time.
 - The Moon is marked **potentially uncertain** when it changes sign or Sabian degree
-  during the local calendar day.
+  during the local calendar day — scanned over the ACTUAL local day at the birthplace
+  (converted to UTC bounds), independent of the server machine's timezone.
 - The reading is reduced accordingly, and the Ascendant gate becomes a respectful
   explanation.
+
+## 6a. Birth-time integrity (DST gaps and overlaps)
+
+- **Calendar dates** are strictly validated (Feb 30, Apr 31, etc. are rejected as HTTP
+  400) via a UTC round-trip that never depends on the server's local zone.
+- **DST spring-forward gaps**: a wall-clock time that never existed (e.g. 2024-03-10
+  02:30 in America/New_York) is detected and rejected — never silently shifted.
+- **DST fall-back overlaps**: a wall-clock time that occurred twice (e.g. 2024-11-03
+  01:30 in America/New_York) is detected; both candidate instants are exposed, the
+  daylight-saving occurrence is used by default with the choice disclosed, and an
+  explicit standard-time override is supported.
+- `timeKnown=true` requires a `birthTime`; `timeKnown=false` forbids one. A silent
+  midnight substitution for a supposedly known time is impossible by construction.
 
 ## 7. Validation
 
@@ -92,9 +113,12 @@ The chart provider is validated against published reference charts:
 - **John Paul II** (Wadowice, 1920-05-18, 17:30 local): Sun Taurus 27°22′, Moon Gemini
   2°41′, Mercury Taurus 18°33′, Venus Taurus 14°51′, Mars Libra 22°26′, Jupiter Leo 11°00′,
   Saturn Virgo 4°56′, Uranus Pisces 5°28′, Neptune Leo 8°59′, Pluto Cancer 6°19′, North
-  Node Scorpio 15°38′, Ascendant Libra 27°16′, MC Leo 5°38′ — matches the published chart
-  within arcminutes.
+  Node Scorpio ~15°38′ (osculating), Ascendant Libra 27°16′, MC Leo 5°38′ — matches the
+  published chart within arcminutes for the planets/angles; the North Node is compared
+  within a documented osculating-vs-mean tolerance and is never the descending node.
+- House placements (Sun/Moon in House 8 per Astrotheme Placidus) and the numerical
+  Placidus cusp equations are asserted in the reference-chart tests.
 
 Unit tests cover: 0°00′00″, 0°00′01″, normal fractional positions, 29°59′59″ of every
-sign, the Aries↔Pisces global boundary, DST and historical time-zone cases, and
-unknown-time behavior.
+sign, the Aries↔Pisces global boundary, DST gap/overlap and historical time-zone cases,
+calendar-date integrity, and unknown-time behavior.

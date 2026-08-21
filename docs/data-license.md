@@ -5,18 +5,23 @@
 The MVP ships with a **demo fixture dataset** (`src/lib/sabian/demo-data.ts`): 120 records
 covering degrees 1–10 of each sign, every record with `licenseStatus: "demo-fixture"`.
 
-- The titles are **original editorial summaries written for this project**, deliberately
-  paraphrasing common themes without reproducing any published wording.
+- The titles are **unmistakably fictional placeholders** ("Demo image for Aries 1").
+  No published or near-canonical wording is reproduced or implied — deliberately, so the
+  demo dataset can never be mistaken for an authorized Sabian text set.
 - No Sabian website was scraped; no book text was copied. The `licensedSourceText` field is
   empty for all demo records.
 - Every record carries `sourceVersion`, `sourceAttribution`, and `licenseStatus` so the
-  provenance is auditable.
+  provenance is auditable. The provenance explicitly states the record is a fictional
+  placeholder and not a Sabian symbol text.
 - The UI and the reading output reference symbols generically when a record is absent
   (e.g. "Gemini 25 — an unrecorded image"), and the methodology page states that the
   complete dataset is not yet present.
+- The reading page shows a "Demo symbol dataset — placeholders, not licensed Sabian
+  texts" badge whenever the demo fixture dataset was used.
 
-**This is not an authorized or canonical set of 360 symbol texts.** An authorized dataset
-is a prerequisite for production/commercial use.
+**This is not an authorized or canonical set of 360 symbol texts, and no claim of
+originality or clearance is made.** An authorized dataset is a prerequisite for
+production/commercial use.
 
 ## Data model
 

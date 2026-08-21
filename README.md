@@ -38,12 +38,15 @@ Then open http://localhost:3000 and click **Begin Your Reading**.
 | `npm start` | Serve the production build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` (strict) |
-| `npm test` | Vitest unit + integration tests |
+| `npm run audit` / `npm run audit:prod` | `npm audit` (full / production-only) |
+| `npm test` | Vitest unit tests (isolated temp DB + art cache) |
 | `npm run test:integration` | Vitest database-backed integration tests |
 | `npm run validate:symbols` | Validate the Sabian dataset (360 unique records expected) |
-| `npm run cleanup:readings` | Remove readings older than the retention policy |
-| `npm run e2e` | Playwright browser tests (main journey, unknown time, 390px/1440px) |
-| `npm run verify` | Lint + typecheck + unit tests + dataset validation + build |
+| `npm run cleanup:readings` | Remove readings + art cache entries older than the retention policy |
+| `npm run scan:client-secrets` | Sentinel-secret scan of the client bundle |
+| `npm run e2e` | Playwright browser tests (journey, DST/validation, unknown time, 390px/1440px, quality) |
+| `npm run verify` | Lint + typecheck + unit + integration + dataset validation + build |
+| `npm run verify:full` | `verify` + Playwright + sentinel scan |
 
 ## Configuration
 
@@ -92,7 +95,7 @@ src/
     image/              ImageGenerationProvider + shared visual style
     art/                Prompt-hash artwork cache (no duplicate generation)
     reading/            ReadingService pipeline (7 stages, retry, status)
-    db/                 Db adapter (better-sqlite3) + ReadingRepository
+    db/                 Db adapter (node:sqlite via a CJS shim) + ReadingRepository
 scripts/                Dataset validation, retention cleanup
 e2e/                    Playwright browser tests
 docs/                   Architecture, calculation method, data license, entitlements
@@ -130,7 +133,10 @@ on the reading page.
 - Guest use by default; no account required.
 - Birth data goes in POST bodies only — never in URLs, analytics, or logs.
 - Random, non-guessable reading IDs (`crypto.randomBytes`).
-- One-click delete on every reading; configurable retention + `npm run cleanup:readings`.
+- Generated readings are NOT saved by default; saving is an explicit opt-in
+  with the retention period disclosed up front.
+- One-click delete on every reading; configurable retention + `npm run cleanup:readings`
+  (which also removes stale failed records and old artwork cache entries).
 - External providers (when enabled) receive only the minimum fields; the image provider
   never receives the person's name or raw birthplace.
 
@@ -144,12 +150,15 @@ are invented.
 
 ## Sabian content and rights
 
-This MVP ships a **small, clearly labeled demo fixture dataset** (120 records, degrees 1–10
-of each sign, `licenseStatus: "demo-fixture"`) so the complete engine and interface can be
-exercised. It does **not** contain an authorized set of 360 symbol texts, and nothing has
-been scraped or copied from books or websites. Importing an authorized dataset is a
-prerequisite for production — see [docs/data-license.md](docs/data-license.md) and
-`npm run validate:symbols`.
+This MVP ships a **small, clearly labeled demo fixture dataset** (120 records,
+degrees 1–10 of each sign) so the complete engine and interface can be
+exercised. Every record uses an **unmistakably fictional placeholder title**
+("Demo image for Aries 1") with `licenseStatus: "demo-fixture"`, empty
+`licensedSourceText`, and fictional provenance — **no published or
+near-canonical wording is reproduced or implied**, and nothing has been
+scraped or copied. It does **not** contain an authorized set of 360 symbol
+texts. Importing an authorized dataset is a prerequisite for production — see
+[docs/data-license.md](docs/data-license.md) and `npm run validate:symbols`.
 
 ## Methodology
 
@@ -163,22 +172,34 @@ in-app `/about/method` page.
 
 ## Verification
 
-Everything below was run on this machine (Windows, Node v24.18.0, npm 11.16.0) and
-passed; exact commands and counts are in [docs/verification.md](docs/verification.md).
+Everything below was run on this machine (Windows, Node v24.18.0, npm 11.16.0)
+in an isolated fresh copy (clean `npm ci`, temporary databases and artwork
+caches) and passed; exact commands and counts are in
+[docs/verification.md](docs/verification.md).
 
-- [x] Dependency install from the committed lockfile
-- [x] Lint (ESLint, 0 errors)
-- [x] Typecheck (`tsc --noEmit`, strict)
-- [x] Unit tests (Vitest, 31 passed)
-- [x] Integration tests (real SQLite file, 5 passed)
+- [x] Clean `npm ci` from the committed lockfile
+- [x] `npm audit` and `npm audit --omit=dev` — 0 vulnerabilities each
+- [x] Lint (ESLint, 0 errors / 0 warnings)
+- [x] Strict typecheck (`tsc --noEmit`)
+- [x] Unit tests (Vitest 4, 62 passed)
+- [x] Integration tests (isolated SQLite, 10 passed)
 - [x] Production build (`next build`)
-- [x] Playwright main journey (11 steps, incl. reload-consistency and delete)
-- [x] Playwright unknown-time journey (no Ascendant/MC/houses)
-- [x] Mobile 390px check, Desktop 1440px check
-- [x] No private keys in the browser bundle (secrets are server-only)
-- [x] Demo/fixture results visibly labeled in the UI
-- [x] Dataset validation: 120 demo records, all unique, clearly labeled; authorized
-      360-entry dataset not yet imported (explicitly stated)
+- [x] Playwright suite (13 passed): saved-data comparison journey, DST
+      gap/overlap + validation cases, unknown-time, 390px/1440px, browser
+      quality (no console errors / failed resources, keyboard + focus)
+- [x] Sentinel-secret scan of the client bundle (0 patterns)
+- [x] Unknown-time readings never contain Ascendant/Midheaven/houses
+- [x] `timeKnown=true` without a time is rejected (HTTP 400)
+- [x] Story is 1,200–1,800 words (tested)
+- [x] All mock/incomplete readings store `isDemo=true` (from provider metadata)
+- [x] Dataset validation: 120 demo records, all fictional placeholders,
+      unique, clearly labeled; authorized 360-entry dataset not yet imported
+      (explicitly stated)
+
+What remains unproven — live AI, live image generation, complete licensed
+Sabian content, PostgreSQL, commercial licensing, and production deployment —
+is stated precisely in docs/verification.md. **No claim of "no audit
+findings" is made beyond the two point-in-time `npm audit` results above.**
 
 ## Decisions required before monetization
 
@@ -190,7 +211,7 @@ migration; retention policy tuning; and payment/entitlement enforcement choices.
 ## License
 
 The application code in this repository is provided for evaluation of this testing-phase
-MVP. Third-party licenses: astronomy-engine (MIT), moment-timezone (MIT), better-sqlite3
-(MIT), Next.js (MIT), React (MIT), Tailwind CSS (MIT). The demo Sabian fixture records are
-original editorial summaries written for this project (see
+MVP. Third-party licenses: astronomy-engine (MIT), moment-timezone (MIT), node:sqlite
+(built into Node.js), Next.js (MIT), React (MIT), Tailwind CSS (MIT). The demo Sabian
+fixture records are original fictional placeholders written for this project (see
 [docs/data-license.md](docs/data-license.md)).
