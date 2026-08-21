@@ -8,6 +8,14 @@
  * Midheaven, and Placidus houses are computed with the classical formulas in
  * `celestial.ts` and `houses.ts`.
  *
+ * NORTH NODE: computed as the instantaneous OSCULATING ascending node — the
+ * ecliptic longitude of the ascending node of the Moon's osculating orbit at
+ * the birth instant, derived from the geocentric position and velocity
+ * vectors. This is the instantaneous documented node at the exact moment of
+ * birth, never the descending node, and never the longitude at some nearby
+ * node-crossing event (the old implementation used the nearest event, which
+ * could select the descending node — that is removed).
+ *
  * License note: astronomy-engine is MIT-licensed (Don Cross). See
  * `docs/architecture.md` and the third-party notices in the README.
  */
@@ -21,8 +29,10 @@ import {
   Ecliptic,
   GeoVector,
   EclipticGeoMoon,
+  GeoMoonState,
   MakeTime,
-  SearchMoonNode,
+  RotateVector,
+  Rotation_EQJ_ECL,
   type AstroTime,
 } from "astronomy-engine";
 
@@ -75,13 +85,38 @@ function moonLongitude(time: AstroTime): number {
   return normalizeDegrees(moon.lon);
 }
 
-/** North Node longitude via the nearest ascending-node event. */
-function northNodeLongitude(time: AstroTime): number {
-  const node = SearchMoonNode(time);
-  // The node time is within a few weeks of the birth time; use its longitude.
-  const t = node.time;
-  const moon = EclipticGeoMoon(t);
-  return normalizeDegrees(moon.lon);
+/**
+ * North Node longitude at the birth instant — the instantaneous OSCULATING
+ * ascending node.
+ *
+ * The ascending node of the Moon's osculating orbit is the ecliptic
+ * longitude where the Moon crosses the ecliptic from south to north. Using
+ * the geocentric state vectors (position r, velocity v):
+ *
+ *   h = r × v                      (angular momentum, perpendicular to the
+ *                                   Moon's orbital plane)
+ *   n = k̂ × h                      (node vector; k̂ = ecliptic pole)
+ *   λ_node = atan2(n.y, n.x)       in the ecliptic frame
+ *
+ * The state vectors from astronomy-engine are in the J2000 equatorial frame,
+ * so they are rotated into the J2000 ecliptic frame (Rotation_EQJ_ECL) before
+ * the cross products. This yields the true (osculating) node at the exact
+ * birth instant — never the descending node, and never a value sampled from
+ * a nearby node-crossing event.
+ */
+export function northNodeLongitude(utc: Date): number {
+  const state = GeoMoonState(utc);
+  const rot = Rotation_EQJ_ECL();
+  const r = RotateVector(rot, { x: state.x, y: state.y, z: state.z });
+  const v = RotateVector(rot, { x: state.vx, y: state.vy, z: state.vz });
+  // h = r × v
+  const hx = r.y * v.z - r.z * v.y;
+  const hy = r.z * v.x - r.x * v.z;
+  // n = k̂ × h with k̂ = (0, 0, 1) in the ecliptic frame → n = (−hy, hx, 0)
+  const nx = -hy;
+  const ny = hx;
+  let lon = (Math.atan2(ny, nx) * 180) / Math.PI;
+  return normalizeDegrees(lon);
 }
 
 function makePlacement(key: string, name: string, glyph: string, longitude: number): Placement {
@@ -145,7 +180,7 @@ export class AstronomyEngineChartProvider implements ChartCalculationProvider {
       if (body === Body.Sun) continue;
       add(key, nodeNames[key.toUpperCase() as keyof typeof nodeNames] ?? key, glyphFor(key), planetLongitude(body, time));
     }
-    add("north_node", nodeNames.NORTH_NODE, "☊", northNodeLongitude(time));
+    add("north_node", nodeNames.NORTH_NODE, "☊", northNodeLongitude(utc));
 
     // Ascendant/Midheaven: only calculated when the birth time is exact.
     // For unknown times they are never computed or displayed as facts.

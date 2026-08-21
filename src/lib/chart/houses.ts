@@ -1,41 +1,30 @@
 /**
  * House cusp calculation — Placidus (default, configurable).
  *
- * Placidus is a time-based house system: each intermediate cusp is the point
- * of the ecliptic whose semi-diurnal (above-horizon) or semi-nocturnal
- * (below-horizon) arc has been traversed by a specific fraction at the birth
- * moment.
+ * Implementation follows the Swiss Ephemeris / LibEphemeris Placidus
+ * algorithm (see "House System Algorithms and Mathematical Formulas",
+ * LibEphemeris docs; equivalently the classical Placidus definition):
  *
- * The classical formulation (as used by the Swiss Ephemeris and standard
- * references): for an ecliptic point of longitude λ with declination
- * δ(λ) = arcsin(sin ε · sin λ), and an observer at latitude φ:
+ *   SA = 90° + AD                      (diurnal semi-arc)
+ *   AD = arcsin(tan φ · tan δ)         (ascensional difference)
+ *   tan δ = sin(RA) · tan ε            (declination from right ascension)
  *
- *   Semi-diurnal arc      S(λ) = 2·arccos(−tan φ · tan δ(λ))
- *   Semi-nocturnal arc    N(λ) = 2·arccos( tan φ · tan δ(λ))
+ *   cusp 11: RA = ARMC + SA/3
+ *   cusp 12: RA = ARMC + 2·SA/3
+ *   cusp 2:  RA = ARMC + 180° − 2·(90°−AD)/3
+ *   cusp 3:  RA = ARMC + 180° − (90°−AD)/3
  *
- * The hour angle of a point, H(λ) = LST − RA(λ), is measured from the upper
- * meridian (positive westward). The Placidus cusps satisfy:
+ * Each cusp is found by fixed-point iteration: starting from a seed right
+ * ascension, compute the declination of the ecliptic point at that RA, the
+ * ascensional difference and semi-arc, then the next RA from the formula;
+ * repeat until the change is below the tolerance.
  *
- *   Cusp 11:  H(λ) = −S(λ)/6        (one-sixth of the diurnal arc past rising)
- *   Cusp 12:  H(λ) = +S(λ)/6        (two-sixths past rising)
- *   Cusp 3:   H(λ) = S(λ)/2 + N(λ)/3 (one-third of the nocturnal arc past setting)
- *   Cusp 2:   H(λ) = S(λ)/2 + 2·N(λ)/3
+ * Cusps 1, 4, 7, 10 are the Ascendant, IC, Descendant, and MC directly;
+ * cusps 5, 6, 8, 9 are the opposites of 11, 12, 2, 3.
  *
- * Because H(λ) is a smooth, monotonically decreasing function of λ over each
- * 360° traversal, and the targets are smooth, the residuals are well-behaved;
- * the cusp longitude is found by scanning for a sign change and bisecting.
- *
- * The Placidus equation is solved by iterating on λ using the exact formula
- *   H(λ) = target(λ)
- * with bisection on the continuous residual (see `hourAngleResidual`).
- *
- * At latitudes above the polar circles the semi-arcs may be undefined (polar
- * day/night); the function then falls back to equal houses from the
+ * At latitudes above the polar circles the semi-arcs are undefined (AD
+ * undefined); the function then falls back to equal houses from the
  * Ascendant and records it.
- *
- * The house-system choice is isolated in this module. To switch systems,
- * replace `computeHouseCusps` (or select a different provider in the chart
- * provider) — nothing else in the application needs to change.
  */
 
 import { normalizeDegrees, DEG2RAD } from "@/lib/chart/celestial";
@@ -50,98 +39,66 @@ export interface HouseSystemResult {
   system: string;
 }
 
-function declinationOf(lonDeg: number, obliquityDeg: number): number {
-  return Math.asin(Math.sin(obliquityDeg * DEG2RAD) * Math.sin(lonDeg * DEG2RAD)) * (180 / Math.PI);
-}
-
-/**
- * Continuous right ascension: RA increases from 0° to 360° over a full
- * 360° sweep of ecliptic longitude. The atan2 result wraps from +180° to
- * −180° at RA = 180° (the autumnal point); we unwrap by adding 360° after
- * each downward jump so RA is a smooth, strictly increasing function.
- */
-function continuousRightAscension(lonDeg: number, obliquityDeg: number): number {
+/** Ecliptic longitude whose right ascension equals `ra` (degrees, [0, 360)). */
+function longitudeFromRightAscension(raDeg: number, obliquityDeg: number): number {
   const eps = obliquityDeg * DEG2RAD;
+  const a = raDeg * DEG2RAD;
+  let lon = Math.atan2(Math.sin(a), Math.cos(a) * Math.cos(eps)) * (180 / Math.PI);
+  return normalizeDegrees(lon);
+}
+
+/** Ascensional difference for a point of the ecliptic at longitude `lon`. */
+function ascensionalDifference(lonDeg: number, latitudeDeg: number, obliquityDeg: number): number | null {
   const l = lonDeg * DEG2RAD;
-  const ra = Math.atan2(Math.cos(eps) * Math.sin(l), Math.cos(l)) * (180 / Math.PI);
-  // Unwrap the atan2 branch cut (at RA = ±180°): add 360° for each
-  // full revolution plus 360° when the raw atan2 result is negative
-  // (i.e. the point has passed the autumnal point).
-  const turns = Math.floor(lonDeg / 360);
-  let unwrapped = ra + 360 * turns;
-  // The raw atan2 is in (−180, 180]; the branch cut lies at RA=180
-  // (longitude of the autumnal point ≈ 180°). For a continuous RA we need
-  // RA ∈ [0, 360) per revolution: add 360 to negative values.
-  if (ra < 0) unwrapped += 360;
-  return unwrapped;
-}
-
-function semiDiurnal(latitudeDeg: number, declinationDeg: number): number | null {
-  const arg = -Math.tan(latitudeDeg * DEG2RAD) * Math.tan(declinationDeg * DEG2RAD);
+  const e = obliquityDeg * DEG2RAD;
+  const p = latitudeDeg * DEG2RAD;
+  const dec = Math.asin(Math.sin(e) * Math.sin(l));
+  const arg = Math.tan(p) * Math.tan(dec);
   if (arg < -1 || arg > 1) return null;
-  return 2 * Math.acos(arg) * (180 / Math.PI);
-}
-
-function semiNocturnal(latitudeDeg: number, declinationDeg: number): number | null {
-  const arg = Math.tan(latitudeDeg * DEG2RAD) * Math.tan(declinationDeg * DEG2RAD);
-  if (arg < -1 || arg > 1) return null;
-  return 2 * Math.acos(arg) * (180 / Math.PI);
+  return Math.asin(arg) * (180 / Math.PI);
 }
 
 /**
- * Continuous residual for root finding:
- *   f(λ) = H(λ) − target(λ),  H(λ) = LST − RA(λ)
- * with the hour angle UNFOLDED (no ±180 wrap) so that the residual is a
- * smooth, strictly monotone function of λ across the scan. This eliminates
- * the false "fold" roots at the ±180° wrap that a normalized hour angle
- * would introduce.
+ * Fixed-point iteration for a Placidus cusp, per the LibEphemeris/Swiss
+ * Ephemeris algorithm:
+ *   RA ← ARMC + offset(δ(RA))   with δ from the ecliptic point at RA.
  */
-function hourAngleResidual(
-  lonDeg: number,
+function iterateCusp(
   cusp: number,
-  lstDeg: number,
+  seedRa: number,
+  ramc: number,
   latitudeDeg: number,
   obliquityDeg: number
-): number | null {
-  const dec = declinationOf(lonDeg, obliquityDeg);
-  const S = semiDiurnal(latitudeDeg, dec);
-  const N = semiNocturnal(latitudeDeg, dec);
-  let target: number | null = null;
-  // Placidus by elapsed semi-arc, with H normalized to [0, 360):
-  //   rising point:  H = 360 − S/2   (east of upper meridian)
-  //   setting point: H = S/2
-  //   cusp 11: 1/3 of S elapsed since rising → H = 360 − S/2 + S/3
-  //   cusp 12: 1/6 of S elapsed since rising → H = 360 − S/2 + S/6
-  //   cusp 2:  5/6 of N elapsed since setting → H = S/2 + 5N/6
-  //   cusp 3:  2/3 of N elapsed since setting → H = S/2 + 2N/3
-  switch (cusp) {
-    case 11:
-      target = S === null ? null : 360 - S / 2 + S / 3;
-      break;
-    case 12:
-      target = S === null ? null : 360 - S / 2 + S / 6;
-      break;
-    case 3:
-      target = S === null || N === null ? null : S / 2 + (2 * N) / 3;
-      break;
-    case 2:
-      target = S === null || N === null ? null : S / 2 + (5 * N) / 6;
-      break;
+): { ra: number; converged: boolean } {
+  let ra = seedRa;
+  for (let i = 0; i < 80; i++) {
+    const lon = longitudeFromRightAscension(ra, obliquityDeg);
+    const ad = ascensionalDifference(lon, latitudeDeg, obliquityDeg);
+    if (ad === null) return { ra, converged: false };
+    let offset: number;
+    switch (cusp) {
+      case 11:
+        offset = (90 + ad) / 3;
+        break;
+      case 12:
+        offset = (2 * (90 + ad)) / 3;
+        break;
+      case 2:
+        offset = 180 - (2 * (90 - ad)) / 3;
+        break;
+      case 3:
+        offset = 180 - (90 - ad) / 3;
+        break;
+      default:
+        return { ra, converged: false };
+    }
+    let next = ramc + offset;
+    let delta = next - ra;
+    delta -= 360 * Math.round(delta / 360);
+    if (Math.abs(delta) < 1e-5) return { ra: ((next % 360) + 360) % 360, converged: true };
+    ra = next;
   }
-  if (target === null) return null;
-  // Hour angle H(λ) = LST − RA(λ) normalized to [0, 360). The targets are
-  // expressed in the same range:
-  //   rising point:  H = 360 − S/2   (east of upper meridian)
-  //   setting point: H = S/2
-  //   cusp 11: 1/3 of S elapsed since rising → H = 360 − S/2 + S/3
-  //   cusp 12: 1/6 of S elapsed since rising → H = 360 − S/2 + S/6
-  //   cusp 2:  1/3 of N elapsed since setting → H = S/2 + N/3
-  //   cusp 3:  1/6 of N elapsed since setting → H = S/2 + N/6
-  // The residual maps to the branch closest to the target.
-  const h = ((lstDeg - continuousRightAscension(lonDeg, obliquityDeg)) % 360 + 360) % 360;
-  let residual = h - target;
-  residual -= 360 * Math.round(residual / 360);
-  return residual;
+  return { ra, converged: false };
 }
 
 function makeCusp(house: number, longitude: number): HouseCusp {
@@ -154,87 +111,19 @@ function makeCusp(house: number, longitude: number): HouseCusp {
   return { house, longitude: norm, sign: SIGNS[signIndex], degree, minute, second };
 }
 
-function bisect(
-  cusp: number,
-  a: number,
-  b: number,
-  lstDeg: number,
-  latitudeDeg: number,
-  obliquityDeg: number
-): { longitude: number; converged: boolean } {
-  let fa = hourAngleResidual(a, cusp, lstDeg, latitudeDeg, obliquityDeg)!;
-  for (let i = 0; i < 60; i++) {
-    const mid = (a + b) / 2;
-    const fm = hourAngleResidual(mid, cusp, lstDeg, latitudeDeg, obliquityDeg);
-    if (fm === null) return { longitude: a, converged: false };
-    if (Math.abs(fm) < 1e-4) return { longitude: mid, converged: true };
-    if ((fa < 0 && fm > 0) || (fa > 0 && fm < 0)) {
-      b = mid;
-    } else {
-      a = mid;
-      fa = fm;
-    }
-  }
-  return { longitude: (a + b) / 2, converged: true };
-}
-
-/**
- * Find the cusp longitude by scanning the FULL circle for the root of the
- * continuous residual nearest the seed, then bisecting.
- *
- * The residual f(λ) = H(λ) − target(λ) is continuous and strictly monotone
- * over any 360° sweep (H uses unwrapped RA), so it has exactly one root per
- * revolution. We scan the circle at 2° steps, detect the sign change, and
- * pick the crossing with the smallest circular distance to the seed.
- */
-function solveCusp(
-  cusp: number,
-  seed: number,
-  lstDeg: number,
-  latitudeDeg: number,
-  obliquityDeg: number
-): { longitude: number; converged: boolean } {
-  const fAt = (lon: number) => hourAngleResidual(lon, cusp, lstDeg, latitudeDeg, obliquityDeg);
-
-  const f0 = fAt(seed);
-  if (f0 === null) return { longitude: seed, converged: false };
-
-  // Find all sign-change brackets over the full circle.
-  const brackets: Array<{ lo: number; hi: number; mid: number; distance: number }> = [];
-  let prevLon = 0;
-  let prev = fAt(0);
-  if (prev === null) return { longitude: seed, converged: false };
-  for (let lon = 2; lon <= 360; lon += 2) {
-    const cur = lon % 360;
-    const f = fAt(cur);
-    if (f === null) return { longitude: seed, converged: false };
-    if ((prev < 0 && f >= 0) || (prev > 0 && f <= 0)) {
-      const mid = ((prevLon + cur) / 2) % 360;
-      const dist = Math.min(Math.abs(mid - seed), 360 - Math.abs(mid - seed));
-      brackets.push({ lo: prevLon, hi: cur, mid, distance: dist });
-    }
-    prevLon = cur;
-    prev = f;
-  }
-  if (brackets.length === 0) return { longitude: seed, converged: false };
-  brackets.sort((a, b) => a.distance - b.distance);
-  const best = brackets[0];
-  const { longitude } = bisect(cusp, best.lo, best.hi, lstDeg, latitudeDeg, obliquityDeg);
-  return { longitude, converged: true };
-}
-
 /**
  * Compute Placidus house cusps.
  * @param ascendant  Ascendant ecliptic longitude (degrees).
  * @param midheaven  Midheaven ecliptic longitude (degrees).
- * @param lst        Local sidereal time (degrees).
+ * @param ramc       Right ascension of the Midheaven (degrees) — the local
+ *                   sidereal time of the place, since RA(MC) = LST.
  * @param latitude   Geographic latitude (degrees).
  * @param obliquity  True obliquity of the ecliptic (degrees).
  */
 export function computeHouseCusps(
   ascendant: number,
   midheaven: number,
-  lst: number,
+  ramc: number,
   latitude: number,
   obliquity: number
 ): HouseSystemResult {
@@ -248,21 +137,23 @@ export function computeHouseCusps(
     [4, makeCusp(4, mc + 180)],
   ]);
 
-  const seeds: Record<number, number> = {
-    11: mc + 30,
-    12: mc + 60,
-    2: asc + 30,
-    3: asc + 60,
+  // Seeds in RA space: cusp 11 ≈ ARMC + 30°, cusp 12 ≈ ARMC + 60°,
+  // cusp 2 ≈ ARMC + 120°, cusp 3 ≈ ARMC + 150°.
+  const seedsRa: Record<number, number> = {
+    11: ramc + 30,
+    12: ramc + 60,
+    2: ramc + 120,
+    3: ramc + 150,
   };
   let fallback = false;
-  for (const cusp of [11, 12, 3, 2]) {
-    const seed = seeds[cusp];
-    const { longitude, converged } = solveCusp(cusp, seed, lst, latitude, obliquity);
+  for (const cusp of [11, 12, 2, 3]) {
+    const { ra, converged } = iterateCusp(cusp, seedsRa[cusp], ramc, latitude, obliquity);
     if (!converged) {
       fallback = true;
-      console.error(`[houses] cusp ${cusp} did not converge (seed ${seed.toFixed(2)}, lst ${lst.toFixed(2)}, lat ${latitude})`);
+      console.error(`[houses] cusp ${cusp} did not converge (ramc ${ramc.toFixed(2)}, lat ${latitude})`);
     }
-    cusps.set(cusp, makeCusp(cusp, longitude));
+    const lon = longitudeFromRightAscension(ra, obliquity);
+    cusps.set(cusp, makeCusp(cusp, lon));
   }
 
   for (const [a, b] of [
