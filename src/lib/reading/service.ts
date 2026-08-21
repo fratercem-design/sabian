@@ -21,7 +21,7 @@
  * components, and tests/scripts — never from client components. */
 
 import { createPlaceSearchProvider, type PlaceSearchProvider } from "@/lib/places/provider";
-import { localToUtc, unknownTimeUtc } from "@/lib/time/birthtime";
+import { localToUtc, unknownTimeUtc, localDayBoundsUtc } from "@/lib/time/birthtime";
 import { createChartProvider, type ChartCalculationProvider } from "@/lib/chart/provider";
 import { demoSabianSymbols } from "@/lib/sabian/demo-data";
 import { findSymbolByGlobalIndex } from "@/lib/sabian/model";
@@ -66,6 +66,8 @@ export interface CreateReadingInput {
   birthDate: string; // YYYY-MM-DD
   birthTime?: string; // HH:MM, required unless unknown
   timeKnown: boolean;
+  /** Explicit offset choice for ambiguous (DST overlap) times. */
+  overlapOffsetChoice?: "daylight" | "standard";
   placeId: string;
   consent: boolean;
 }
@@ -99,7 +101,12 @@ export class ReadingService {
     // Stage 2: historical time conversion.
     this.emit("converting-time");
     const resolved = input.timeKnown
-      ? localToUtc({ date: input.birthDate, time: input.birthTime ?? "00:00", timezone: place.timezone })
+      ? localToUtc({
+          date: input.birthDate,
+          time: input.birthTime!,
+          timezone: place.timezone,
+          overlapOffsetChoice: input.overlapOffsetChoice,
+        })
       : unknownTimeUtc({ date: input.birthDate, timezone: place.timezone });
 
     // Stage 3: deterministic chart calculation.
@@ -111,6 +118,9 @@ export class ReadingService {
       timeKnown: input.timeKnown,
       localDateOnly: input.timeKnown ? undefined : input.birthDate,
       timeNotation: input.timeKnown ? undefined : "Solar midnight of the local calendar date (disclosed reference instant)",
+      // Moon uncertainty is scanned over the ACTUAL local calendar day at the
+      // birthplace (converted to UTC bounds), independent of the server zone.
+      localDayBoundsUtc: input.timeKnown ? undefined : localDayBoundsUtc(input.birthDate, place.timezone),
     });
 
     // Stage 4: symbol lookup.

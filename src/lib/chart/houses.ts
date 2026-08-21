@@ -43,7 +43,7 @@ export interface HouseSystemResult {
 function longitudeFromRightAscension(raDeg: number, obliquityDeg: number): number {
   const eps = obliquityDeg * DEG2RAD;
   const a = raDeg * DEG2RAD;
-  let lon = Math.atan2(Math.sin(a), Math.cos(a) * Math.cos(eps)) * (180 / Math.PI);
+  const lon = Math.atan2(Math.sin(a), Math.cos(a) * Math.cos(eps)) * (180 / Math.PI);
   return normalizeDegrees(lon);
 }
 
@@ -92,7 +92,7 @@ function iterateCusp(
       default:
         return { ra, converged: false };
     }
-    let next = ramc + offset;
+    const next = ramc + offset;
     let delta = next - ra;
     delta -= 360 * Math.round(delta / 360);
     if (Math.abs(delta) < 1e-5) return { ra: ((next % 360) + 360) % 360, converged: true };

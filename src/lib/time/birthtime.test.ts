@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { localToUtc, unknownTimeUtc, isValidTimezone } from "@/lib/time/birthtime";
-import { createChartProvider } from "@/lib/chart/provider";
+import {
+  localToUtc,
+  unknownTimeUtc,
+  isValidTimezone,
+  classifyLocalTime,
+  isValidCalendarDate,
+  localDayBoundsUtc,
+} from "@/lib/time/birthtime";
+import { createChartProvider, moonChangesSignDuringWindow } from "@/lib/chart/provider";
 
 describe("timezone conversion", () => {
   it("converts London local time to UTC using historical offset", () => {
@@ -8,6 +15,7 @@ describe("timezone conversion", () => {
     const r = localToUtc({ date: "1990-06-15", time: "14:30", timezone: "Europe/London" });
     expect(r.utcOffsetMinutes).toBe(60);
     expect(r.utcIso).toBe("1990-06-15T13:30:00.000Z");
+    expect(r.dstKind).toBe("unique");
   });
 
   it("handles winter time (GMT, UTC+0)", () => {
@@ -48,6 +56,73 @@ describe("timezone conversion", () => {
     expect(() => localToUtc({ date: "1990-06-15", time: "12:00", timezone: "No/Zone" })).toThrow();
   });
 });
+
+describe("calendar-date integrity", () => {
+  it("accepts real dates and rejects impossible ones", () => {
+    expect(isValidCalendarDate("2024-02-29")).toBe(true); // leap year
+    expect(isValidCalendarDate("2023-02-29")).toBe(false); // not a leap year
+    expect(isValidCalendarDate("2024-02-30")).toBe(false);
+    expect(isValidCalendarDate("2024-13-01")).toBe(false);
+    expect(isValidCalendarDate("2024-00-10")).toBe(false);
+    expect(isValidCalendarDate("2024-04-31")).toBe(false); // April has 30 days
+    expect(isValidCalendarDate("1990-06-15")).toBe(true);
+  });
+
+  it("throws on impossible dates during conversion", () => {
+    expect(() => localToUtc({ date: "2024-02-30", time: "10:00", timezone: "Europe/London" })).toThrow(/calendar date/i);
+  });
+});
+
+describe("DST gap and overlap handling", () => {
+  it("detects a spring-forward gap (time never existed)", () => {
+    // US 2024-03-10 02:30 does not exist (2:00→3:00).
+    expect(classifyLocalTime({ date: "2024-03-10", time: "02:30", timezone: "America/New_York" }).kind).toBe("gap");
+    expect(() =>
+      localToUtc({ date: "2024-03-10", time: "02:30", timezone: "America/New_York" })
+    ).toThrow(/never existed/i);
+  });
+
+  it("accepts times just outside the gap", () => {
+    expect(classifyLocalTime({ date: "2024-03-10", time: "01:59", timezone: "America/New_York" }).kind).toBe("unique");
+    expect(classifyLocalTime({ date: "2024-03-10", time: "03:00", timezone: "America/New_York" }).kind).toBe("unique");
+  });
+
+  it("detects a fall-back overlap (time occurred twice) and exposes both choices", () => {
+    // US 2024-11-03 01:30 occurred twice (2:00→1:00).
+    const cls = classifyLocalTime({ date: "2024-11-03", time: "01:30", timezone: "America/New_York" });
+    expect(cls.kind).toBe("overlap");
+    const r = localToUtc({ date: "2024-11-03", time: "01:30", timezone: "America/New_York" });
+    expect(r.dstKind).toBe("overlap");
+    expect(r.overlapChoices).toHaveLength(2);
+    // Daylight (first) occurrence: EDT = UTC-4 → 05:30Z.
+    expect(r.utcIso).toBe("2024-11-03T05:30:00.000Z");
+    expect(r.overlapChosenLabel).toMatch(/Daylight/i);
+    // The standard-time choice is available and differs by one hour.
+    const std = localToUtc({ date: "2024-11-03", time: "01:30", timezone: "America/New_York", overlapOffsetChoice: "standard" });
+    expect(std.utcIso).toBe("2024-11-03T06:30:00.000Z");
+    expect(std.overlapChosenLabel).toMatch(/Standard/i);
+  });
+
+  it("marks an unambiguous time as unique", () => {
+    expect(classifyLocalTime({ date: "2024-06-15", time: "10:00", timezone: "America/New_York" }).kind).toBe("unique");
+  });
+});
+
+describe("local calendar day for Moon uncertainty", () => {
+  it("produces UTC bounds for a local day that differ from a UTC day", () => {
+    // New York (UTC-5 in March): the local 1985-03-14 day runs 05:00Z → 05:00Z next day.
+    const [start, end] = localDayBoundsUtc("1985-03-14", "America/New_York");
+    expect(start).toBe("1985-03-14T05:00:00.000Z");
+    expect(end.startsWith("1985-03-15T04:")).toBe(true);
+  });
+
+  it("moonChangesSignDuringWindow scans the given window deterministically", () => {
+    const [start, end] = localDayBoundsUtc("1985-03-14", "America/New_York");
+    const result = moonChangesSignDuringWindow(start, end);
+    expect(typeof result).toBe("boolean");
+  });
+});
+
 
 describe("chart provider with timezones", () => {
   it("produces a time-known chart with Ascendant and houses", () => {

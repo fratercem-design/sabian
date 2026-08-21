@@ -12,6 +12,26 @@ interface PlaceOption {
   timezone: string;
 }
 
+interface ReviewData {
+  place: {
+    displayName: string;
+    region?: string;
+    country?: string;
+    latitude: number;
+    longitude: number;
+    timezone: string;
+  };
+  utcIso: string | null;
+  referenceUtcIso?: string;
+  utcOffsetMinutes: number;
+  offsetLabel: string;
+  dstKind: "gap" | "overlap" | "unique";
+  overlapChoices?: { utcIso: string; utcOffsetMinutes: number; offsetLabel: string; label: string }[] | null;
+  overlapChosenLabel?: string | null;
+  timeKnown: boolean;
+  timeNotation: string | null;
+}
+
 type Step = 1 | 2 | 3 | 4 | 5;
 
 const STEPS: { n: Step; label: string }[] = [
@@ -37,7 +57,44 @@ export default function ReadingForm() {
   const [searching, setSearching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [review, setReview] = useState<ReviewData | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Deterministic review: resolve the selected date/time/place before
+  // submission and show the canonical place, coordinates, timezone,
+  // historical offset, and resolved UTC instant.
+  useEffect(() => {
+    if (step !== 5 || !selectedPlace || !date) return;
+    let cancelled = false;
+    const params = new URLSearchParams({
+      date,
+      timeKnown: String(timeKnown),
+      placeId: selectedPlace.id,
+    });
+    if (timeKnown && time) params.set("time", time);
+    fetch(`/api/reading/review?${params.toString()}`)
+      .then(async (res) => {
+        const data = (await res.json()) as { error?: string } & ReviewData;
+        if (cancelled) return;
+        if (!res.ok) {
+          setReview(null);
+          setReviewError(data.error ?? "Could not resolve this birth time.");
+          return;
+        }
+        setReview(data);
+        setReviewError(null);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setReview(null);
+          setReviewError("Could not resolve this birth time.");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [step, date, time, timeKnown, selectedPlace]);
 
   useEffect(() => {
     if (step !== 4) return;
@@ -75,8 +132,9 @@ export default function ReadingForm() {
     }
     if (step === 4 && !selectedPlace) errs.push("Please select a birthplace from the search results.");
     if (step === 5 && !consent) errs.push("Please consent to processing your birth information to continue.");
+    if (step === 5 && reviewError) errs.push(reviewError);
     return errs;
-  }, [step, name, date, timeKnown, time, selectedPlace, consent]);
+  }, [step, name, date, timeKnown, time, selectedPlace, consent, reviewError]);
 
   const next = () => {
     const errs = validateStep();
@@ -110,6 +168,10 @@ export default function ReadingForm() {
           birthDate: date,
           birthTime: timeKnown ? time : undefined,
           timeKnown,
+          overlapOffsetChoice:
+            timeKnown && review?.dstKind === "overlap" && review.overlapChosenLabel?.match(/Standard/i)
+              ? "standard"
+              : "daylight",
           placeId: selectedPlace!.id,
           consent: true,
         }),
@@ -338,6 +400,73 @@ export default function ReadingForm() {
                 </dd>
               </div>
             </dl>
+
+            {reviewError && (
+              <div role="alert" className="mt-4 rounded-xl border border-ember/50 bg-ember/10 p-4 text-sm text-parchment-200">
+                {reviewError}
+              </div>
+            )}
+
+            {review && (
+              <div className="mt-6 rounded-2xl border border-gold/25 bg-midnight-900/60 p-5 text-sm" aria-label="Resolved birth time details">
+                <p className="text-xs font-medium uppercase tracking-[0.25em] text-gold-400">
+                  Resolved before submission
+                </p>
+                <dl className="mt-3 space-y-2">
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-silver-mist">Canonical place</dt>
+                    <dd className="text-right font-medium text-parchment-100">
+                      {review.place.displayName}
+                      <span className="block text-xs font-normal text-silver-mist">
+                        {[review.place.region, review.place.country].filter(Boolean).join(", ")}
+                      </span>
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-silver-mist">Coordinates</dt>
+                    <dd className="text-right font-medium text-parchment-100">
+                      {review.place.latitude.toFixed(4)}°, {review.place.longitude.toFixed(4)}°
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-silver-mist">IANA time zone</dt>
+                    <dd className="text-right font-medium text-parchment-100">{review.place.timezone}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-silver-mist">Historical UTC offset</dt>
+                    <dd className="text-right font-medium text-parchment-100">{review.offsetLabel}</dd>
+                  </div>
+                  {timeKnown ? (
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-silver-mist">Resolved UTC instant</dt>
+                      <dd className="text-right font-medium text-parchment-100">{review.utcIso}</dd>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between gap-4">
+                        <dt className="text-silver-mist">Actual UTC birth instant</dt>
+                        <dd className="text-right font-medium text-ember">Not known — no time was supplied</dd>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <dt className="text-silver-mist">Disclosed reference instant</dt>
+                        <dd className="text-right font-medium text-parchment-100">{review.referenceUtcIso}</dd>
+                      </div>
+                      <p className="text-xs leading-relaxed text-silver-mist">
+                        {review.timeNotation}. This reference instant is used only for
+                        date-anchored placements; the Ascendant, Midheaven, and houses are never
+                        derived from it.
+                      </p>
+                    </>
+                  )}
+                  {review.dstKind === "overlap" && review.overlapChosenLabel && (
+                    <p className="rounded-lg bg-gold/10 p-2 text-xs leading-relaxed text-gold-300">
+                      This local time occurred twice (DST fall-back). Using the {review.overlapChosenLabel}.
+                    </p>
+                  )}
+                </dl>
+              </div>
+            )}
+
             <label className="mt-6 flex items-start gap-3 text-sm text-parchment-200">
               <input
                 type="checkbox"
@@ -347,8 +476,9 @@ export default function ReadingForm() {
               />
               <span>
                 I consent to this experience processing my birth date, time, and place to calculate
-                my chart and generate a reading. I understand it is for reflection and
-                entertainment, and that I can delete my reading at any time.
+                my chart and generate a reading. Readings are kept for a limited retention period
+                (configurable; currently 90 days) and I can delete my reading at any time. This
+                experience is for reflection and entertainment.
               </span>
             </label>
           </fieldset>

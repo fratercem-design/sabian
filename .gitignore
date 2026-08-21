@@ -29,9 +29,12 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# database (local dev)
+# database (local dev, runtime state — never commit)
 data/*.db
 data/*.db-journal
+data/*.db-shm
+data/*.db-wal
+data/art-cache/
 
 # testing
 /coverage

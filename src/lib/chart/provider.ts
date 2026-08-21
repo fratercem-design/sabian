@@ -33,6 +33,7 @@ import {
   MakeTime,
   RotateVector,
   Rotation_EQJ_ECL,
+  Vector,
   type AstroTime,
 } from "astronomy-engine";
 
@@ -57,6 +58,8 @@ export interface ChartInput {
   localDateOnly?: string;
   /** Disclosure text for the time notation used when unknown. */
   timeNotation?: string;
+  /** UTC bounds of the local calendar day at the birthplace (for Moon uncertainty). */
+  localDayBoundsUtc?: [string, string];
 }
 
 export interface ChartCalculationProvider {
@@ -107,15 +110,15 @@ function moonLongitude(time: AstroTime): number {
 export function northNodeLongitude(utc: Date): number {
   const state = GeoMoonState(utc);
   const rot = Rotation_EQJ_ECL();
-  const r = RotateVector(rot, { x: state.x, y: state.y, z: state.z });
-  const v = RotateVector(rot, { x: state.vx, y: state.vy, z: state.vz });
+  const r = RotateVector(rot, new Vector(state.x, state.y, state.z, state.t));
+  const v = RotateVector(rot, new Vector(state.vx, state.vy, state.vz, state.t));
   // h = r × v
   const hx = r.y * v.z - r.z * v.y;
   const hy = r.z * v.x - r.x * v.z;
   // n = k̂ × h with k̂ = (0, 0, 1) in the ecliptic frame → n = (−hy, hx, 0)
   const nx = -hy;
   const ny = hx;
-  let lon = (Math.atan2(ny, nx) * 180) / Math.PI;
+  const lon = (Math.atan2(ny, nx) * 180) / Math.PI;
   return normalizeDegrees(lon);
 }
 
@@ -141,13 +144,16 @@ function makePlacement(key: string, name: string, glyph: string, longitude: numb
 }
 
 /**
- * Whether the Moon changes sign during the local calendar day (UTC day) —
- * used to mark the Moon as potentially uncertain when the birth time is unknown.
+ * Whether the Moon changes sign during an explicit [startUtcIso, endUtcIso]
+ * window (the actual local calendar day at the birthplace) — used to mark the
+ * Moon as potentially uncertain when the birth time is unknown. The window is
+ * passed in from the time layer, so the scan is independent of the server
+ * machine's timezone.
  */
-export function moonChangesSignDuringUtcDay(utcMidnight: Date): boolean {
+export function moonChangesSignDuringWindow(startUtcIso: string, endUtcIso: string): boolean {
   const step = 30 * 60 * 1000;
-  const start = utcMidnight.getTime();
-  const end = start + 86400000;
+  const start = new Date(startUtcIso).getTime();
+  const end = new Date(endUtcIso).getTime();
   let prev = Math.floor(moonLongitude(MakeTime(new Date(start))) / 30);
   for (let t = start + step; t <= end; t += step) {
     const cur = Math.floor(moonLongitude(MakeTime(new Date(t))) / 30);
@@ -197,7 +203,9 @@ export class AstronomyEngineChartProvider implements ChartCalculationProvider {
     }
 
     const moonUncertain =
-      !timeKnown && moonChangesSignDuringUtcDay(new Date(utc.getTime() - utc.getTimezoneOffset() * 60000));
+      !timeKnown &&
+      input.localDayBoundsUtc !== undefined &&
+      moonChangesSignDuringWindow(input.localDayBoundsUtc[0], input.localDayBoundsUtc[1]);
 
     return {
       utcIso: utc.toISOString(),
