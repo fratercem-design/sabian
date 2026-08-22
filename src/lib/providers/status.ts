@@ -42,14 +42,17 @@ function chartStatus(): ProviderStatus {
 }
 
 function geocodingStatus(): ProviderStatus {
-  // The local place index is the only implementation; GEOCODING_* env vars
-  // are accepted but not yet consumed by a live provider.
+  const isLive = Boolean(env.GEOCODING_API_URL && env.GEOCODING_API_KEY);
   return {
     interfaceName: "PlaceSearchProvider",
-    implementation: "LocalPlaceSearchProvider (static place index)",
-    kind: "fixture",
+    implementation: isLive
+      ? `LivePlaceSearchProvider (${env.GEOCODING_API_URL})`
+      : "LocalPlaceSearchProvider (static place index)",
+    kind: isLive ? "live" : "fixture",
     envVars: ["GEOCODING_API_URL", "GEOCODING_API_KEY"],
-    externalData: "None in fixture mode. A live provider would send only the free-text query.",
+    externalData: isLive
+      ? "Free-text query only sent to external geocoding API."
+      : "None in fixture mode. A live provider would send only the free-text query.",
     testedLive: false,
   };
 }
@@ -103,7 +106,7 @@ function imageStatus(): ProviderStatus {
     implementation:
       env.IMAGE_PROVIDER === "mock"
         ? "MockImageGenerationProvider (deterministic SVG)"
-        : `live adapter selected via IMAGE_PROVIDER=${env.IMAGE_PROVIDER} (not yet implemented)`,
+        : `LiveImageGenerationProvider (${env.IMAGE_PROVIDER})`,
     kind,
     envVars: ["IMAGE_PROVIDER", "IMAGE_API_KEY", "IMAGE_MODEL"],
     externalData: kind === "live" ? "Sanitized visual prompt only (symbol motifs + style); never the visitor's name or birthplace." : "None.",

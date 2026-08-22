@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPlaceSearchProvider } from "@/lib/places/provider";
+import { selectPlaceSearchProvider } from "@/lib/places/provider";
 import { z } from "zod";
 
 export const runtime = "nodejs";
@@ -11,8 +11,8 @@ const QuerySchema = z.object({
 
 /**
  * GET /api/places?q=...
- * Searches the deterministic place index. Only the free-text query is used;
- * no birth data is ever sent to a third party in demo mode.
+ * Searches the place index (local index by default, live provider when configured).
+ * Only the free-text query is used; no birth data is ever sent to a third party.
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid query" }, { status: 400 });
   }
-  const provider = createPlaceSearchProvider();
+  const provider = selectPlaceSearchProvider();
   const results = await provider.search(parsed.data.q, parsed.data.limit);
   return NextResponse.json({ results });
 }

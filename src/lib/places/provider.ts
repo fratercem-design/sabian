@@ -9,8 +9,10 @@
  * service.
  */
 
+import { env } from "@/lib/config";
 import type { PlaceResult } from "@/lib/types";
 import { placeIndex, PLACES } from "@/lib/places/place-index";
+import { LivePlaceSearchProvider } from "@/lib/places/live-provider";
 
 export interface PlaceSearchProvider {
   search(query: string, limit?: number): Promise<PlaceResult[]>;
@@ -47,5 +49,17 @@ export class LocalPlaceSearchProvider implements PlaceSearchProvider {
 }
 
 export function createPlaceSearchProvider(): PlaceSearchProvider {
+  return new LocalPlaceSearchProvider();
+}
+
+/**
+ * Select the place search provider from environment configuration.
+ * When GEOCODING_API_URL is configured, returns a live provider.
+ * Otherwise returns the deterministic local place index (default).
+ */
+export function selectPlaceSearchProvider(): PlaceSearchProvider {
+  if (env.GEOCODING_API_URL) {
+    return new LivePlaceSearchProvider();
+  }
   return new LocalPlaceSearchProvider();
 }
