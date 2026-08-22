@@ -27,7 +27,7 @@ import { getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
 import { findSymbolByGlobalIndex } from "@/lib/sabian/model";
 import { createInterpretationProvider } from "@/lib/interpretation/mock-provider";
 import { createLiveInterpretationProvider } from "@/lib/interpretation/live-provider";
-import { createImageGenerationProvider, type ImageGenerationProvider } from "@/lib/image/provider";
+import { createImageGenerationProvider, selectImageProvider, type ImageGenerationProvider } from "@/lib/image/provider";
 import { hashPrompt } from "@/lib/art/art-cache";
 import { createReadingRepository, newReadingId, type ReadingRepository } from "@/lib/db/reading-repository";
 import { validateInterpretation, type InterpretationInput, type InterpretationOutput, type InterpretationProvider } from "@/lib/interpretation/contract";
@@ -78,7 +78,7 @@ export class ReadingService {
     private places: PlaceSearchProvider = createPlaceSearchProvider(),
     private chart: ChartCalculationProvider = createChartProvider(),
     private interpretation: InterpretationProvider = selectInterpretationProvider(),
-    private image: ImageGenerationProvider = createImageGenerationProvider(),
+    private image: ImageGenerationProvider = selectImageProvider(),
     private repo: ReadingRepository = createReadingRepository()
   ) {}
 
@@ -293,13 +293,29 @@ export class ReadingService {
     interpretation: InterpretationOutput
   ): Promise<Record<string, GeneratedArtwork>> {
     const result: Record<string, GeneratedArtwork> = {};
-    const keys: Array<keyof typeof interpretation.imagePrompts> = ["sun", "moon", "ascendant"];
+    // Sun and Moon always; Ascendant only when the birth time is known;
+    // plus the combined Soul Portrait.
+    const keys: Array<keyof typeof interpretation.imagePrompts> = ["sun", "moon"];
+    if (reading.timeKnown) keys.push("ascendant");
     for (const key of keys) {
       const prompt = interpretation.imagePrompts[key];
       const cacheKey = hashPrompt(prompt, this.image.name);
       const seed = seededRandom(reading.id + key).toString();
       result[key] = await this.image.generate(prompt, cacheKey, seed);
     }
+    // Soul Portrait: combined Sun + Moon emblem derived from both motifs.
+    const soulMotifs = [
+      ...(interpretation.imagePrompts.sun ?? "").split(/[,.]/).slice(0, 3),
+      ...(interpretation.imagePrompts.moon ?? "").split(/[,.]/).slice(0, 3),
+    ].filter(Boolean);
+    const soulPrompt = interpretation.imagePrompts.sun; // reuse the style carrier
+    const soulCacheKey = hashPrompt(`soul|${soulMotifs.join("|")}`, this.image.name);
+    const soulSeed = seededRandom(reading.id + "soul").toString();
+    result["soul-portrait"] = await this.image.generate(
+      `A combined emblem of Sun and Moon together, inspired by: ${soulMotifs.join(", ")}. ${soulPrompt.split("inspired by:")[1] ?? ""}`,
+      soulCacheKey,
+      soulSeed
+    );
     return result;
   }
 }

@@ -183,6 +183,16 @@ export interface GeneratedArtwork {
   source: ImageSource;
   altText: string;
   prompt?: string;
+  /** Provenance metadata (Task 6): exact prompt, provider, model, status, creation time. */
+  provenance?: {
+    prompt: string;
+    provider: string;
+    model?: string;
+    status: "generated" | "failed" | "placeholder";
+    createdAt: string;
+    /** Stable asset identifier when the provider returns one. */
+    assetId?: string;
+  };
 }
 
 export interface Reading {

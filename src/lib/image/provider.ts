@@ -12,6 +12,7 @@
 
 import type { GeneratedArtwork } from "@/lib/types";
 import { createArtCache } from "@/lib/art/art-cache";
+import { env } from "@/lib/config";
 
 export interface ImageGenerationProvider {
   readonly name: string;
@@ -119,5 +120,23 @@ export class MockImageGenerationProvider implements ImageGenerationProvider {
 }
 
 export function createImageGenerationProvider(): ImageGenerationProvider {
+  return new MockImageGenerationProvider();
+}
+
+/**
+ * Select the image provider from configuration.
+ * IMAGE_PROVIDER=mock (default) → deterministic demo SVG provider.
+ * IMAGE_PROVIDER=openai|replicate → server-only live adapter (throws at
+ * construction when no IMAGE_API_KEY is set, so a misconfigured server
+ * fails loudly instead of silently serving demo artwork).
+ */
+export function selectImageProvider(): ImageGenerationProvider {
+  if (env.IMAGE_PROVIDER !== "mock") {
+    // Lazy import keeps the live adapter (and its fetch usage) out of the
+    // client bundle and out of the mock path.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createLiveImageGenerationProvider } = require("@/lib/image/live-provider") as typeof import("@/lib/image/live-provider");
+    return createLiveImageGenerationProvider();
+  }
   return new MockImageGenerationProvider();
 }
