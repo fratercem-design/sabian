@@ -1,0 +1,2781 @@
+{
+  "generator": "swisseph-wasm (Swiss Ephemeris 2.10.03)",
+  "generatedAt": "2026-08-22T00:19:35.402Z",
+  "conventions": {
+    "zodiac": "tropical",
+    "houses": "Placidus (hsys P)",
+    "node": "mean_node and true_node both recorded",
+    "sabian": "degree-to-next (leading edge)"
+  },
+  "fixtures": [
+    {
+      "id": "north-modern-london",
+      "label": "Northern Hemisphere, modern date (London, 1990-06-15 14:30 BST)",
+      "utcIso": "1990-06-15T13:30:00.000Z",
+      "lat": 51.5074,
+      "lon": -0.1278,
+      "timeKnown": true,
+      "jd": 2448058.0625,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 2,
+          "degree": 24,
+          "minute": 11,
+          "second": 21,
+          "longitude": 84.18924910992894,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 85,
+            "sign": "Gemini"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 11,
+          "degree": 16,
+          "minute": 11,
+          "second": 37,
+          "longitude": 346.1938488901619,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 17,
+            "globalIndex": 347,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 2,
+          "degree": 5,
+          "minute": 47,
+          "second": 52,
+          "longitude": 65.79803747228158,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 6,
+            "globalIndex": 66,
+            "sign": "Gemini"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 1,
+          "degree": 18,
+          "minute": 51,
+          "second": 3,
+          "longitude": 48.85109864265792,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 19,
+            "globalIndex": 49,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 0,
+          "degree": 11,
+          "minute": 5,
+          "second": 10,
+          "longitude": 11.086241656677089,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 12,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 3,
+          "degree": 15,
+          "minute": 54,
+          "second": 10,
+          "longitude": 105.90302755433834,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 106,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 9,
+          "degree": 24,
+          "minute": 1,
+          "second": 41,
+          "longitude": 294.02826801296965,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 295,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 9,
+          "degree": 8,
+          "minute": 9,
+          "second": 46,
+          "longitude": 278.1627785601413,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 9,
+            "globalIndex": 279,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 9,
+          "degree": 13,
+          "minute": 42,
+          "second": 55,
+          "longitude": 283.7155124549124,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 14,
+            "globalIndex": 284,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 7,
+          "degree": 15,
+          "minute": 24,
+          "second": 0,
+          "longitude": 225.40024193243164,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 226,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 10,
+          "degree": 9,
+          "minute": 41,
+          "second": 40,
+          "longitude": 309.6945732018394,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 10,
+            "globalIndex": 310,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 10,
+          "degree": 8,
+          "minute": 7,
+          "second": 21,
+          "longitude": 308.1227273596626,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 9,
+            "globalIndex": 309,
+            "sign": "Aquarius"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 191.2400641093742,
+        "2": 216.41021584019427,
+        "3": 247.77069942897572,
+        "4": 284.68901883041406,
+        "5": 320.0102288533177,
+        "6": 348.77593570229465,
+        "7": 11.240064109374202,
+        "8": 36.41021584019427,
+        "9": 67.77069942897572,
+        "10": 104.68901883041406,
+        "11": 140.0102288533177,
+        "12": 168.77593570229465
+      },
+      "ascmc": {
+        "ascendant": 191.2400641093742,
+        "mc": 104.68901883041406,
+        "armc": 105.94533620886429
+      }
+    },
+    {
+      "id": "north-historical-wadowice",
+      "label": "Northern Hemisphere, historical date (Wadowice, 1920-05-18 17:30 CET+1h)",
+      "utcIso": "1920-05-18T15:30:00.000Z",
+      "lat": 49.8833,
+      "lon": 19.5,
+      "timeKnown": true,
+      "jd": 2422463.1458333335,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 1,
+          "degree": 27,
+          "minute": 21,
+          "second": 32,
+          "longitude": 57.359015144801276,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 28,
+            "globalIndex": 58,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 2,
+          "degree": 2,
+          "minute": 41,
+          "second": 6,
+          "longitude": 62.68505688628363,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 3,
+            "globalIndex": 63,
+            "sign": "Gemini"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 1,
+          "degree": 18,
+          "minute": 32,
+          "second": 31,
+          "longitude": 48.542180230906695,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 19,
+            "globalIndex": 49,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 1,
+          "degree": 14,
+          "minute": 50,
+          "second": 53,
+          "longitude": 44.84824292415607,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 15,
+            "globalIndex": 45,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 6,
+          "degree": 22,
+          "minute": 26,
+          "second": 0,
+          "longitude": 202.43344600614228,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 23,
+            "globalIndex": 203,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 4,
+          "degree": 11,
+          "minute": 0,
+          "second": 15,
+          "longitude": 131.00429468072343,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 132,
+            "sign": "Leo"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 5,
+          "degree": 4,
+          "minute": 55,
+          "second": 56,
+          "longitude": 154.9324836553651,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 5,
+            "globalIndex": 155,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 11,
+          "degree": 5,
+          "minute": 28,
+          "second": 9,
+          "longitude": 335.46929835830156,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 6,
+            "globalIndex": 336,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 4,
+          "degree": 8,
+          "minute": 58,
+          "second": 33,
+          "longitude": 128.97596115829072,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 9,
+            "globalIndex": 129,
+            "sign": "Leo"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 3,
+          "degree": 6,
+          "minute": 18,
+          "second": 53,
+          "longitude": 96.31486829172502,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 7,
+            "globalIndex": 97,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 7,
+          "degree": 15,
+          "minute": 2,
+          "second": 33,
+          "longitude": 225.04264573369426,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 226,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 7,
+          "degree": 15,
+          "minute": 38,
+          "second": 16,
+          "longitude": 225.63794041921756,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 226,
+            "sign": "Scorpio"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 207.26399992909944,
+        "2": 234.41757681934473,
+        "3": 267.8881264204215,
+        "4": 305.64444070250534,
+        "5": 339.635950203991,
+        "6": 6.49900026325048,
+        "7": 27.26399992909944,
+        "8": 54.41757681934479,
+        "9": 87.88812642042154,
+        "10": 125.64444070250534,
+        "11": 159.635950203991,
+        "12": 186.49900026325054
+      },
+      "ascmc": {
+        "ascendant": 207.26399992909944,
+        "mc": 125.64444070250534,
+        "armc": 128.01078895874224
+      }
+    },
+    {
+      "id": "south-sydney",
+      "label": "Southern Hemisphere (Sydney, 1985-03-14 09:15 AEDT)",
+      "utcIso": "1985-03-13T22:15:00.000Z",
+      "lat": -33.8688,
+      "lon": 151.2093,
+      "timeKnown": true,
+      "jd": 2446138.4270833335,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 11,
+          "degree": 23,
+          "minute": 16,
+          "second": 55,
+          "longitude": 353.2820587607316,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 24,
+            "globalIndex": 354,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 8,
+          "degree": 25,
+          "minute": 43,
+          "second": 14,
+          "longitude": 265.72076694793736,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 26,
+            "globalIndex": 266,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 0,
+          "degree": 11,
+          "minute": 3,
+          "second": 48,
+          "longitude": 11.063364181486804,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 12,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 0,
+          "degree": 22,
+          "minute": 17,
+          "second": 44,
+          "longitude": 22.29561306348586,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 23,
+            "globalIndex": 23,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 0,
+          "degree": 29,
+          "minute": 3,
+          "second": 52,
+          "longitude": 29.064631091280035,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 30,
+            "globalIndex": 30,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 10,
+          "degree": 7,
+          "minute": 36,
+          "second": 49,
+          "longitude": 307.6137786966668,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 8,
+            "globalIndex": 308,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 7,
+          "degree": 28,
+          "minute": 5,
+          "second": 29,
+          "longitude": 238.09161764054465,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 29,
+            "globalIndex": 239,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 8,
+          "degree": 17,
+          "minute": 56,
+          "second": 59,
+          "longitude": 257.9498085298245,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 18,
+            "globalIndex": 258,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 9,
+          "degree": 3,
+          "minute": 28,
+          "second": 48,
+          "longitude": 273.4801293646657,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 4,
+            "globalIndex": 274,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 7,
+          "degree": 4,
+          "minute": 23,
+          "second": 4,
+          "longitude": 214.38446370775955,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 5,
+            "globalIndex": 215,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 1,
+          "degree": 21,
+          "minute": 20,
+          "second": 21,
+          "longitude": 51.33941731968321,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 22,
+            "globalIndex": 52,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 1,
+          "degree": 19,
+          "minute": 58,
+          "second": 36,
+          "longitude": 49.97670708955553,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 20,
+            "globalIndex": 50,
+            "sign": "Taurus"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 22.24962801456155,
+        "2": 50.54144573694839,
+        "3": 81.61864778432113,
+        "4": 114.52690257694417,
+        "5": 147.08149270842694,
+        "6": 176.75271022490256,
+        "7": 202.2496280145615,
+        "8": 230.5414457369484,
+        "9": 261.6186477843212,
+        "10": 294.52690257694417,
+        "11": 327.08149270842694,
+        "12": 356.75271022490256
+      },
+      "ascmc": {
+        "ascendant": 22.24962801456155,
+        "mc": 294.52690257694417,
+        "armc": 296.4423311826573
+      }
+    },
+    {
+      "id": "south-auckland",
+      "label": "Southern Hemisphere (Auckland, 2001-11-05 06:00 NZDT)",
+      "utcIso": "2001-11-04T17:00:00.000Z",
+      "lat": -36.8485,
+      "lon": 174.7633,
+      "timeKnown": true,
+      "jd": 2452218.2083333335,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 7,
+          "degree": 12,
+          "minute": 20,
+          "second": 31,
+          "longitude": 222.3420670756907,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 13,
+            "globalIndex": 223,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 2,
+          "degree": 24,
+          "minute": 1,
+          "second": 7,
+          "longitude": 84.01873703702904,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 85,
+            "sign": "Gemini"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 6,
+          "degree": 25,
+          "minute": 23,
+          "second": 1,
+          "longitude": 205.38374065193443,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 26,
+            "globalIndex": 206,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 6,
+          "degree": 25,
+          "minute": 10,
+          "second": 48,
+          "longitude": 205.18011158185618,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 26,
+            "globalIndex": 206,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 10,
+          "degree": 5,
+          "minute": 30,
+          "second": 54,
+          "longitude": 305.51527357612076,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 6,
+            "globalIndex": 306,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 3,
+          "degree": 15,
+          "minute": 41,
+          "second": 4,
+          "longitude": 105.68454073962005,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 106,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 2,
+          "degree": 13,
+          "minute": 40,
+          "second": 4,
+          "longitude": 73.66788566520319,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 14,
+            "globalIndex": 74,
+            "sign": "Gemini"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 10,
+          "degree": 20,
+          "minute": 55,
+          "second": 8,
+          "longitude": 320.91907072728463,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 21,
+            "globalIndex": 321,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 10,
+          "degree": 6,
+          "minute": 4,
+          "second": 48,
+          "longitude": 306.08003561612213,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 7,
+            "globalIndex": 307,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 8,
+          "degree": 13,
+          "minute": 54,
+          "second": 10,
+          "longitude": 253.90298717044766,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 14,
+            "globalIndex": 254,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 2,
+          "degree": 29,
+          "minute": 23,
+          "second": 25,
+          "longitude": 89.39037728252276,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 30,
+            "globalIndex": 90,
+            "sign": "Gemini"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 2,
+          "degree": 27,
+          "minute": 53,
+          "second": 57,
+          "longitude": 87.89925391495012,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 28,
+            "globalIndex": 88,
+            "sign": "Gemini"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 216.65103724752794,
+        "2": 247.02629920703907,
+        "3": 270.0776758144484,
+        "4": 291.99855405470123,
+        "5": 317.2761282887236,
+        "6": 351.34300698055836,
+        "7": 36.65103724752794,
+        "8": 67.02629920703913,
+        "9": 90.07767581444841,
+        "10": 111.99855405470123,
+        "11": 137.27612828872367,
+        "12": 171.34300698055836
+      },
+      "ascmc": {
+        "ascendant": 216.65103724752794,
+        "mc": 111.99855405470123,
+        "armc": 473.76515128301037
+      }
+    },
+    {
+      "id": "equator-singapore",
+      "label": "Equatorial (Singapore, 2010-07-20 12:00 SGT)",
+      "utcIso": "2010-07-20T04:00:00.000Z",
+      "lat": 1.3521,
+      "lon": 103.8198,
+      "timeKnown": true,
+      "jd": 2455397.6666666665,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 3,
+          "degree": 27,
+          "minute": 21,
+          "second": 40,
+          "longitude": 117.36128693953657,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 28,
+            "globalIndex": 118,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 7,
+          "degree": 19,
+          "minute": 12,
+          "second": 12,
+          "longitude": 229.20343064728695,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 20,
+            "globalIndex": 230,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 4,
+          "degree": 18,
+          "minute": 33,
+          "second": 16,
+          "longitude": 138.55448730554986,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 19,
+            "globalIndex": 139,
+            "sign": "Leo"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 5,
+          "degree": 10,
+          "minute": 46,
+          "second": 28,
+          "longitude": 160.7745798464,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 11,
+            "globalIndex": 161,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 5,
+          "degree": 24,
+          "minute": 4,
+          "second": 53,
+          "longitude": 174.08148041000698,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 175,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 0,
+          "degree": 3,
+          "minute": 23,
+          "second": 1,
+          "longitude": 3.3838349681718114,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 4,
+            "globalIndex": 4,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 5,
+          "degree": 29,
+          "minute": 53,
+          "second": 7,
+          "longitude": 179.8853760358162,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 30,
+            "globalIndex": 180,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 0,
+          "degree": 0,
+          "minute": 30,
+          "second": 29,
+          "longitude": 0.5080564489566086,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 1,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 10,
+          "degree": 28,
+          "minute": 5,
+          "second": 59,
+          "longitude": 328.09991594888913,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 29,
+            "globalIndex": 329,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 9,
+          "degree": 3,
+          "minute": 30,
+          "second": 31,
+          "longitude": 273.50867114054336,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 4,
+            "globalIndex": 274,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 9,
+          "degree": 11,
+          "minute": 2,
+          "second": 10,
+          "longitude": 281.03623115812934,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 282,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 9,
+          "degree": 11,
+          "minute": 54,
+          "second": 5,
+          "longitude": 281.9014406158715,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 282,
+            "sign": "Capricorn"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 192.54444153682573,
+        "2": 223.8548161671988,
+        "3": 252.906450641549,
+        "4": 280.71724955797197,
+        "5": 309.36455282244333,
+        "6": 340.2612421747709,
+        "7": 12.54444153682573,
+        "8": 43.85481616719886,
+        "9": 72.90645064154899,
+        "10": 100.71724955797197,
+        "11": 129.3645528224434,
+        "12": 160.26124217477093
+      },
+      "ascmc": {
+        "ascendant": 192.54444153682573,
+        "mc": 100.71724955797197,
+        "armc": 461.65567050542836
+      }
+    },
+    {
+      "id": "equator-quito",
+      "label": "Equatorial (Quito, 1975-01-01 00:10 ECT)",
+      "utcIso": "1975-01-01T05:10:00.000Z",
+      "lat": -0.1807,
+      "lon": -78.4678,
+      "timeKnown": true,
+      "jd": 2442413.715277778,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 9,
+          "degree": 10,
+          "minute": 9,
+          "second": 14,
+          "longitude": 280.15389504152233,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 11,
+            "globalIndex": 281,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 4,
+          "degree": 22,
+          "minute": 22,
+          "second": 55,
+          "longitude": 142.38201179320754,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 23,
+            "globalIndex": 143,
+            "sign": "Leo"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 9,
+          "degree": 17,
+          "minute": 23,
+          "second": 38,
+          "longitude": 287.3938972195592,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 18,
+            "globalIndex": 288,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 9,
+          "degree": 23,
+          "minute": 39,
+          "second": 3,
+          "longitude": 293.6509852414745,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 24,
+            "globalIndex": 294,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 8,
+          "degree": 15,
+          "minute": 6,
+          "second": 48,
+          "longitude": 255.11358037255377,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 256,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 11,
+          "degree": 13,
+          "minute": 21,
+          "second": 3,
+          "longitude": 343.35100037639756,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 14,
+            "globalIndex": 344,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 3,
+          "degree": 15,
+          "minute": 51,
+          "second": 24,
+          "longitude": 105.85680718869685,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 106,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 7,
+          "degree": 1,
+          "minute": 53,
+          "second": 5,
+          "longitude": 211.88476323715372,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 2,
+            "globalIndex": 212,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 8,
+          "degree": 10,
+          "minute": 26,
+          "second": 26,
+          "longitude": 250.4406833776634,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 11,
+            "globalIndex": 251,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 6,
+          "degree": 9,
+          "minute": 13,
+          "second": 26,
+          "longitude": 189.2240324309014,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 10,
+            "globalIndex": 190,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 8,
+          "degree": 8,
+          "minute": 35,
+          "second": 6,
+          "longitude": 248.58525277603917,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 9,
+            "globalIndex": 249,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 8,
+          "degree": 9,
+          "minute": 56,
+          "second": 15,
+          "longitude": 249.93752948826273,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 10,
+            "globalIndex": 250,
+            "sign": "Sagittarius"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 190.10133108308924,
+        "2": 221.73948048042212,
+        "3": 250.87413944413402,
+        "4": 278.5172694790309,
+        "5": 306.85631906944457,
+        "6": 337.56457239036513,
+        "7": 10.101331083089235,
+        "8": 41.73948048042212,
+        "9": 70.87413944413407,
+        "10": 98.51726947903092,
+        "11": 126.85631906944457,
+        "12": 157.56457239036513
+      },
+      "ascmc": {
+        "ascendant": 190.10133108308924,
+        "mc": 98.51726947903092,
+        "armc": 99.27042032511746
+      }
+    },
+    {
+      "id": "high-lat-reykjavik",
+      "label": "High latitude, Placidus calculable (Reykjavík, 1980-06-21 10:00 GMT)",
+      "utcIso": "1980-06-21T10:00:00.000Z",
+      "lat": 64.1466,
+      "lon": -21.9426,
+      "timeKnown": true,
+      "jd": 2444411.9166666665,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 3,
+          "degree": 0,
+          "minute": 10,
+          "second": 3,
+          "longitude": 90.16761271142025,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 91,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 6,
+          "degree": 9,
+          "minute": 54,
+          "second": 34,
+          "longitude": 189.90954936410265,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 10,
+            "globalIndex": 190,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 3,
+          "degree": 23,
+          "minute": 13,
+          "second": 59,
+          "longitude": 113.23328516153833,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 24,
+            "globalIndex": 114,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 2,
+          "degree": 20,
+          "minute": 39,
+          "second": 36,
+          "longitude": 80.6601723469688,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 21,
+            "globalIndex": 81,
+            "sign": "Gemini"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 5,
+          "degree": 19,
+          "minute": 42,
+          "second": 21,
+          "longitude": 169.70600196848238,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 20,
+            "globalIndex": 170,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 5,
+          "degree": 4,
+          "minute": 35,
+          "second": 32,
+          "longitude": 154.59227934878027,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 5,
+            "globalIndex": 155,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 5,
+          "degree": 20,
+          "minute": 56,
+          "second": 52,
+          "longitude": 170.94788793532973,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 21,
+            "globalIndex": 171,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 7,
+          "degree": 22,
+          "minute": 6,
+          "second": 54,
+          "longitude": 232.11518757340104,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 23,
+            "globalIndex": 233,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 8,
+          "degree": 21,
+          "minute": 3,
+          "second": 5,
+          "longitude": 261.0516377115821,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 22,
+            "globalIndex": 262,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 6,
+          "degree": 18,
+          "minute": 59,
+          "second": 0,
+          "longitude": 198.9835952777786,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 19,
+            "globalIndex": 199,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 4,
+          "degree": 22,
+          "minute": 45,
+          "second": 55,
+          "longitude": 142.76528476464256,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 23,
+            "globalIndex": 143,
+            "sign": "Leo"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 4,
+          "degree": 21,
+          "minute": 36,
+          "second": 3,
+          "longitude": 141.60103499643446,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 22,
+            "globalIndex": 142,
+            "sign": "Leo"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 150.26810150113317,
+        "2": 164.89430613135903,
+        "3": 186.55344122703355,
+        "4": 220.222997328146,
+        "5": 269.0443098209239,
+        "6": 305.43856348892723,
+        "7": 330.2681015011332,
+        "8": 344.89430613135903,
+        "9": 6.553441227033545,
+        "10": 40.22299732814594,
+        "11": 89.04430982092384,
+        "12": 125.43856348892729
+      },
+      "ascmc": {
+        "ascendant": 150.26810150113317,
+        "mc": 40.22299732814594,
+        "armc": 37.810548447492295
+      }
+    },
+    {
+      "id": "high-lat-helsinki",
+      "label": "High latitude (Helsinki, 1995-12-15 03:30 EET)",
+      "utcIso": "1995-12-15T01:30:00.000Z",
+      "lat": 60.1699,
+      "lon": 24.9384,
+      "timeKnown": true,
+      "jd": 2450066.5625,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 8,
+          "degree": 22,
+          "minute": 35,
+          "second": 5,
+          "longitude": 262.5847300685092,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 23,
+            "globalIndex": 263,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 5,
+          "degree": 20,
+          "minute": 38,
+          "second": 26,
+          "longitude": 170.64075812272347,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 21,
+            "globalIndex": 171,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 9,
+          "degree": 4,
+          "minute": 34,
+          "second": 33,
+          "longitude": 274.5758521356339,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 5,
+            "globalIndex": 275,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 9,
+          "degree": 21,
+          "minute": 42,
+          "second": 31,
+          "longitude": 291.70882603864356,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 22,
+            "globalIndex": 292,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 9,
+          "degree": 11,
+          "minute": 2,
+          "second": 57,
+          "longitude": 281.0494392748453,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 282,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 8,
+          "degree": 25,
+          "minute": 37,
+          "second": 9,
+          "longitude": 265.6193896301223,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 26,
+            "globalIndex": 266,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 11,
+          "degree": 18,
+          "minute": 28,
+          "second": 26,
+          "longitude": 348.4739538960687,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 19,
+            "globalIndex": 349,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 9,
+          "degree": 28,
+          "minute": 26,
+          "second": 30,
+          "longitude": 298.4419095849846,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 29,
+            "globalIndex": 299,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 9,
+          "degree": 24,
+          "minute": 4,
+          "second": 44,
+          "longitude": 294.07909523506305,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 295,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 8,
+          "degree": 1,
+          "minute": 20,
+          "second": 44,
+          "longitude": 241.3458165206739,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 2,
+            "globalIndex": 242,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 6,
+          "degree": 23,
+          "minute": 20,
+          "second": 6,
+          "longitude": 203.3351678956218,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 24,
+            "globalIndex": 204,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 6,
+          "degree": 24,
+          "minute": 34,
+          "second": 30,
+          "longitude": 204.57503900620782,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 205,
+            "sign": "Libra"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 205.13425988949552,
+        "2": 230.36468953013514,
+        "3": 264.87317671346375,
+        "4": 308.2623793939133,
+        "5": 343.2406102806618,
+        "6": 7.736849901375535,
+        "7": 25.134259889495524,
+        "8": 50.36468953013514,
+        "9": 84.87317671346375,
+        "10": 128.26237939391336,
+        "11": 163.24061028066183,
+        "12": 187.73684990137554
+      },
+      "ascmc": {
+        "ascendant": 205.13425988949552,
+        "mc": 128.26237939391336,
+        "armc": 130.6826614686898
+      }
+    },
+    {
+      "id": "dst-spring-gap-ny",
+      "label": "DST spring-forward gap avoided (New York, 2024-03-10 03:05 EDT)",
+      "utcIso": "2024-03-10T07:05:00.000Z",
+      "lat": 40.7128,
+      "lon": -74.006,
+      "timeKnown": true,
+      "jd": 2460379.795138889,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 11,
+          "degree": 20,
+          "minute": 11,
+          "second": 59,
+          "longitude": 350.1997376994269,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 21,
+            "globalIndex": 351,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 11,
+          "degree": 19,
+          "minute": 3,
+          "second": 23,
+          "longitude": 349.05655670836995,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 20,
+            "globalIndex": 350,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 0,
+          "degree": 0,
+          "minute": 14,
+          "second": 35,
+          "longitude": 0.24323809293508702,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 1,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 10,
+          "degree": 28,
+          "minute": 0,
+          "second": 2,
+          "longitude": 328.0008101751671,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 29,
+            "globalIndex": 329,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 10,
+          "degree": 20,
+          "minute": 7,
+          "second": 40,
+          "longitude": 320.12783959451326,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 21,
+            "globalIndex": 321,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 1,
+          "degree": 12,
+          "minute": 58,
+          "second": 37,
+          "longitude": 42.97714977146762,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 13,
+            "globalIndex": 43,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 11,
+          "degree": 11,
+          "minute": 2,
+          "second": 44,
+          "longitude": 341.0457935294851,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 342,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 1,
+          "degree": 19,
+          "minute": 52,
+          "second": 32,
+          "longitude": 49.8755958099195,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 20,
+            "globalIndex": 50,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 11,
+          "degree": 27,
+          "minute": 5,
+          "second": 15,
+          "longitude": 357.0875728964945,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 28,
+            "globalIndex": 358,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 10,
+          "degree": 1,
+          "minute": 26,
+          "second": 52,
+          "longitude": 301.4480467235362,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 2,
+            "globalIndex": 302,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 0,
+          "degree": 17,
+          "minute": 12,
+          "second": 27,
+          "longitude": 17.207771601907098,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 18,
+            "globalIndex": 18,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 0,
+          "degree": 15,
+          "minute": 44,
+          "second": 6,
+          "longitude": 15.735270356077194,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 16,
+            "sign": "Aries"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 268.89647461732534,
+        "2": 307.15163078639193,
+        "3": 348.45212843051513,
+        "4": 22.380075008188783,
+        "5": 48.009382524237594,
+        "6": 68.98292540004411,
+        "7": 88.89647461732534,
+        "8": 127.15163078639199,
+        "9": 168.45212843051513,
+        "10": 202.38007500818878,
+        "11": 228.0093825242376,
+        "12": 248.9829254000441
+      },
+      "ascmc": {
+        "ascendant": 268.89647461732534,
+        "mc": 202.38007500818878,
+        "armc": 200.69610000312647
+      }
+    },
+    {
+      "id": "dst-autumn-overlap-ny",
+      "label": "DST autumn overlap, daylight choice (New York, 2024-11-03 01:30 EDT)",
+      "utcIso": "2024-11-03T05:30:00.000Z",
+      "lat": 40.7128,
+      "lon": -74.006,
+      "timeKnown": true,
+      "jd": 2460617.7291666665,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 7,
+          "degree": 11,
+          "minute": 17,
+          "second": 17,
+          "longitude": 221.2882451837927,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 222,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 8,
+          "degree": 0,
+          "minute": 5,
+          "second": 23,
+          "longitude": 240.08976853006197,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 241,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 8,
+          "degree": 0,
+          "minute": 35,
+          "second": 26,
+          "longitude": 240.59063024212014,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 241,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 8,
+          "degree": 19,
+          "minute": 46,
+          "second": 53,
+          "longitude": 259.78143320318236,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 20,
+            "globalIndex": 260,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 3,
+          "degree": 29,
+          "minute": 40,
+          "second": 26,
+          "longitude": 119.67416557374395,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 30,
+            "globalIndex": 120,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 2,
+          "degree": 20,
+          "minute": 18,
+          "second": 39,
+          "longitude": 80.31086424689761,
+          "signName": "Gemini",
+          "sabian": {
+            "sabianDegree": 21,
+            "globalIndex": 81,
+            "sign": "Gemini"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 11,
+          "degree": 12,
+          "minute": 49,
+          "second": 34,
+          "longitude": 342.8262337730687,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 13,
+            "globalIndex": 343,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 1,
+          "degree": 25,
+          "minute": 48,
+          "second": 43,
+          "longitude": 55.81213554379633,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 26,
+            "globalIndex": 56,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 11,
+          "degree": 27,
+          "minute": 27,
+          "second": 36,
+          "longitude": 357.4600148769947,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 28,
+            "globalIndex": 358,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 9,
+          "degree": 29,
+          "minute": 45,
+          "second": 35,
+          "longitude": 299.75997963307964,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 30,
+            "globalIndex": 300,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 0,
+          "degree": 4,
+          "minute": 36,
+          "second": 31,
+          "longitude": 4.608611931679604,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 5,
+            "globalIndex": 5,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 0,
+          "degree": 6,
+          "minute": 13,
+          "second": 54,
+          "longitude": 6.231852212059096,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 7,
+            "globalIndex": 7,
+            "sign": "Aries"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 149.5554767980958,
+        "2": 172.55423488027282,
+        "3": 200.704542923119,
+        "4": 233.84396564193548,
+        "5": 268.8668441873465,
+        "6": 301.3101058744869,
+        "7": 329.5554767980958,
+        "8": 352.5542348802728,
+        "9": 20.704542923118993,
+        "10": 53.843965641935426,
+        "11": 88.86684418734649,
+        "12": 121.31010587448691
+      },
+      "ascmc": {
+        "ascendant": 149.5554767980958,
+        "mc": 53.843965641935426,
+        "armc": 51.46545712824057
+      },
+      "note": "overlap resolved to the daylight (EDT) occurrence 05:30Z"
+    },
+    {
+      "id": "boundary-before-taurus",
+      "label": "Placement just before a zodiac boundary (Sun ~29° Aries)",
+      "utcIso": "1994-04-20T12:00:00.000Z",
+      "lat": 48.8566,
+      "lon": 2.3522,
+      "timeKnown": true,
+      "jd": 2449463,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 1,
+          "degree": 0,
+          "minute": 10,
+          "second": 44,
+          "longitude": 30.17896496891177,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 31,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 4,
+          "degree": 17,
+          "minute": 20,
+          "second": 50,
+          "longitude": 137.34746158965618,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 18,
+            "globalIndex": 138,
+            "sign": "Leo"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 0,
+          "degree": 19,
+          "minute": 26,
+          "second": 14,
+          "longitude": 19.437439263450756,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 20,
+            "globalIndex": 20,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 1,
+          "degree": 22,
+          "minute": 57,
+          "second": 42,
+          "longitude": 52.96176245052794,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 23,
+            "globalIndex": 53,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 0,
+          "degree": 4,
+          "minute": 27,
+          "second": 38,
+          "longitude": 4.460802439579368,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 5,
+            "globalIndex": 5,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 7,
+          "degree": 11,
+          "minute": 1,
+          "second": 51,
+          "longitude": 221.03111087107982,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 222,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 11,
+          "degree": 9,
+          "minute": 16,
+          "second": 44,
+          "longitude": 339.27911443987773,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 10,
+            "globalIndex": 340,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 9,
+          "degree": 26,
+          "minute": 17,
+          "second": 54,
+          "longitude": 296.29860127410734,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 27,
+            "globalIndex": 297,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 9,
+          "degree": 23,
+          "minute": 20,
+          "second": 36,
+          "longitude": 293.3433383838135,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 24,
+            "globalIndex": 294,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 7,
+          "degree": 27,
+          "minute": 24,
+          "second": 55,
+          "longitude": 237.41551467350064,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 28,
+            "globalIndex": 238,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 7,
+          "degree": 25,
+          "minute": 17,
+          "second": 52,
+          "longitude": 235.29800857512487,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 26,
+            "globalIndex": 236,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 7,
+          "degree": 24,
+          "minute": 1,
+          "second": 34,
+          "longitude": 234.02613171620612,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 235,
+            "sign": "Scorpio"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 137.04819385263102,
+        "2": 156.10376000417705,
+        "3": 180.65320944896484,
+        "4": 212.90730800737379,
+        "5": 251.49628092716102,
+        "6": 287.82446264930604,
+        "7": 317.048193852631,
+        "8": 336.10376000417705,
+        "9": 0.6532094489648443,
+        "10": 32.90730800737373,
+        "11": 71.49628092716097,
+        "12": 107.8244626493061
+      },
+      "ascmc": {
+        "ascendant": 137.04819385263102,
+        "mc": 32.90730800737373,
+        "armc": 30.698444262631227
+      }
+    },
+    {
+      "id": "boundary-after-taurus",
+      "label": "Placement just after a zodiac boundary (Sun ~0-1° Taurus)",
+      "utcIso": "1994-04-20T14:00:00.000Z",
+      "lat": 48.8566,
+      "lon": 2.3522,
+      "timeKnown": true,
+      "jd": 2449463.0833333335,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 1,
+          "degree": 0,
+          "minute": 15,
+          "second": 37,
+          "longitude": 30.260304672043446,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 31,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 4,
+          "degree": 18,
+          "minute": 29,
+          "second": 0,
+          "longitude": 138.48341147258503,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 19,
+            "globalIndex": 139,
+            "sign": "Leo"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 0,
+          "degree": 19,
+          "minute": 35,
+          "second": 56,
+          "longitude": 19.599059537145024,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 20,
+            "globalIndex": 20,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 1,
+          "degree": 23,
+          "minute": 3,
+          "second": 49,
+          "longitude": 53.06363962910689,
+          "signName": "Taurus",
+          "sabian": {
+            "sabianDegree": 24,
+            "globalIndex": 54,
+            "sign": "Taurus"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 0,
+          "degree": 4,
+          "minute": 31,
+          "second": 31,
+          "longitude": 4.525330283901042,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 5,
+            "globalIndex": 5,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 7,
+          "degree": 11,
+          "minute": 1,
+          "second": 15,
+          "longitude": 221.02085211779865,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 12,
+            "globalIndex": 222,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 11,
+          "degree": 9,
+          "minute": 17,
+          "second": 12,
+          "longitude": 339.28670557726196,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 10,
+            "globalIndex": 340,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 9,
+          "degree": 26,
+          "minute": 17,
+          "second": 57,
+          "longitude": 296.2993239240898,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 27,
+            "globalIndex": 297,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 9,
+          "degree": 23,
+          "minute": 20,
+          "second": 36,
+          "longitude": 293.3435619540405,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 24,
+            "globalIndex": 294,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 7,
+          "degree": 27,
+          "minute": 24,
+          "second": 48,
+          "longitude": 237.41353615506102,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 28,
+            "globalIndex": 238,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 7,
+          "degree": 25,
+          "minute": 17,
+          "second": 36,
+          "longitude": 235.29359451950506,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 26,
+            "globalIndex": 236,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 7,
+          "degree": 24,
+          "minute": 1,
+          "second": 26,
+          "longitude": 234.0239892850533,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 235,
+            "sign": "Scorpio"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 158.7609527163254,
+        "2": 180.63929644469067,
+        "3": 208.53575360868342,
+        "4": 242.83407945939746,
+        "5": 279.6635080606144,
+        "6": 312.1167482790129,
+        "7": 338.7609527163254,
+        "8": 0.6392964446906717,
+        "9": 28.53575360868342,
+        "10": 62.83407945939746,
+        "11": 99.66350806061439,
+        "12": 132.11674827901282
+      },
+      "ascmc": {
+        "ascendant": 158.7609527163254,
+        "mc": 62.83407945939746,
+        "armc": 60.7805804601515
+      }
+    },
+    {
+      "id": "house-cusp-boundary",
+      "label": "Placement near a house cusp (targeted)",
+      "utcIso": "1978-08-08T08:15:00.000Z",
+      "lat": 34.0522,
+      "lon": -118.2437,
+      "timeKnown": true,
+      "jd": 2443728.84375,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 4,
+          "degree": 15,
+          "minute": 26,
+          "second": 15,
+          "longitude": 135.43767917130026,
+          "signName": "Leo",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 136,
+            "sign": "Leo"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 6,
+          "degree": 3,
+          "minute": 30,
+          "second": 3,
+          "longitude": 183.50102309228123,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 4,
+            "globalIndex": 184,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 5,
+          "degree": 2,
+          "minute": 30,
+          "second": 24,
+          "longitude": 152.5068317048267,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 3,
+            "globalIndex": 153,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 6,
+          "degree": 0,
+          "minute": 13,
+          "second": 40,
+          "longitude": 180.22796941599813,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 181,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 6,
+          "degree": 2,
+          "minute": 27,
+          "second": 42,
+          "longitude": 182.46191282256302,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 3,
+            "globalIndex": 183,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 3,
+          "degree": 24,
+          "minute": 14,
+          "second": 33,
+          "longitude": 114.2427434133653,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 115,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 5,
+          "degree": 1,
+          "minute": 33,
+          "second": 12,
+          "longitude": 151.5535395370478,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 2,
+            "globalIndex": 152,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 7,
+          "degree": 12,
+          "minute": 27,
+          "second": 17,
+          "longitude": 222.45492623554958,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 13,
+            "globalIndex": 223,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 8,
+          "degree": 15,
+          "minute": 38,
+          "second": 54,
+          "longitude": 255.64845759940863,
+          "signName": "Sagittarius",
+          "sabian": {
+            "sabianDegree": 16,
+            "globalIndex": 256,
+            "sign": "Sagittarius"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 6,
+          "degree": 14,
+          "minute": 27,
+          "second": 9,
+          "longitude": 194.45264474611622,
+          "signName": "Libra",
+          "sabian": {
+            "sabianDegree": 15,
+            "globalIndex": 195,
+            "sign": "Libra"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 5,
+          "degree": 28,
+          "minute": 56,
+          "second": 23,
+          "longitude": 178.9397591452008,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 29,
+            "globalIndex": 179,
+            "sign": "Virgo"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 5,
+          "degree": 27,
+          "minute": 19,
+          "second": 36,
+          "longitude": 177.3267140301084,
+          "signName": "Virgo",
+          "sabian": {
+            "sabianDegree": 28,
+            "globalIndex": 178,
+            "sign": "Virgo"
+          }
+        }
+      ],
+      "houses": {
+        "0": 0,
+        "1": 69.40185832232794,
+        "2": 93.0570901168781,
+        "3": 115.08947410261561,
+        "4": 139.5774185779166,
+        "5": 170.34706909411784,
+        "6": 209.15879811408718,
+        "7": 249.40185832232794,
+        "8": 273.05709011687804,
+        "9": 295.08947410261567,
+        "10": 319.57741857791666,
+        "11": 350.34706909411784,
+        "12": 29.15879811408712
+      },
+      "ascmc": {
+        "ascendant": 69.40185832232794,
+        "mc": 319.57741857791666,
+        "armc": -38.00665689327869
+      }
+    },
+    {
+      "id": "unknown-time-tokyo",
+      "label": "Unknown birth time (Tokyo, 1988-02-29)",
+      "utcIso": "1988-02-28T15:00:00.000Z",
+      "lat": 35.6762,
+      "lon": 139.6503,
+      "timeKnown": false,
+      "jd": 2447220.125,
+      "placements": [
+        {
+          "key": "sun",
+          "sign": 11,
+          "degree": 9,
+          "minute": 14,
+          "second": 40,
+          "longitude": 339.2444463075184,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 10,
+            "globalIndex": 340,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "moon",
+          "sign": 3,
+          "degree": 25,
+          "minute": 26,
+          "second": 53,
+          "longitude": 115.44825678725033,
+          "signName": "Cancer",
+          "sabian": {
+            "sabianDegree": 26,
+            "globalIndex": 116,
+            "sign": "Cancer"
+          }
+        },
+        {
+          "key": "mercury",
+          "sign": 10,
+          "degree": 13,
+          "minute": 54,
+          "second": 41,
+          "longitude": 313.91156510479254,
+          "signName": "Aquarius",
+          "sabian": {
+            "sabianDegree": 14,
+            "globalIndex": 314,
+            "sign": "Aquarius"
+          }
+        },
+        {
+          "key": "venus",
+          "sign": 0,
+          "degree": 22,
+          "minute": 17,
+          "second": 0,
+          "longitude": 22.28338466970189,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 23,
+            "globalIndex": 23,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "mars",
+          "sign": 9,
+          "degree": 4,
+          "minute": 10,
+          "second": 36,
+          "longitude": 274.1767781238382,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 5,
+            "globalIndex": 275,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "jupiter",
+          "sign": 0,
+          "degree": 28,
+          "minute": 10,
+          "second": 20,
+          "longitude": 28.172323479227373,
+          "signName": "Aries",
+          "sabian": {
+            "sabianDegree": 29,
+            "globalIndex": 29,
+            "sign": "Aries"
+          }
+        },
+        {
+          "key": "saturn",
+          "sign": 9,
+          "degree": 1,
+          "minute": 6,
+          "second": 13,
+          "longitude": 271.10376667884486,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 2,
+            "globalIndex": 272,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "uranus",
+          "sign": 9,
+          "degree": 0,
+          "minute": 29,
+          "second": 4,
+          "longitude": 270.4846520869701,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 1,
+            "globalIndex": 271,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "neptune",
+          "sign": 9,
+          "degree": 9,
+          "minute": 41,
+          "second": 34,
+          "longitude": 279.69278058491136,
+          "signName": "Capricorn",
+          "sabian": {
+            "sabianDegree": 10,
+            "globalIndex": 280,
+            "sign": "Capricorn"
+          }
+        },
+        {
+          "key": "pluto",
+          "sign": 7,
+          "degree": 12,
+          "minute": 31,
+          "second": 34,
+          "longitude": 222.52617255658777,
+          "signName": "Scorpio",
+          "sabian": {
+            "sabianDegree": 13,
+            "globalIndex": 223,
+            "sign": "Scorpio"
+          }
+        },
+        {
+          "key": "mean_node",
+          "sign": 11,
+          "degree": 24,
+          "minute": 3,
+          "second": 49,
+          "longitude": 354.0638004482603,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 25,
+            "globalIndex": 355,
+            "sign": "Pisces"
+          }
+        },
+        {
+          "key": "true_node",
+          "sign": 11,
+          "degree": 23,
+          "minute": 9,
+          "second": 3,
+          "longitude": 353.15102284718216,
+          "signName": "Pisces",
+          "sabian": {
+            "sabianDegree": 24,
+            "globalIndex": 354,
+            "sign": "Pisces"
+          }
+        }
+      ],
+      "houses": null,
+      "ascmc": null
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createReadingService } from "@/lib/reading/service";
+import { getProviderMatrix } from "@/lib/providers/status";
 import type { Reading, Placement } from "@/lib/types";
 import { DemoArtworkBadge, DemoTextBadge, TestingBadge, Button } from "@/components/ui";
 import ReadingClient from "./reading-client";
@@ -116,7 +117,7 @@ function ReadyReading({ reading }: { reading: Reading }) {
         </div>
       </section>
 
-      <DemoBadgeContainer reading={reading} />
+      <DemoBadgeContainer reading={reading} matrix={getProviderMatrix()} />
 
       {/* The Three Gates */}
       <section className="mx-auto max-w-5xl px-5 py-16" aria-labelledby="gates">
@@ -353,12 +354,16 @@ function UnknownAscendant({ explanation }: { explanation: string }) {
   );
 }
 
-function DemoBadgeContainer({ reading }: { reading: Reading }) {
+function DemoBadgeContainer({ reading, matrix }: { reading: Reading; matrix: ReturnType<typeof getProviderMatrix> }) {
   const mockText = reading.providers?.interpretation?.includes("mock") ?? reading.isDemo;
   const mockArt = reading.providers?.image?.includes("mock") ?? reading.isDemo;
-  if (!reading.isDemo && !mockText && !mockArt) return null;
+  const showLabel = matrix.isDemonstration || reading.isDemo || mockText || mockArt;
+  if (!showLabel) return null;
   return (
     <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-2 px-5 pb-4">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-ember/60 bg-ember/10 px-3 py-1 text-xs font-semibold tracking-wideish text-ember">
+        Demonstration Reading
+      </span>
       {mockText && <DemoTextBadge />}
       {mockArt && <DemoArtworkBadge />}
       {reading.providers?.symbolDatasetIsDemo && (
