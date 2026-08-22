@@ -9,6 +9,14 @@
 
 import { z } from "zod";
 
+/** Provider interface shared by the mock and live implementations. */
+export interface InterpretationProvider {
+  /** Generate the full reading interpretation. */
+  generate(input: InterpretationInput): Promise<InterpretationOutput>;
+  /** Provider name for disclosure, e.g. "deterministic mock" or "anthropic". */
+  readonly name: string;
+}
+
 export const ChapterSchema = z.object({
   title: z.string().min(1),
   body: z.string().min(20),

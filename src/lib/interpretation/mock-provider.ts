@@ -12,14 +12,8 @@ import { seededRandom } from "@/lib/config";
 import type {
   InterpretationInput,
   InterpretationOutput,
+  InterpretationProvider,
 } from "@/lib/interpretation/contract";
-
-export interface InterpretationProvider {
-  /** Generate the full reading interpretation. */
-  generate(input: InterpretationInput): Promise<InterpretationOutput>;
-  /** Provider name for disclosure, e.g. "deterministic mock" or "anthropic". */
-  readonly name: string;
-}
 
 const STORY_TITLES = [
   "The First Image",

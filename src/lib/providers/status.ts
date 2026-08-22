@@ -87,7 +87,7 @@ function storyStatus(): ProviderStatus {
     implementation:
       env.TEXT_PROVIDER === "mock"
         ? "MockInterpretationProvider (deterministic demo)"
-        : `live adapter selected via TEXT_PROVIDER=${env.TEXT_PROVIDER} (not yet implemented)`,
+        : `LiveInterpretationProvider (${env.TEXT_PROVIDER})`,
     kind,
     envVars: ["TEXT_PROVIDER", "TEXT_API_KEY", "TEXT_MODEL"],
     externalData: kind === "live" ? "Validated chart JSON + symbol records (no raw birthplace beyond the resolved place)." : "None.",

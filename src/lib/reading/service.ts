@@ -25,12 +25,13 @@ import { localToUtc, unknownTimeUtc, localDayBoundsUtc } from "@/lib/time/birtht
 import { createChartProvider, type ChartCalculationProvider } from "@/lib/chart/provider";
 import { getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
 import { findSymbolByGlobalIndex } from "@/lib/sabian/model";
-import { createInterpretationProvider, type InterpretationProvider } from "@/lib/interpretation/mock-provider";
+import { createInterpretationProvider } from "@/lib/interpretation/mock-provider";
+import { createLiveInterpretationProvider } from "@/lib/interpretation/live-provider";
 import { createImageGenerationProvider, type ImageGenerationProvider } from "@/lib/image/provider";
 import { hashPrompt } from "@/lib/art/art-cache";
 import { createReadingRepository, newReadingId, type ReadingRepository } from "@/lib/db/reading-repository";
-import { validateInterpretation, type InterpretationInput, type InterpretationOutput } from "@/lib/interpretation/contract";
-import { seededRandom } from "@/lib/config";
+import { validateInterpretation, type InterpretationInput, type InterpretationOutput, type InterpretationProvider } from "@/lib/interpretation/contract";
+import { env, seededRandom } from "@/lib/config";
 import type { Reading, PlaceResult, ChartData, GeneratedArtwork } from "@/lib/types";
 
 export type PipelineStage =
@@ -76,7 +77,7 @@ export class ReadingService {
   constructor(
     private places: PlaceSearchProvider = createPlaceSearchProvider(),
     private chart: ChartCalculationProvider = createChartProvider(),
-    private interpretation: InterpretationProvider = createInterpretationProvider(),
+    private interpretation: InterpretationProvider = selectInterpretationProvider(),
     private image: ImageGenerationProvider = createImageGenerationProvider(),
     private repo: ReadingRepository = createReadingRepository()
   ) {}
@@ -305,4 +306,13 @@ export class ReadingService {
 
 export function createReadingService(): ReadingService {
   return new ReadingService();
+}
+
+/** Select the interpretation provider from configuration (mock by default). */
+export function selectInterpretationProvider(): InterpretationProvider {
+  if (env.TEXT_PROVIDER !== "mock") {
+    // Server-only live adapter; throws at construction if no key is set.
+    return createLiveInterpretationProvider();
+  }
+  return createInterpretationProvider();
 }
