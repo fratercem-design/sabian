@@ -82,7 +82,8 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
   private cache: ReturnType<typeof createArtCache>;
 
   /** Generate one artwork with prompt-hash caching and one retry. */
-  async generate(prompt: string, cacheKey: string, _seed: string): Promise<GeneratedArtwork> {
+  async generate(prompt: string, cacheKey: string, seed: string): Promise<GeneratedArtwork> {
+    void seed; // determinism is the caller's concern; live generation is non-deterministic.
     if (!this.apiKey) {
       throw new Error(
         `IMAGE_PROVIDER=${env.IMAGE_PROVIDER} is selected but IMAGE_API_KEY is not set. ` +

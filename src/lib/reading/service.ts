@@ -27,7 +27,7 @@ import { getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
 import { findSymbolByGlobalIndex } from "@/lib/sabian/model";
 import { createInterpretationProvider } from "@/lib/interpretation/mock-provider";
 import { createLiveInterpretationProvider } from "@/lib/interpretation/live-provider";
-import { createImageGenerationProvider, selectImageProvider, type ImageGenerationProvider } from "@/lib/image/provider";
+import { selectImageProvider, type ImageGenerationProvider } from "@/lib/image/provider";
 import { hashPrompt } from "@/lib/art/art-cache";
 import { createReadingRepository, newReadingId, type ReadingRepository } from "@/lib/db/reading-repository";
 import { validateInterpretation, type InterpretationInput, type InterpretationOutput, type InterpretationProvider } from "@/lib/interpretation/contract";

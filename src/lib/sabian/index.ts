@@ -8,6 +8,8 @@
  * broken content.
  */
 
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 import { demoSabianSymbols } from "@/lib/sabian/demo-data";
 import { findSymbol, findSymbolByGlobalIndex, type SabianSymbol } from "@/lib/sabian/model";
 
@@ -15,13 +17,14 @@ let active: SabianSymbol[] | null = null;
 
 function loadActive(): SabianSymbol[] {
   if (active) return active;
+  const path = join(process.cwd(), "src", "lib", "sabian", "generated", "full-dataset.json");
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const generated = require("@/lib/sabian/generated/full-dataset.json") as { default?: SabianSymbol[] } | SabianSymbol[];
-    const data = Array.isArray(generated) ? generated : generated.default;
-    if (data && data.length === 360) {
-      active = data;
-      return active;
+    if (existsSync(path)) {
+      const data = JSON.parse(readFileSync(path, "utf8")) as SabianSymbol[];
+      if (Array.isArray(data) && data.length === 360) {
+        active = data;
+        return active;
+      }
     }
   } catch {
     // No imported dataset yet — demo fixture.

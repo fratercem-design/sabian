@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import { LiveImageGenerationProvider, buildImagePrompt } from "@/lib/image/live-provider";
+import { hashPrompt } from "@/lib/art/art-cache";
 
 const SHARED = /no readable text, no logos, no watermarks/i;
 
@@ -49,13 +50,24 @@ describe("LiveImageGenerationProvider (Task 6)", () => {
     process.env.ART_CACHE_DIR = `${process.cwd()}/.tmp-test/live-image-cache`;
   });
 
+  function generate(
+    provider: LiveImageGenerationProvider,
+    kind: "sun" | "moon" | "ascendant" | "soul-portrait",
+    motifs: string[],
+    title: string
+  ) {
+    const prompt = buildImagePrompt(kind, motifs, title);
+    const cacheKey = hashPrompt(prompt, provider.name);
+    return provider.generate(prompt, cacheKey, "test-seed");
+  }
+
   it("throws clearly when no API key is configured", async () => {
     const provider = new LiveImageGenerationProvider({
       provider: "openai",
       apiKey: undefined,
       fetchImpl: fakeFetch({}),
     });
-    await expect(provider.generate("sun", ["motif"], "title")).rejects.toThrow(/IMAGE_API_KEY/);
+    await expect(generate(provider, "sun", ["motif"], "title")).rejects.toThrow(/IMAGE_API_KEY/);
   });
 
   it("generates and caches an artwork with provenance", async () => {
@@ -64,7 +76,7 @@ describe("LiveImageGenerationProvider (Task 6)", () => {
       apiKey: "k",
       fetchImpl: fakeFetch({ data: [{ url: "https://img.example/x.png" }] }),
     });
-    const art = await provider.generate("sun", ["gold rays"], "Demo image for Aries 1");
+    const art = await generate(provider, "sun", ["gold rays"], "Demo image for Aries 1");
     expect(art.source).toBe("generated");
     expect(art.imageUrl).toBe("https://img.example/x.png");
     expect(art.provenance?.provider).toBe("openai");
@@ -72,14 +84,14 @@ describe("LiveImageGenerationProvider (Task 6)", () => {
     expect(art.provenance?.createdAt).toBeTruthy();
     expect(art.prompt).toMatch(SHARED);
     // Second call must hit the cache (same prompt hash) — no second HTTP call.
-    const again = await provider.generate("sun", ["gold rays"], "Demo image for Aries 1");
+    const again = await generate(provider, "sun", ["gold rays"], "Demo image for Aries 1");
     expect(again.imageUrl).toBe(art.imageUrl);
   });
 
   it("retries ONE failed image without regenerating siblings", async () => {
     const fetchImpl = fakeFetch({ data: [{ url: "https://img.example/y.png" }] }, 200, 0, true);
     const provider = new LiveImageGenerationProvider({ provider: "openai", apiKey: "k", fetchImpl });
-    const art = await provider.generate("moon", ["silver"], "Demo image for Taurus 1");
+    const art = await generate(provider, "moon", ["silver"], "Demo image for Taurus 1");
     expect(art.imageUrl).toBe("https://img.example/y.png");
     expect(art.provenance?.status).toBe("generated");
   });
@@ -91,7 +103,7 @@ describe("LiveImageGenerationProvider (Task 6)", () => {
       timeoutMs: 50,
       fetchImpl: fakeFetch({ data: [{ url: "x" }] }, 200, 500),
     });
-    await expect(provider.generate("ascendant", ["door"], "t")).rejects.toThrow(/timed out/i);
+    await expect(generate(provider, "ascendant", ["door"], "t")).rejects.toThrow(/timed out/i);
   });
 
   it("throws on non-OK HTTP status", async () => {
@@ -100,6 +112,6 @@ describe("LiveImageGenerationProvider (Task 6)", () => {
       apiKey: "k",
       fetchImpl: fakeFetch({ error: "nope" }, 400),
     });
-    await expect(provider.generate("sun", ["x"], "t")).rejects.toThrow(/HTTP 400/);
+    await expect(generate(provider, "sun", ["x"], "t")).rejects.toThrow(/HTTP 400/);
   });
 });

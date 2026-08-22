@@ -32,7 +32,7 @@ describe("reading service integration", () => {
     expect(reading.interpretation!.story).toHaveLength(7);
     expect(reading.interpretation!.ascendant.available).toBe(true);
     expect(reading.artwork).toBeDefined();
-    expect(Object.keys(reading.artwork!)).toEqual(["sun", "moon", "ascendant"]);
+    expect(Object.keys(reading.artwork!)).toEqual(["sun", "moon", "ascendant", "soul-portrait"]);
     expect(reading.artwork!.sun.source).toBe("placeholder");
   });
 
@@ -123,7 +123,8 @@ describe("reading service integration", () => {
     expect(reading.chart.placements.find((p) => p.key === "midheaven")).toBeUndefined();
     expect(reading.chart.houses).toBeUndefined();
     expect(reading.interpretation!.ascendant.available).toBe(false);
-    expect(reading.artwork!.ascendant.source).toBe("placeholder");
+    expect(Object.keys(reading.artwork!)).toEqual(["sun", "moon", "soul-portrait"]);
+    expect(reading.artwork!.sun.source).toBe("placeholder");
   });
 
   it("refuses to create a reading without consent", async () => {
