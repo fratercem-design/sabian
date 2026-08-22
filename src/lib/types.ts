@@ -68,6 +68,7 @@ export interface EphemerisConfig {
   houseSystem: string;
   obliquity: string;
   deltaT: string;
+  northNodeConvention: string;
 }
 
 export interface ChartData {

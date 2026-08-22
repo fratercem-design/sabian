@@ -111,7 +111,8 @@ function ReadyReading({ reading }: { reading: Reading }) {
             </dl>
             <p className="mt-5 text-xs leading-relaxed text-silver-mist">
               {reading.chart.ephemerisConfig.zodiac} zodiac · {reading.chart.ephemerisConfig.houseSystem} ·{" "}
-              {reading.chart.ephemerisConfig.ephemeris} — deterministic calculations, not AI.
+              {reading.chart.ephemerisConfig.ephemeris} ·{" "}
+              {reading.chart.ephemerisConfig.northNodeConvention} — deterministic calculations, not AI.
             </p>
           </div>
         </div>

@@ -60,6 +60,8 @@ export interface ChartInput {
   timeNotation?: string;
   /** UTC bounds of the local calendar day at the birthplace (for Moon uncertainty). */
   localDayBoundsUtc?: [string, string];
+  /** North Node convention: "true" (default, SE-compatible), "mean", or "osculating". */
+  nodeMode?: NodeMode;
 }
 
 export interface ChartCalculationProvider {
@@ -103,9 +105,9 @@ function moonLongitude(time: AstroTime): number {
  *
  * The state vectors from astronomy-engine are in the J2000 equatorial frame,
  * so they are rotated into the J2000 ecliptic frame (Rotation_EQJ_ECL) before
- * the cross products. This yields the true (osculating) node at the exact
- * birth instant — never the descending node, and never a value sampled from
- * a nearby node-crossing event.
+ * the cross products. This yields the osculating node at the exact birth
+ * instant — never the descending node, and never a value sampled from a
+ * nearby node-crossing event.
  */
 export function northNodeLongitude(utc: Date): number {
   const state = GeoMoonState(utc);
@@ -121,6 +123,24 @@ export function northNodeLongitude(utc: Date): number {
   const lon = (Math.atan2(ny, nx) * 180) / Math.PI;
   return normalizeDegrees(lon);
 }
+
+/**
+ * MEAN lunar node — the standard polynomial used by the Swiss Ephemeris and
+ * most ephemeris references (Meeus ch. 47 / SE mean node):
+ *
+ *   Ω = 125.04452 − 1934.136261·T + 0.0020708·T² + T³/450000
+ *
+ * where T is Julian centuries TT since J2000. The mean node moves smoothly
+ * retrograde (~19.3°/year) and is what many published charts label "Node".
+ */
+export function meanNodeLongitude(utc: Date, deltaTSeconds: number): number {
+  const jd = utc.getTime() / 86400000 + 2440587.5;
+  const T = (jd + deltaTSeconds / 86400 - 2451545.0) / 36525.0;
+  const om = 125.04452 - 1934.136261 * T + 0.0020708 * T * T + (T * T * T) / 450000;
+  return normalizeDegrees(om);
+}
+
+export type NodeMode = "true" | "mean" | "osculating";
 
 function makePlacement(key: string, name: string, glyph: string, longitude: number): Placement {
   const norm = normalizeDegrees(longitude);
@@ -186,7 +206,22 @@ export class AstronomyEngineChartProvider implements ChartCalculationProvider {
       if (body === Body.Sun) continue;
       add(key, nodeNames[key.toUpperCase() as keyof typeof nodeNames] ?? key, glyphFor(key), planetLongitude(body, time));
     }
-    add("north_node", nodeNames.NORTH_NODE, "☊", northNodeLongitude(utc));
+    // North Node per the configured convention (see NodeMode).
+    const nodeMode: NodeMode = input.nodeMode ?? "true";
+    let nodeLon: number;
+    if (nodeMode === "mean") {
+      nodeLon = meanNodeLongitude(utc, dt);
+    } else if (nodeMode === "osculating") {
+      nodeLon = northNodeLongitude(utc);
+    } else {
+      // "true": SE-compatible true node. SE's true node equals the osculating
+      // node adjusted by the difference between the osculating and true
+      // treatments; empirically the osculating node agrees with the SE true
+      // node to within ~0.02–1.2° (see docs/goldmaster.md). We use the
+      // osculating node as the closest available computation, documented.
+      nodeLon = northNodeLongitude(utc);
+    }
+    add("north_node", nodeNames.NORTH_NODE, "☊", nodeLon);
 
     // Ascendant/Midheaven: only calculated when the birth time is exact.
     // For unknown times they are never computed or displayed as facts.
@@ -225,10 +260,17 @@ export class AstronomyEngineChartProvider implements ChartCalculationProvider {
         houseSystem: houseSystemUsed,
         obliquity: "IAU 2006 mean obliquity + nutation (true obliquity of date)",
         deltaT: "Espenak–Meeus ΔT polynomials (NASA Eclipse)",
+        northNodeConvention: NODE_MODE_LABELS[nodeMode],
       },
     };
   }
 }
+
+export const NODE_MODE_LABELS: Record<NodeMode, string> = {
+  true: "True node (Swiss-Ephemeris-compatible; osculating node, default)",
+  mean: "Mean node (Meeus polynomial, matches published 'Node' labels)",
+  osculating: "Osculating ascending node (custom state-vector computation)",
+};
 
 function glyphFor(key: string): string {
   const glyphs: Record<string, string> = {

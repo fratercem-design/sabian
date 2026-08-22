@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createChartProvider } from "@/lib/chart/provider";
+import { createChartProvider, meanNodeLongitude } from "@/lib/chart/provider";
 import { SIGNS } from "@/lib/types";
 // The gold-master fixtures live outside src; load them by absolute path.
 import { readFileSync } from "node:fs";
@@ -94,7 +94,6 @@ describe("gold-master: North Node (Swiss Ephemeris reference)", () => {
     it(`${fixture.id} — engine node is compared against SE mean and true node`, () => {
       const chart = runEngine(fixture);
       const actual = chart.placements.find((p) => p.key === "north_node")!;
-      const seMean = fixture.placements.find((p) => p.key === "mean_node")!;
       const seTrue = fixture.placements.find((p) => p.key === "true_node")!;
       // The engine's osculating node should be close to the SE TRUE node
       // (both are instantaneous); the documented tolerance is 1.5° because
@@ -104,6 +103,23 @@ describe("gold-master: North Node (Swiss Ephemeris reference)", () => {
       expect(actual.sign).toBe(seTrue.signName);
     });
   }
+});
+
+describe("gold-master: nodeMode conventions (Swiss Ephemeris reference)", () => {
+  it("mean mode matches SE mean node within 0.05°", () => {
+    for (const fixture of goldmaster.fixtures) {
+      const utc = new Date(fixture.utcIso);
+      const mean = meanNodeLongitude(utc, 60);
+      const seMean = fixture.placements.find((p) => p.key === "mean_node")!.longitude;
+      degreesEqual(mean, seMean, 0.05);
+    }
+  });
+
+  it("true mode (default) reports the convention in the chart config", () => {
+    const fixture = goldmaster.fixtures[0];
+    const chart = runEngine(fixture);
+    expect(chart.ephemerisConfig.northNodeConvention).toMatch(/True node/i);
+  });
 });
 
 describe("gold-master: Ascendant and Midheaven (Swiss Ephemeris reference)", () => {

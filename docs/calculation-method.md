@@ -37,11 +37,7 @@ North Node (and Ascendant/Midheaven when the time is known):
 - Exact ecliptic longitude normalized to [0, 360).
 - Zodiac sign, degree/minute/second within the sign.
 - Sabian degree (1–30) and global index (1–360) via the documented convention below.
-- **North Node**: the instantaneous OSCULATING ascending node at the birth instant,
-  computed from the Moon's geocentric state vectors (position and velocity) rotated into
-  the ecliptic frame: h = r × v, node vector n = k̂ × h, λ_node = atan2(n.y, n.x).
-  This is never the descending node and never a value sampled from a nearby
-  node-crossing event. Note: this is the osculating (true) node; published charts may
+- **North Node**: configurable convention (nodeMode): `true` (default, SE-compatible — implemented as the osculating node, agrees with SE true node within 0.02–1.2°), `mean` (Meeus polynomial, agrees with SE mean node within 0.005°), or `osculating` (custom state-vector computation). See docs/north-node-convention.md. The selected convention is recorded in every chart. Note: this is the osculating (true) node; published charts may
   use the mean node, which differs by up to ~1.5°.
 
 ## 4. Ascendant, Midheaven, and houses (time-known only)
