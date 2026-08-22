@@ -23,7 +23,7 @@
 import { createPlaceSearchProvider, type PlaceSearchProvider } from "@/lib/places/provider";
 import { localToUtc, unknownTimeUtc, localDayBoundsUtc } from "@/lib/time/birthtime";
 import { createChartProvider, type ChartCalculationProvider } from "@/lib/chart/provider";
-import { demoSabianSymbols } from "@/lib/sabian/demo-data";
+import { getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
 import { findSymbolByGlobalIndex } from "@/lib/sabian/model";
 import { createInterpretationProvider, type InterpretationProvider } from "@/lib/interpretation/mock-provider";
 import { createImageGenerationProvider, type ImageGenerationProvider } from "@/lib/image/provider";
@@ -131,7 +131,7 @@ export class ReadingService {
     // dataset used — not from a global "testing mode" flag. It is true
     // whenever mock text, mock artwork, or the incomplete demo-fixture
     // symbol dataset is used.
-    const symbolDatasetIsDemo = symbols.some((s) => s.licenseStatus === "demo-fixture");
+    const symbolDatasetIsDemo = isDemoDataset();
     const isDemo =
       this.interpretation.name.includes("mock") ||
       this.image.name.includes("mock") ||
@@ -208,8 +208,9 @@ export class ReadingService {
   }
 
   private findSymbols(chart: ChartData) {
+    const dataset = getSymbolDataset();
     return chart.placements.map((p) => {
-      const symbol = findSymbolByGlobalIndex(demoSabianSymbols, p.globalIndex);
+      const symbol = findSymbolByGlobalIndex(dataset, p.globalIndex);
       return {
         globalIndex: p.globalIndex,
         sign: p.sign,

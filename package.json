@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.mts",
     "validate:symbols": "tsx scripts/validate-symbols.ts",
+    "import:symbols": "tsx scripts/import-symbols.ts",
     "goldmaster:generate": "node scripts/generate-goldmaster.mjs",
     "cleanup:readings": "tsx scripts/cleanup-readings.ts",
     "scan:client-secrets": "node scripts/scan-client-secrets.mjs",

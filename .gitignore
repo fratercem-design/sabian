@@ -36,6 +36,9 @@ data/*.db-shm
 data/*.db-wal
 data/art-cache/
 
+# imported Sabian dataset (operator-supplied, licensed — never committed)
+src/lib/sabian/generated/
+
 # testing
 /coverage
 /test-results/

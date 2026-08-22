@@ -3,15 +3,15 @@
  *
  * Every symbol record carries:
  *  - A stable identity: globalIndex (1–360), sign, degree (1–30).
- *  - Source/rights fields: sourceVersion, sourceAttribution, licenseStatus,
- *    licensedSourceText (verbatim, authorized wording only).
+ *  - Canonical content: canonicalSymbolText (verbatim authorized wording),
+ *    title, source, edition, licenseStatus.
  *  - Original editorial commentary: originalEditorialInterpretation,
  *    keywords, lightExpression, shadowExpression, reflectionQuestion,
  *    visualMotifs.
  *
- * Canonical or licensed source wording is ALWAYS kept in licensedSourceText
- * and NEVER merged into the editorial fields. No Sabian website or book text
- * is scraped or reproduced here.
+ * Canonical or licensed source wording is ALWAYS kept in canonicalSymbolText
+ * (and licensedSourceText) and NEVER merged into the editorial fields. No
+ * Sabian website or book text is scraped or reproduced here.
  */
 
 import { z } from "zod";
@@ -23,15 +23,27 @@ export type LicenseStatus =
   | "demo-fixture"
   | "needs-licensed-content";
 
+export const LicenseStatusSchema = z.enum([
+  "public-domain-original",
+  "licensed",
+  "demo-fixture",
+  "needs-licensed-content",
+]);
+
 export const SabianSymbolSchema = z
   .object({
     globalIndex: z.number().int().min(1).max(360),
     sign: z.enum(SIGNS),
     degree: z.number().int().min(1).max(30),
     title: z.string().min(1),
+    /** Verbatim authorized canonical wording (empty for demo fixtures). */
+    canonicalSymbolText: z.string().default(""),
+    /** Source/edition provenance. */
     sourceVersion: z.string().min(1),
     sourceAttribution: z.string().min(1),
-    licenseStatus: z.enum(["public-domain-original", "licensed", "demo-fixture", "needs-licensed-content"]),
+    edition: z.string().default(""),
+    licenseStatus: LicenseStatusSchema,
+    /** Back-compat alias kept for existing consumers. */
     licensedSourceText: z.string().default(""),
     originalEditorialInterpretation: z.string().min(1),
     keywords: z.array(z.string()).default([]),
@@ -50,6 +62,21 @@ export const SabianSymbolSchema = z
         code: z.ZodIssueCode.custom,
         path: ["globalIndex"],
         message: `globalIndex ${data.globalIndex} inconsistent with ${data.sign} ${data.degree} (expected ${expected})`,
+      });
+    }
+    // Non-demo records must carry canonical wording; demo records must not.
+    if (data.licenseStatus !== "demo-fixture" && !data.canonicalSymbolText.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["canonicalSymbolText"],
+        message: `record ${data.sign} ${data.degree} is ${data.licenseStatus} but has no canonicalSymbolText`,
+      });
+    }
+    if (data.licenseStatus === "demo-fixture" && data.canonicalSymbolText.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["canonicalSymbolText"],
+        message: `demo-fixture record ${data.sign} ${data.degree} must not carry canonical wording`,
       });
     }
   });

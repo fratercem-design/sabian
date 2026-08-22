@@ -77,3 +77,7 @@ Every symbol record (`src/lib/sabian/model.ts`):
 - Next.js — MIT; React — MIT; Tailwind CSS — MIT
 - The demo fixture records themselves: original editorial material written for this
   project; you may use them within this project while it remains in testing phase.
+
+## Import pipeline (Task 4)
+
+`npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers. The imported dataset lands in src/lib/sabian/generated/ (gitignored — never committed). Until an approved dataset is supplied, the app retains the 120 fictional placeholders and every reading is labeled incomplete demo content.
