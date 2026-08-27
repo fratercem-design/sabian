@@ -135,7 +135,7 @@ export class LivePlaceSearchProvider implements PlaceSearchProvider {
     throw lastError ?? new Error("Live geocoding request failed");
   }
 
-  async getById(_id: string): Promise<PlaceResult | null> {
+  async getById(): Promise<PlaceResult | null> {
     // Standard geocoding APIs are search-based; getById falls back to null
     // or can be implemented with a reverse geocode lookup when available.
     return null;

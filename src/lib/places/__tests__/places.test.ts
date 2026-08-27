@@ -53,8 +53,6 @@ describe("LocalPlaceSearchProvider — Core Functionality (Task 7)", () => {
 });
 
 describe("Location & Timezone Separate Resolution (Task 7)", () => {
-  const provider = createPlaceSearchProvider();
-
   it("resolves canonical place, lat/long, and IANA timezone as separate fields for all fixture places", async () => {
     for (const place of PLACES) {
       // 1. Canonical place name fields
