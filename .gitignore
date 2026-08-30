@@ -48,3 +48,6 @@ src/lib/sabian/generated/
 /.tmp-test/
 sabian-story-tests/
 /.e2e-tmp/
+
+# verification manifest (generated locally by npm run verify:manifest — reflects a real run, never committed)
+/verification-manifest.json

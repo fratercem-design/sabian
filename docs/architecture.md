@@ -25,7 +25,7 @@ privacy/monetization groundwork.
 │  └ local index│  └ astronomy- │  └ mock (demo)│  └ mock SVG  │
 │                │    engine     │  └ live (env) │  └ live (env)│
 ├───────────────┴───────────────┴───────────────┴──────────────┤
-│ ReadingRepository (interface) → node:sqlite → PostgreSQL   │
+│ ReadingRepository → node:sqlite | pg connection pool      │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -80,8 +80,9 @@ privacy/monetization groundwork.
 
 ## Persistence
 
-- `Db` interface (adapter): SQLite via node:sqlite today; PostgreSQL later behind the
-  same interface. `DATABASE_URL` selects the backend.
+- `ReadingRepository`: SQLite via `node:sqlite` locally and PostgreSQL via a bounded
+  `pg` connection pool. `DATABASE_URL` selects the backend. PostgreSQL values are
+  parameterized; schema provisioning and a controlled live smoke test remain operator gates.
 - `ReadingRepository`: create/update/get/delete/cleanup. Random non-guessable IDs,
   explicit delete, configurable retention (`READING_RETENTION_DAYS`,
   `npm run cleanup:readings`).

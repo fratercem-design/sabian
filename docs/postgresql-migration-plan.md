@@ -49,7 +49,7 @@ The database interface `Db` in `src/lib/db/adapter.ts` and repository `ReadingRe
 
 ## 4. Identifier Strategy
 
-- Identifiers are generated using `crypto.randomBytes(12).toString("base64url")`, providing 72 bits of cryptographic entropy.
+- Identifiers are generated using `crypto.randomBytes(12).toString("base64url")`, providing 96 bits of cryptographic entropy.
 - Characteristics:
   - Non-sequential and collision-resistant.
   - Opaque (no embedded timestamps, user IDs, or birth attributes).
@@ -63,10 +63,10 @@ Automated retention and cleanup are enforced via stored procedures and scheduled
 
 1. **Stale Generation Cleanup**:
    - Records with status `failed`, `generating`, or `pending` older than **24 hours** are deleted automatically. Uncompleted readings contain sensitive birth info without an opt-in save and must not linger.
-2. **Guest / Unsaved Reading Retention**:
-   - Unsaved guest readings are deleted after `READING_RETENTION_DAYS` (default **90 days**).
-3. **Saved Reading Preservation**:
-   - Records marked `saved = TRUE` by explicit user action are retained until explicitly deleted by the user.
+2. **Reading Retention**:
+   - Saved and unsaved readings are deleted after `READING_RETENTION_DAYS` (default **90 days**), matching the product's privacy disclosure.
+3. **Save Semantics**:
+   - `saved = TRUE` records explicit user opt-in and keeps a reading addressable during the retention window; it does not create indefinite retention.
 4. **Explicit Expiration (`expires_at`)**:
    - Temporary links or shared previews can have an optional `expires_at` timestamp. Once passed, they are immediately purged.
 
@@ -76,14 +76,17 @@ Automated retention and cleanup are enforced via stored procedures and scheduled
 
 1. **Step 1: Schema Provisioning**
    - Apply `scripts/schema-postgres.sql` to the production PostgreSQL instance.
-2. **Step 2: Database Adapter Enhancement**
-   - Implement `PostgresDb` class in `src/lib/db/adapter.ts` using `pg` / `@vercel/postgres` or `node-postgres` with connection pooling.
+2. **Step 2: Database Runtime (implemented, locally contract-tested)**
+   - `PostgresReadingRepository` uses a bounded `pg` pool and parameterized SQL behind the existing repository interface.
+   - This does not prove a production database, schema, TLS policy, backups, or retention job.
 3. **Step 3: Dual-Read / Validation Verification**
    - Verify connection pool health, transaction isolation (`READ COMMITTED`), and connection error handling.
 4. **Step 4: Historical Data Migration (if migrating existing dev/beta records)**
-   - Run `npx tsx scripts/migrate-sqlite-to-postgres.ts` to transform and stream records from SQLite into PostgreSQL with parameterized batch inserts (`ON CONFLICT (id) DO NOTHING`).
+   - Dry-run first: `npm run migrate:postgres -- --source=file:./data/sabian.db`.
+   - After explicit operator approval, set `POSTGRES_MIGRATION_URL` and add `--apply` to stream records with parameterized inserts (`ON CONFLICT (id) DO NOTHING`) inside one transaction.
 5. **Step 5: Cutover via Environment Configuration**
    - Set `DATABASE_URL=postgres://user:password@host:5432/sabian?sslmode=require`.
    - The application automatically switches to the PostgreSQL backend upon environment variable detection without code changes.
 6. **Step 6: Rollback Plan**
-   - In the event of a PostgreSQL outage or connection failure, reverting `DATABASE_URL=file:./data/sabian.db` immediately restores local SQLite operation.
+   - Do not silently fail over to a stale local SQLite file; that would split writes and risk data loss.
+   - Restore PostgreSQL service or switch to a separately verified replica. Reverting the application version or data backend requires a reconciliation plan and operator approval.

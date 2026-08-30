@@ -2,7 +2,9 @@
  * ReadingService — the orchestration pipeline.
  *
  * Strict separation is enforced here:
- *   1. resolve place        (PlaceSearchProvider — sends only free text)
+ *   1. resolve place        (lib/places/resolve — shared by search/review/create;
+ *                            live results resolve via server-signed place tokens,
+ *                            never client-supplied coordinates/timezones)
  *   2. convert time         (historical UTC offset via moment-timezone)
  *   3. calculate chart      (ChartCalculationProvider — deterministic)
  *   4. find symbols         (Sabian dataset lookup — deterministic)
@@ -20,7 +22,7 @@
 /* Server-side orchestration. Imported only from API routes, server
  * components, and tests/scripts — never from client components. */
 
-import { createPlaceSearchProvider, type PlaceSearchProvider } from "@/lib/places/provider";
+import { resolvePlace as resolvePlaceById } from "@/lib/places/resolve";
 import { localToUtc, unknownTimeUtc, localDayBoundsUtc } from "@/lib/time/birthtime";
 import { createChartProvider, type ChartCalculationProvider } from "@/lib/chart/provider";
 import { getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
@@ -75,7 +77,6 @@ export interface CreateReadingInput {
 
 export class ReadingService {
   constructor(
-    private places: PlaceSearchProvider = createPlaceSearchProvider(),
     private chart: ChartCalculationProvider = createChartProvider(),
     private interpretation: InterpretationProvider = selectInterpretationProvider(),
     private image: ImageGenerationProvider = selectImageProvider(),
@@ -203,7 +204,7 @@ export class ReadingService {
 
   private async resolvePlace(placeId: string): Promise<PlaceResult> {
     this.emit("resolving-place");
-    const place = await this.places.getById(placeId);
+    const place = await resolvePlaceById(placeId);
     if (!place) throw new Error("Selected birthplace could not be resolved.");
     return place;
   }

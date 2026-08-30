@@ -16,7 +16,13 @@ import { LivePlaceSearchProvider } from "@/lib/places/live-provider";
 
 export interface PlaceSearchProvider {
   search(query: string, limit?: number): Promise<PlaceResult[]>;
-  getById(id: string): Promise<PlaceResult | null>;
+  /**
+   * Resolve a previously returned place by a stable id. OPTIONAL: live
+   * geocoding APIs are search-based and have no stable id to look up later, so
+   * live providers omit this and their search results carry a signed place
+   * token instead (see lib/places/place-token.ts).
+   */
+  getById?(id: string): Promise<PlaceResult | null>;
 }
 
 function normalize(query: string): string {
@@ -48,7 +54,7 @@ export class LocalPlaceSearchProvider implements PlaceSearchProvider {
   }
 }
 
-export function createPlaceSearchProvider(): PlaceSearchProvider {
+export function createPlaceSearchProvider(): LocalPlaceSearchProvider {
   return new LocalPlaceSearchProvider();
 }
 

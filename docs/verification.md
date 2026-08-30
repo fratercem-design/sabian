@@ -1,18 +1,17 @@
 # Verification results
 
-All commands were run on **Windows, Node v24.18.0, npm 11.16.0** in the project
-root, against the **isolated verification copy** (fresh `npm ci`, temporary
-databases, temporary artwork caches — see below). Dates: 2026-08-21.
+Commands were run on **Windows, Node v24.18.0**. A fresh `npm ci` baseline was
+run in an isolated copy, followed by a source-fingerprinted full verification
+of the current working tree. Date: 2026-08-27.
 
 ## Isolated environment
 
-The final verification ran in an **isolated fresh copy**: a detached git
-worktree of HEAD (`sabian-verify-copy`) with a clean `npm ci` from the
-committed lockfile, then removed afterward. Every test run uses a unique
-per-run temporary database and artwork cache (`vitest.tmpdir.mts` +
-`vitest.setup.ts`); the Playwright dev server runs against `.e2e-tmp/`. No
-command touched `data/sabian.db` or the real artwork cache in either the copy
-or the main repo.
+The dependency baseline ran in an isolated copy with `npm ci`. The final
+`npm run verify:manifest` run certified the exact dirty-worktree fingerprint
+for commit `bcba8fb`. Every test uses a per-run temporary database and artwork
+cache (`vitest.tmpdir.mts` + `vitest.setup.ts`); the Playwright server uses
+`.e2e-tmp/`. No verification command touched `data/sabian.db` or the real
+artwork cache.
 
 ## 1. Dependency installation from the committed lockfile
 
@@ -60,15 +59,11 @@ npm run typecheck   # tsc --noEmit
 npm test            # vitest run
 ```
 
-**Result: passed — 62/62 tests** across 5 files:
-
-| File | Tests | Coverage |
-| --- | --- | --- |
-| src/lib/chart/celestial.test.ts | 12 | longitude normalization, sign mapping, DMS, ΔT, sidereal time, obliquity, Sabian convention incl. 0°00′00″, 0°00′01″, fractional, 29°59′59″ of every sign, Aries↔Pisces boundary, trailing-edge |
-| src/lib/chart/reference-chart.test.ts | 18 | independent reference chart (JPII): Sun, Moon, 8 planets, North Node (osculating, never descending), Ascendant, MC, house placements, numerical Placidus cusp equations, node continuity/retrograde |
-| src/lib/time/birthtime.test.ts | 19 | historical offsets, calendar-date integrity (Feb 30 etc.), DST gap rejection, DST overlap with both offset choices, local-day bounds, moon-uncertainty window |
-| src/lib/sabian/dataset.test.ts | 3 | demo dataset uniqueness, license labeling, global-index consistency |
-| src/lib/reading/service.test.ts | 10 | full pipeline, persistence/reload, unknown-time reduction, consent refusal, deletion, opt-in save, cleanup, demo marking, chapter titles, story word count |
+**Result: passed — 194/194 tests** across 14 files. Coverage includes longitude
+and Sabian boundaries, Swiss-Ephemeris gold masters, North Node convention,
+DST gap/overlap handling, licensed-dataset rejection gates, live-provider
+contracts, signed place tokens, production configuration failure, readiness
+truthfulness, and parameterized PostgreSQL repository behavior.
 
 ## 7. Integration tests (isolated SQLite)
 
@@ -76,7 +71,8 @@ npm test            # vitest run
 npm run test:integration
 ```
 
-**Result: passed — 10/10** (database-backed, isolated temp SQLite file).
+**Result: passed — 12/12** across 2 files (database-backed service flow plus
+live-geocoding search → signed token → review → create), using isolated temp SQLite.
 
 ## 8. Symbol validation
 
@@ -94,6 +90,7 @@ Duplicates:    none
 Missing:       240
 Invalid:       none
 Licenses:      {"demo-fixture":120}
+Rights gaps:   120
 Result:        INCOMPLETE (see above)
 ```
 
@@ -195,8 +192,9 @@ mock artwork, or demo-fixture symbols) and persists via `providers` metadata.
   mode (120 fictional placeholders); no authorized 360-entry dataset is
   imported.
 - **Commercial licensing** — no licenses beyond MIT open-source dependencies.
-- **PostgreSQL** — the adapter interface is provider-agnostic; only SQLite
-  (node:sqlite via a CJS shim) is implemented and tested.
+- **PostgreSQL** — the runtime repository and migration path are implemented
+  with parameterized SQL and local contract tests, but no real PostgreSQL
+  schema, TLS connection, CRUD/cleanup smoke test, backup, or restore has been exercised.
 - **Production deployment** — verified locally only; no hosting, TLS, backups,
   or load behavior tested.
 - **npm audit claims** — 0 vulnerabilities at time of writing for both full and

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { createChartProvider, meanNodeLongitude } from "@/lib/chart/provider";
+import {
+  createChartProvider,
+  meanNodeLongitude,
+  northNodeLongitude,
+  NODE_MODE_LABELS,
+  type NodeMode,
+} from "@/lib/chart/provider";
 import { SIGNS } from "@/lib/types";
+import { deltaT } from "@/lib/chart/celestial";
 // The gold-master fixtures live outside src; load them by absolute path.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -106,6 +113,16 @@ describe("gold-master: North Node (Swiss Ephemeris reference)", () => {
 });
 
 describe("gold-master: nodeMode conventions (Swiss Ephemeris reference)", () => {
+  function runEngineWithMode(fixture: GoldFixture, nodeMode: NodeMode) {
+    return createChartProvider().calculate({
+      utc: new Date(fixture.utcIso),
+      latitude: fixture.lat,
+      longitude: fixture.lon,
+      timeKnown: fixture.timeKnown,
+      nodeMode,
+    });
+  }
+
   it("mean mode matches SE mean node within 0.05°", () => {
     for (const fixture of goldmaster.fixtures) {
       const utc = new Date(fixture.utcIso);
@@ -115,10 +132,48 @@ describe("gold-master: nodeMode conventions (Swiss Ephemeris reference)", () => 
     }
   });
 
-  it("true mode (default) reports the convention in the chart config", () => {
+  it("defaults to the osculating node and never labels it 'True node'", () => {
     const fixture = goldmaster.fixtures[0];
     const chart = runEngine(fixture);
-    expect(chart.ephemerisConfig.northNodeConvention).toMatch(/True node/i);
+    expect(chart.ephemerisConfig.northNodeConvention).toMatch(/Osculating/i);
+    expect(chart.ephemerisConfig.northNodeConvention).not.toMatch(/^True node/i);
+  });
+
+  it("every displayed convention name matches the algorithm actually executed", () => {
+    for (const fixture of goldmaster.fixtures) {
+      const utc = new Date(fixture.utcIso);
+
+      const osc = runEngineWithMode(fixture, "osculating");
+      expect(osc.ephemerisConfig.northNodeConvention).toBe(NODE_MODE_LABELS.osculating);
+      const oscNode = osc.placements.find((p) => p.key === "north_node")!;
+      expect(oscNode.longitude).toBeCloseTo(northNodeLongitude(utc), 6);
+
+      const mean = runEngineWithMode(fixture, "mean");
+      expect(mean.ephemerisConfig.northNodeConvention).toBe(NODE_MODE_LABELS.mean);
+      const meanNode = mean.placements.find((p) => p.key === "north_node")!;
+      expect(meanNode.longitude).toBeCloseTo(
+        meanNodeLongitude(utc, deltaT(utc.getUTCFullYear())),
+        9
+      );
+    }
+  });
+
+  it("documents that osculating differs from SE true node enough to change the Sabian degree", () => {
+    // In the committed fixture set, the osculating node and the SE true node
+    // land in different Sabian degrees for a known subset of charts. Count that
+    // subset so the disclosure stays accurate and auditable.
+    let sabianDegreeDiffers = 0;
+    for (const fixture of goldmaster.fixtures) {
+      const utc = new Date(fixture.utcIso);
+      const oscLon = northNodeLongitude(utc);
+      const seTrue = fixture.placements.find((p) => p.key === "true_node")!;
+      const oscSabian = Math.floor(oscLon % 30);
+      const seSabian = Math.floor(seTrue.longitude % 30);
+      if (oscSabian !== seSabian) sabianDegreeDiffers += 1;
+    }
+    // The disclosed figure is 4 of 14 fixtures.
+    expect(goldmaster.fixtures.length).toBe(14);
+    expect(sabianDegreeDiffers).toBe(4);
   });
 });
 

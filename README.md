@@ -42,6 +42,7 @@ Then open http://localhost:3000 and click **Begin Your Reading**.
 | `npm test` | Vitest unit tests (isolated temp DB + art cache) |
 | `npm run test:integration` | Vitest database-backed integration tests |
 | `npm run validate:symbols` | Validate the Sabian dataset (360 unique records expected) |
+| `npm run migrate:postgres -- --source=file:./data/sabian.db` | Dry-run SQLite → PostgreSQL transformation (never connects without `--apply`) |
 | `npm run cleanup:readings` | Remove readings + art cache entries older than the retention policy |
 | `npm run scan:client-secrets` | Sentinel-secret scan of the client bundle |
 | `npm run e2e` | Playwright browser tests (journey, DST/validation, unknown time, 390px/1440px, quality) |
@@ -58,13 +59,16 @@ Environment variables (server-side only, never in the browser):
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | `file:./data/sabian.db` | SQLite path; PostgreSQL later |
+| `DATABASE_URL` | `file:./data/sabian.db` | SQLite path or provisioned PostgreSQL URL |
+| `POSTGRES_POOL_MAX` | `10` | Maximum PostgreSQL pool size |
+| `POSTGRES_CONNECTION_TIMEOUT_MS` | `5000` | PostgreSQL connection timeout |
 | `READING_RETENTION_DAYS` | `90` | Auto-delete readings older than N days |
 | `TESTING_MODE_ENABLED` | `true` | Unlock all features (no entitlements enforced) |
 | `MONETIZATION_ENABLED` | `false` | Must stay `false` until a payment provider exists |
 | `TEXT_PROVIDER` | `mock` | `mock` (deterministic) or a live provider name |
 | `IMAGE_PROVIDER` | `mock` | `mock` (deterministic SVG) or a live provider name |
 | `GEOCODING_API_URL` / `GEOCODING_API_KEY` | unset | Optional live geocoding |
+| `PLACE_TOKEN_SECRET` | development-only default | Required unique 32+ character secret for live geocoding in production |
 
 See [`.env.example`](.env.example) for the full annotated template. Never commit real
 credentials.
@@ -112,7 +116,7 @@ The product is not hard-wired to any AI company. Each capability sits behind an 
   `TEXT_PROVIDER`, output validated with Zod (one retry, then graceful failure).
 - `ImageGenerationProvider` — demo: deterministic SVG emblem; live: image API behind the
   same interface.
-- `ReadingRepository` — SQLite now, PostgreSQL later, same interface.
+- `ReadingRepository` — SQLite and parameterized PostgreSQL implementations behind the same interface.
 
 ### Strict separation (non-negotiable)
 
@@ -172,17 +176,18 @@ in-app `/about/method` page.
 
 ## Verification
 
-Everything below was run on this machine (Windows, Node v24.18.0, npm 11.16.0)
-in an isolated fresh copy (clean `npm ci`, temporary databases and artwork
-caches) and passed; exact commands and counts are in
+Everything below was run on this machine (Windows, Node v24.18.0): first a
+clean `npm ci` baseline in an isolated copy, then a source-fingerprinted full
+verification of the current worktree using temporary databases and artwork
+caches. Exact commands and counts are in
 [docs/verification.md](docs/verification.md).
 
 - [x] Clean `npm ci` from the committed lockfile
 - [x] `npm audit` and `npm audit --omit=dev` — 0 vulnerabilities each
 - [x] Lint (ESLint, 0 errors / 0 warnings)
 - [x] Strict typecheck (`tsc --noEmit`)
-- [x] Unit tests (Vitest 4, 62 passed)
-- [x] Integration tests (isolated SQLite, 10 passed)
+- [x] Unit tests (Vitest 4, 194 passed)
+- [x] Integration tests (isolated SQLite, 12 passed)
 - [x] Production build (`next build`)
 - [x] Playwright suite (13 passed): saved-data comparison journey, DST
       gap/overlap + validation cases, unknown-time, 390px/1440px, browser
@@ -197,7 +202,7 @@ caches) and passed; exact commands and counts are in
       (explicitly stated)
 
 What remains unproven — live AI, live image generation, complete licensed
-Sabian content, PostgreSQL, commercial licensing, and production deployment —
+Sabian content, a controlled live PostgreSQL/schema/retention check, commercial licensing, and production deployment —
 is stated precisely in docs/verification.md. **No claim of "no audit
 findings" is made beyond the two point-in-time `npm audit` results above.**
 

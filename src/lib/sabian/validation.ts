@@ -33,6 +33,8 @@ export interface ValidationResult {
   missingProvenance: string[];
   /** Non-demo records that still carry fixture markers in provenance/title. */
   fixtureMarkersInNonDemo: string[];
+  /** Records whose license status does not authorize production use. */
+  unresolvedLicenseRecords: string[];
   source: string;
   licenseStatuses: Record<string, number>;
 }
@@ -91,6 +93,7 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
   // Provenance + fixture-marker checks.
   const missingProvenance: string[] = [];
   const fixtureMarkersInNonDemo: string[] = [];
+  const unresolvedLicenseRecords: string[] = [];
   for (const s of parsed) {
     if (!s.sourceAttribution.trim() || !s.sourceVersion.trim()) {
       missingProvenance.push(keyOf(s));
@@ -100,6 +103,9 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
       if (FIXTURE_MARKERS.test(haystack)) {
         fixtureMarkersInNonDemo.push(keyOf(s));
       }
+    }
+    if (s.licenseStatus !== "licensed" && s.licenseStatus !== "public-domain-original") {
+      unresolvedLicenseRecords.push(keyOf(s));
     }
   }
 
@@ -116,7 +122,8 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
     parsed.length === 360 &&
     Object.values(perSignCounts).every((n) => n === 30) &&
     missingProvenance.length === 0 &&
-    fixtureMarkersInNonDemo.length === 0;
+    fixtureMarkersInNonDemo.length === 0 &&
+    unresolvedLicenseRecords.length === 0;
 
   return {
     ok,
@@ -129,6 +136,7 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
     duplicateIndices: [...new Set(duplicateIndices)],
     missingProvenance,
     fixtureMarkersInNonDemo,
+    unresolvedLicenseRecords,
     source,
     licenseStatuses,
   };

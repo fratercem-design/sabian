@@ -10,6 +10,7 @@ import { randomBytes } from "node:crypto";
 import { getDb, type Db } from "@/lib/db/adapter";
 import type { Reading, PlaceResult } from "@/lib/types";
 import { env } from "@/lib/config";
+import { createPostgresReadingRepository } from "@/lib/db/postgres-reading-repository";
 
 export interface ReadingRepository {
   create(reading: Reading): Promise<Reading>;
@@ -157,6 +158,9 @@ export class SqliteReadingRepository implements ReadingRepository {
 }
 
 export function createReadingRepository(): ReadingRepository {
+  if (env.DATABASE_URL.startsWith("postgres://") || env.DATABASE_URL.startsWith("postgresql://")) {
+    return createPostgresReadingRepository();
+  }
   return new SqliteReadingRepository();
 }
 

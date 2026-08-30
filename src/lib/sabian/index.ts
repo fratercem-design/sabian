@@ -12,6 +12,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { demoSabianSymbols } from "@/lib/sabian/demo-data";
 import { findSymbol, findSymbolByGlobalIndex, type SabianSymbol } from "@/lib/sabian/model";
+import { validateDataset } from "@/lib/sabian/validation";
 
 let active: SabianSymbol[] | null = null;
 
@@ -21,7 +22,10 @@ function loadActive(): SabianSymbol[] {
   try {
     if (existsSync(path)) {
       const data = JSON.parse(readFileSync(path, "utf8")) as SabianSymbol[];
-      if (Array.isArray(data) && data.length === 360) {
+      const validation = Array.isArray(data)
+        ? validateDataset(data, "generated/full-dataset.json")
+        : null;
+      if (validation?.ok) {
         active = data;
         return active;
       }

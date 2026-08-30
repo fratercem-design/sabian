@@ -60,7 +60,7 @@ export interface ChartInput {
   timeNotation?: string;
   /** UTC bounds of the local calendar day at the birthplace (for Moon uncertainty). */
   localDayBoundsUtc?: [string, string];
-  /** North Node convention: "true" (default, SE-compatible), "mean", or "osculating". */
+  /** North Node convention: "osculating" (default, instantaneous approximation) or "mean". */
   nodeMode?: NodeMode;
 }
 
@@ -140,7 +140,7 @@ export function meanNodeLongitude(utc: Date, deltaTSeconds: number): number {
   return normalizeDegrees(om);
 }
 
-export type NodeMode = "true" | "mean" | "osculating";
+export type NodeMode = "mean" | "osculating";
 
 function makePlacement(key: string, name: string, glyph: string, longitude: number): Placement {
   const norm = normalizeDegrees(longitude);
@@ -206,21 +206,14 @@ export class AstronomyEngineChartProvider implements ChartCalculationProvider {
       if (body === Body.Sun) continue;
       add(key, nodeNames[key.toUpperCase() as keyof typeof nodeNames] ?? key, glyphFor(key), planetLongitude(body, time));
     }
-    // North Node per the configured convention (see NodeMode).
-    const nodeMode: NodeMode = input.nodeMode ?? "true";
-    let nodeLon: number;
-    if (nodeMode === "mean") {
-      nodeLon = meanNodeLongitude(utc, dt);
-    } else if (nodeMode === "osculating") {
-      nodeLon = northNodeLongitude(utc);
-    } else {
-      // "true": SE-compatible true node. SE's true node equals the osculating
-      // node adjusted by the difference between the osculating and true
-      // treatments; empirically the osculating node agrees with the SE true
-      // node to within ~0.02–1.2° (see docs/goldmaster.md). We use the
-      // osculating node as the closest available computation, documented.
-      nodeLon = northNodeLongitude(utc);
-    }
+    // North Node per the configured convention (see NodeMode). The default is
+    // the OSCULATING node — an honest, instantaneous approximation. It is NOT
+    // labeled "True Node": it can differ from the Swiss Ephemeris true node by
+    // up to ~1.5°, which changes the Sabian degree in 4 of the 14 gold-master
+    // fixtures. The "mean" option closely matches the Swiss Ephemeris mean node.
+    const nodeMode: NodeMode = input.nodeMode ?? "osculating";
+    const nodeLon =
+      nodeMode === "mean" ? meanNodeLongitude(utc, dt) : northNodeLongitude(utc);
     add("north_node", nodeNames.NORTH_NODE, "☊", nodeLon);
 
     // Ascendant/Midheaven: only calculated when the birth time is exact.
@@ -267,9 +260,9 @@ export class AstronomyEngineChartProvider implements ChartCalculationProvider {
 }
 
 export const NODE_MODE_LABELS: Record<NodeMode, string> = {
-  true: "True node (Swiss-Ephemeris-compatible; osculating node, default)",
-  mean: "Mean node (Meeus polynomial, matches published 'Node' labels)",
-  osculating: "Osculating ascending node (custom state-vector computation)",
+  osculating:
+    "Osculating ascending node (default) — instantaneous node computed from the Moon's state vectors. This is an approximation, not the Swiss Ephemeris 'true node': it can differ by up to ~1.5°, which changes the Sabian degree in 4 of the 14 gold-master fixtures.",
+  mean: "Mean node — Meeus polynomial; closely matches the Swiss Ephemeris mean node.",
 };
 
 function glyphFor(key: string): string {

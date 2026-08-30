@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createPlaceSearchProvider } from "@/lib/places/provider";
+import { resolvePlace } from "@/lib/places/resolve";
 import { localToUtc, unknownTimeUtc, isValidCalendarDate } from "@/lib/time/birthtime";
 
 export const runtime = "nodejs";
@@ -43,8 +43,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "A birth time is required when the time is known" }, { status: 400 });
   }
 
-  const provider = createPlaceSearchProvider();
-  const place = await provider.getById(parsed.data.placeId);
+  const place = await resolvePlace(parsed.data.placeId);
   if (!place) {
     return NextResponse.json({ error: "Selected birthplace could not be resolved" }, { status: 400 });
   }

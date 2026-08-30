@@ -5,7 +5,13 @@ import { getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
 import { SIGNS, type Sign } from "@/lib/types";
 
 /** Build a synthetic 360-record dataset for pipeline testing (not shipped). */
-function synthetic360(overrides: { omitLast?: boolean; blankProvenance?: boolean } = {}): unknown[] {
+function synthetic360(
+  overrides: {
+    omitLast?: boolean;
+    blankProvenance?: boolean;
+    licenseStatus?: "licensed" | "needs-licensed-content" | "demo-fixture";
+  } = {}
+): unknown[] {
   const out: unknown[] = [];
   for (const sign of SIGNS as readonly Sign[]) {
     for (let d = 1; d <= 30; d++) {
@@ -20,7 +26,7 @@ function synthetic360(overrides: { omitLast?: boolean; blankProvenance?: boolean
         sourceVersion: "test-v1",
         sourceAttribution: overrides.blankProvenance ? "" : "Test License Holder",
         edition: "Test 2026",
-        licenseStatus: "licensed",
+        licenseStatus: overrides.licenseStatus ?? "licensed",
         originalEditorialInterpretation: "Test commentary.",
         keywords: ["test"],
         lightExpression: "Test.",
@@ -77,10 +83,20 @@ describe("Sabian import pipeline (Task 4)", () => {
     expect(result.fixtureMarkersInNonDemo).toContain("Aries 1");
   });
 
+  it("rejects 360 structurally complete records without production-use rights", () => {
+    const result = validateDataset(
+      synthetic360({ licenseStatus: "needs-licensed-content" }) as never,
+      "test"
+    );
+    expect(result.ok).toBe(false);
+    expect(result.unresolvedLicenseRecords).toHaveLength(360);
+  });
+
   it("demo dataset is always labeled incomplete and never accepted as licensed", () => {
     const result = validateDataset(demoSabianSymbols, "demo");
     expect(result.ok).toBe(false);
     expect(result.licenseStatuses).toEqual({ "demo-fixture": 120 });
+    expect(result.unresolvedLicenseRecords).toHaveLength(120);
     expect(result.missing.length).toBe(240);
   });
 

@@ -11,7 +11,13 @@ import { TEST_INTEGRATION_DB, TEST_ART_CACHE_DIR } from "./vitest.tmpdir.mts";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["src/lib/reading/service.test.ts"],
+    // Both integration files use the same isolated SQLite file; run them one at
+    // a time so they never hold concurrent connections to it.
+    fileParallelism: false,
+    include: [
+      "src/lib/reading/service.test.ts",
+      "src/lib/places/__tests__/live-journey.integration.test.ts",
+    ],
     setupFiles: ["./vitest.setup.ts"],
     env: {
       DATABASE_URL: `file:${TEST_INTEGRATION_DB}`,

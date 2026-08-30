@@ -135,11 +135,11 @@ export class LivePlaceSearchProvider implements PlaceSearchProvider {
     throw lastError ?? new Error("Live geocoding request failed");
   }
 
-  async getById(): Promise<PlaceResult | null> {
-    // Standard geocoding APIs are search-based; getById falls back to null
-    // or can be implemented with a reverse geocode lookup when available.
-    return null;
-  }
+  // Live geocoding APIs are search-based and expose no stable id lookup, so
+  // `getById` is intentionally NOT implemented. Instead, `/api/places` signs
+  // each result into a place token (lib/places/place-token.ts) that the review
+  // and reading endpoints verify server-side — client coordinates/timezones are
+  // never trusted.
 
   private normalizeResults(data: GeocodingApiResponse, limit: number): PlaceResult[] {
     const rawItems = data.results ?? data.features ?? [];

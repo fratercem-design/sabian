@@ -57,6 +57,7 @@ function main() {
   console.log(`Provenance:    ${result.missingProvenance.length ? result.missingProvenance.join(", ") : "all populated"}`);
   console.log(`Fixture marks: ${result.fixtureMarkersInNonDemo.length ? result.fixtureMarkersInNonDemo.join(", ") : "none"}`);
   console.log(`Licenses:      ${JSON.stringify(result.licenseStatuses)}`);
+  console.log(`Rights gaps:   ${result.unresolvedLicenseRecords.length}`);
   console.log(`Per-sign 30:   ${Object.entries(result.perSignCounts).every(([, n]) => n === 30)}`);
 
   if (!result.ok) fail(`dataset does not meet all 360-symbol requirements (see above)`);
@@ -64,7 +65,7 @@ function main() {
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT, JSON.stringify(symbols, null, 2));
   console.log(`\nIMPORT OK — wrote ${symbols.length} records to ${OUT}`);
-  console.log("Switch the active dataset by editing src/lib/sabian/index.ts to load this file.");
+  console.log("The application will load this validated dataset automatically on its next start.");
 }
 
 main();

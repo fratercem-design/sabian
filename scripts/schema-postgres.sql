@@ -5,9 +5,6 @@
 -- production deployments, transitioning from local SQLite.
 -- =====================================================================
 
--- Ensure UUID extension if UUIDs are ever used alongside base64url IDs
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 -- Readings table
 CREATE TABLE IF NOT EXISTS readings (
     -- Non-guessable random base64url identifier (12-16 bytes of entropy)
@@ -79,12 +76,12 @@ DECLARE
     stale_cutoff TIMESTAMPTZ := NOW() - INTERVAL '24 hours';
 BEGIN
     -- 1. Delete stale uncompleted records older than 24h (failed, generating, pending)
-    -- 2. Delete unsaved guest readings older than retention period
+    -- 2. Delete readings older than the disclosed retention period
     -- 3. Delete explicitly expired readings past expires_at
     WITH to_delete AS (
         DELETE FROM readings
         WHERE (status IN ('failed', 'generating', 'pending') AND created_at < stale_cutoff)
-           OR (saved = FALSE AND created_at < retention_cutoff)
+           OR (created_at < retention_cutoff)
            OR (expires_at IS NOT NULL AND expires_at < NOW())
         RETURNING id
     )

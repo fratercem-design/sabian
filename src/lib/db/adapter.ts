@@ -1,11 +1,9 @@
 /**
- * Database adapter — SQLite locally (node:sqlite via a CJS shim, Node 22.13+),
- * PostgreSQL later.
+ * SQLite adapter (node:sqlite via a CJS shim, Node 22.13+).
  *
  * The adapter interface isolates the storage engine. `DATABASE_URL` selects
- * the backend; `file:` URLs use SQLite. A PostgreSQL implementation can be
- * added behind the same interface for production without touching the rest
- * of the application.
+ * the backend; `file:` URLs use this synchronous adapter. PostgreSQL uses its
+ * own asynchronous ReadingRepository implementation.
  */
 
 import type { DatabaseSync as DatabaseSyncType } from "node:sqlite";
@@ -41,7 +39,7 @@ export interface Db {
   all<T>(sql: string, params?: unknown[]): T[];
 }
 
-class SQLiteDb implements Db {
+export class SQLiteDb implements Db {
   private db: DatabaseSyncType;
   constructor(path: string) {
     let filePath = path;
@@ -68,6 +66,13 @@ class SQLiteDb implements Db {
   }
 }
 
+/** Open an explicit SQLite source without consulting DATABASE_URL. */
+export function openSqliteDb(path: string): Db {
+  const db = new SQLiteDb(path);
+  migrate(db);
+  return db;
+}
+
 let singleton: Db | null = null;
 
 export function getDb(): Db {
@@ -78,8 +83,7 @@ export function getDb(): Db {
         "PostgreSQL backend not yet configured. Use DATABASE_URL=file:./data/sabian.db for local SQLite."
       );
     }
-    singleton = new SQLiteDb(url);
-    migrate(singleton);
+    singleton = openSqliteDb(url);
   }
   return singleton;
 }

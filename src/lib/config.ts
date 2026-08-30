@@ -119,6 +119,8 @@ export function seededRandom(seed: string): () => number {
 /* Environment configuration (server-side only).                       */
 /* ------------------------------------------------------------------ */
 
+const DEV_PLACE_TOKEN_SECRET = "sabian-dev-place-token-secret-do-not-use-in-prod";
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: z.string().default("file:./data/sabian.db"),
@@ -139,10 +141,46 @@ const envSchema = z.object({
   IMAGE_MODEL: z.string().optional(),
   GEOCODING_API_URL: z.string().optional(),
   GEOCODING_API_KEY: z.string().optional(),
+  GEOCODING_PROVIDER: z.string().optional(),
+  /**
+   * Server-only HMAC secret used to sign place tokens returned by live
+   * geocoding results, so the review/create endpoints can resolve the exact
+   * server-validated place without trusting client-supplied coordinates or
+   * timezones. MUST be overridden in any real deployment.
+   */
+  PLACE_TOKEN_SECRET: z.string().min(32).default(DEV_PLACE_TOKEN_SECRET),
+  POSTGRES_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
+  POSTGRES_CONNECTION_TIMEOUT_MS: z.coerce.number().int().min(100).max(60_000).default(5_000),
+  /**
+   * Explicit gate for the development readiness dashboard. Defaults to off so
+   * the route is a 404 unless deliberately enabled in local development.
+   */
+  READINESS_DASHBOARD_ENABLED: z
+    .enum(["true", "false", "1", "0"])
+    .default("false")
+    .transform((v) => v === "true" || v === "1"),
+}).superRefine((value, ctx) => {
+  if (
+    value.NODE_ENV === "production" &&
+    value.GEOCODING_API_URL &&
+    value.PLACE_TOKEN_SECRET === DEV_PLACE_TOKEN_SECRET
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["PLACE_TOKEN_SECRET"],
+      message: "A unique PLACE_TOKEN_SECRET is required for live geocoding in production",
+    });
+  }
 });
 
+/** Parse an explicit environment object (exported for fail-closed tests). */
+export function parseServerEnv(input: NodeJS.ProcessEnv) {
+  return envSchema.parse(input);
+}
+
 /** Env parsed and validated. Never import into client components. */
-export const env = envSchema.parse(process.env);
+export const env = parseServerEnv(process.env);
 
 export const isTestingMode = env.TESTING_MODE_ENABLED;
 export const isMonetizationEnabled = env.MONETIZATION_ENABLED;
+export const isReadinessDashboardEnabled = env.READINESS_DASHBOARD_ENABLED;

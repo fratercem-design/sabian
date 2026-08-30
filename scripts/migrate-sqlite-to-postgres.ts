@@ -1,17 +1,21 @@
 /**
- * SQLite to PostgreSQL Data Migration Script Template (Task 8)
+ * SQLite -> PostgreSQL reading migration.
  *
- * Demonstrates the zero-loss migration of reading records from local SQLite
- * to production PostgreSQL without requiring live production credentials.
+ * Safe default: transformation-only dry run. A live target is touched only
+ * when --apply is present and POSTGRES_MIGRATION_URL (or DATABASE_URL) is a
+ * PostgreSQL URL. The SQLite source is always selected independently, so a
+ * PostgreSQL target can never accidentally be opened through the SQLite shim.
  *
- * Usage:
- *   npx tsx scripts/migrate-sqlite-to-postgres.ts --dry-run
- *   DATABASE_URL="postgres://user:pass@host:5432/sabian" npx tsx scripts/migrate-sqlite-to-postgres.ts
+ * Dry run:
+ *   npm run migrate:postgres -- --source=file:./data/sabian.db
+ * Apply (requires explicit operator approval):
+ *   POSTGRES_MIGRATION_URL=postgres://... npm run migrate:postgres -- --apply
  */
 
-import { getDb } from "@/lib/db/adapter";
+import { Pool } from "pg";
+import { openSqliteDb, type Db } from "@/lib/db/adapter";
 
-interface SqliteReadingRow {
+export interface SqliteReadingRow {
   id: string;
   created_at: string;
   display_name: string;
@@ -31,8 +35,7 @@ interface SqliteReadingRow {
   saved: number;
 }
 
-export function exportSqliteReadings(): SqliteReadingRow[] {
-  const db = getDb();
+export function exportSqliteReadings(db: Db): SqliteReadingRow[] {
   return db.all<SqliteReadingRow>("SELECT * FROM readings ORDER BY created_at ASC");
 }
 
@@ -58,39 +61,97 @@ export function transformToPostgresRecord(row: SqliteReadingRow) {
   };
 }
 
-async function main() {
-  const isDryRun = process.argv.includes("--dry-run") || !process.env.DATABASE_URL?.startsWith("postgres");
-
-  console.log("=== SQLite to PostgreSQL Migration Plan Execution ===");
-  const rows = exportSqliteReadings();
-  console.log(`Exported ${rows.length} reading(s) from SQLite.`);
-
-  if (isDryRun) {
-    console.log("[DRY RUN] Validating transformations for all records...");
-    let valid = 0;
-    for (const row of rows) {
-      try {
-        const transformed = transformToPostgresRecord(row);
-        if (transformed.id && transformed.place_json && transformed.chart_json) {
-          valid++;
-        }
-      } catch (err) {
-        console.error(`Validation failed for record ${row.id}:`, err);
-      }
-    }
-    console.log(`[DRY RUN] ${valid}/${rows.length} records successfully validated for PostgreSQL schema.`);
-    console.log("[DRY RUN] No live PostgreSQL connection attempted (per testing-phase safety policy).");
-    return;
-  }
-
-  // When live DATABASE_URL is configured for production cutover:
-  console.log("Connecting to PostgreSQL target database...");
-  // pg pool insertion would execute here with parameterized INSERT ... ON CONFLICT (id) DO NOTHING
+function argValue(name: string): string | undefined {
+  const prefix = `--${name}=`;
+  return process.argv.find((arg) => arg.startsWith(prefix))?.slice(prefix.length);
 }
 
-if (import.meta.url.endsWith(process.argv[1] ?? "")) {
-  main().catch((err) => {
-    console.error("Migration error:", err);
+function isPostgresUrl(value: string | undefined): value is string {
+  return Boolean(value?.startsWith("postgres://") || value?.startsWith("postgresql://"));
+}
+
+async function main() {
+  const apply = process.argv.includes("--apply");
+  const sourceUrl =
+    argValue("source") ?? process.env.SQLITE_SOURCE_URL ?? "file:./data/sabian.db";
+  const targetUrl = process.env.POSTGRES_MIGRATION_URL ?? process.env.DATABASE_URL;
+
+  if (isPostgresUrl(sourceUrl)) {
+    throw new Error("SQLite source must be a file: URL or filesystem path, never a PostgreSQL URL");
+  }
+
+  const source = openSqliteDb(sourceUrl);
+  const rows = exportSqliteReadings(source);
+  const transformed = rows.map(transformToPostgresRecord);
+  console.log(`Validated ${transformed.length}/${rows.length} SQLite reading records.`);
+
+  if (!apply) {
+    console.log("[DRY RUN] No PostgreSQL connection attempted. Add --apply only after operator approval.");
+    return;
+  }
+  if (!isPostgresUrl(targetUrl)) {
+    throw new Error("--apply requires POSTGRES_MIGRATION_URL (or DATABASE_URL) with a PostgreSQL URL");
+  }
+
+  const pool = new Pool({ connectionString: targetUrl, max: 1, connectionTimeoutMillis: 5_000 });
+  const client = await pool.connect();
+  let inserted = 0;
+  try {
+    const schema = await client.query<{ readings: string | null }>(
+      "SELECT to_regclass('public.readings')::text AS readings"
+    );
+    if (!schema.rows[0]?.readings) {
+      throw new Error("Target schema is missing public.readings; apply scripts/schema-postgres.sql first");
+    }
+
+    await client.query("BEGIN");
+    for (const row of transformed) {
+      const result = await client.query(
+        `INSERT INTO readings (
+          id, created_at, display_name, birth_date, birth_time, time_known,
+          time_notation, place_id, place_json, chart_json, interpretation_json,
+          artwork_json, providers_json, status, error, is_demo, saved
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb,
+          $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16, $17
+        ) ON CONFLICT (id) DO NOTHING
+        RETURNING id`,
+        [
+          row.id,
+          row.created_at,
+          row.display_name,
+          row.birth_date,
+          row.birth_time,
+          row.time_known,
+          row.time_notation,
+          row.place_id,
+          JSON.stringify(row.place_json),
+          JSON.stringify(row.chart_json),
+          row.interpretation_json ? JSON.stringify(row.interpretation_json) : null,
+          row.artwork_json ? JSON.stringify(row.artwork_json) : null,
+          JSON.stringify(row.providers_json),
+          row.status,
+          row.error,
+          row.is_demo,
+          row.saved,
+        ]
+      );
+      inserted += result.rowCount ?? 0;
+    }
+    await client.query("COMMIT");
+    console.log(`Migration committed: ${inserted} inserted, ${rows.length - inserted} already present.`);
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+    await pool.end();
+  }
+}
+
+if (import.meta.url.endsWith(process.argv[1]?.replace(/\\/g, "/") ?? "")) {
+  main().catch((error) => {
+    console.error("Migration failed:", error instanceof Error ? error.message : error);
     process.exit(1);
   });
 }
