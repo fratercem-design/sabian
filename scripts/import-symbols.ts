@@ -29,7 +29,9 @@ import { validateDataset } from "../src/lib/sabian/validation.ts";
 import type { SabianSymbol } from "../src/lib/sabian/model.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUT = resolve(__dirname, "..", "src", "lib", "sabian", "generated", "full-dataset.json");
+const OUT = process.env.SABIAN_DATASET_PATH
+  ? resolve(process.env.SABIAN_DATASET_PATH)
+  : resolve(__dirname, "..", "src", "lib", "sabian", "generated", "full-dataset.json");
 
 function fail(msg: string): never {
   console.error(`IMPORT FAILED: ${msg}`);

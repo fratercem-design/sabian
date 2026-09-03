@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { validateDataset } from "@/lib/sabian/validation";
 import { demoSabianSymbols } from "@/lib/sabian/demo-data";
-import { getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
+import { getSymbolDataset, isDemoDataset, __resetActiveDataset } from "@/lib/sabian/index";
 import { SIGNS, type Sign } from "@/lib/types";
 
 /** Build a synthetic 360-record dataset for pipeline testing (not shipped). */
@@ -100,11 +100,27 @@ describe("Sabian import pipeline (Task 4)", () => {
     expect(result.missing.length).toBe(240);
   });
 
-  it("getSymbolDataset falls back to the demo fixture when no imported dataset exists", () => {
-    // The generated/ dir is gitignored and not present in CI, so this should
-    // resolve to the demo fixture.
-    const ds = getSymbolDataset();
-    expect(ds.length).toBeLessThanOrEqual(120);
-    expect(isDemoDataset()).toBe(true);
+  it("loads the imported 360-record dataset when SABIAN_DATASET_PATH is set", () => {
+    process.env.SABIAN_DATASET_PATH = "C:\\Users\\johnb\\sabian-quarantine\\full-dataset.json";
+    __resetActiveDataset();
+    try {
+      const ds = getSymbolDataset();
+      expect(ds.length).toBe(360);
+      expect(isDemoDataset()).toBe(false);
+    } finally {
+      __resetActiveDataset();
+    }
+  });
+
+  it("falls back to the demo fixture when SABIAN_DATASET_PATH is not set", () => {
+    delete process.env.SABIAN_DATASET_PATH;
+    __resetActiveDataset();
+    try {
+      const ds = getSymbolDataset();
+      expect(ds.length).toBe(120);
+      expect(isDemoDataset()).toBe(true);
+    } finally {
+      __resetActiveDataset();
+    }
   });
 });

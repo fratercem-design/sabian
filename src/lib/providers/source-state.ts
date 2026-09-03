@@ -56,15 +56,8 @@ export function currentSourceState(): SourceState {
     }
     // The authorized corpus is intentionally gitignored, but it materially
     // changes application behavior and must invalidate an old verification.
-    const datasetPath = join(
-      process.cwd(),
-      "src",
-      "lib",
-      "sabian",
-      "generated",
-      "full-dataset.json"
-    );
-    if (existsSync(datasetPath)) {
+    const datasetPath = process.env.SABIAN_DATASET_PATH;
+    if (datasetPath && existsSync(datasetPath)) {
       hash.update("\0active-sabian-dataset\0");
       hash.update(readFileSync(datasetPath));
     }

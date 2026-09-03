@@ -29,6 +29,9 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# temporary commit message files
+.commit-msg.txt
+
 # database (local dev, runtime state — never commit)
 data/*.db
 data/*.db-journal
