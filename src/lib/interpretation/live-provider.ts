@@ -219,7 +219,7 @@ export class LiveInterpretationProvider implements InterpretationProvider {
       });
 
       if (!res.ok) {
-        throw new Error(`Live story provider HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+        throw new Error(`Live story provider returned HTTP ${res.status}`);
       }
       const data = ProviderResponseSchema.safeParse(await res.json());
       if (!data.success) {

@@ -6,29 +6,32 @@ import { localToUtc, unknownTimeUtc, isValidCalendarDate } from "@/lib/time/birt
 export const runtime = "nodejs";
 
 /**
- * GET /api/reading/review?date=&time=&timeKnown=&placeId=
+ * POST /api/reading/review
  *
  * Deterministic pre-submission review: resolves the selected place, the
  * historical UTC offset, and the resulting UTC instant WITHOUT creating a
  * reading. The birth form shows this on the review step before generation.
+ *
+ * Birth data is sent in the request BODY only — never in URLs, logs, or
+ * analytics. See the privacy page and README for the invariant.
  */
-const QuerySchema = z.object({
+const ReviewBodySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/).optional(),
-  timeKnown: z.enum(["true", "false"]),
+  timeKnown: z.boolean(),
   placeId: z.string().min(1),
   overlapOffsetChoice: z.enum(["daylight", "standard"]).optional(),
 });
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const parsed = QuerySchema.safeParse({
-    date: url.searchParams.get("date"),
-    time: url.searchParams.get("time") ?? undefined,
-    timeKnown: url.searchParams.get("timeKnown"),
-    placeId: url.searchParams.get("placeId"),
-    overlapOffsetChoice: url.searchParams.get("overlapOffsetChoice") ?? undefined,
-  });
+export async function POST(request: Request) {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const parsed = ReviewBodySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Invalid review request", issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })) },
@@ -39,7 +42,7 @@ export async function GET(request: Request) {
   if (!isValidCalendarDate(parsed.data.date)) {
     return NextResponse.json({ error: `Not a real calendar date: ${parsed.data.date}` }, { status: 400 });
   }
-  if (parsed.data.timeKnown === "true" && !parsed.data.time) {
+  if (parsed.data.timeKnown && !parsed.data.time) {
     return NextResponse.json({ error: "A birth time is required when the time is known" }, { status: 400 });
   }
 
@@ -49,7 +52,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    if (parsed.data.timeKnown === "true") {
+    if (parsed.data.timeKnown) {
       const resolved = localToUtc({
         date: parsed.data.date,
         time: parsed.data.time!,

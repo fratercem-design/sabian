@@ -67,13 +67,16 @@ export default function ReadingForm() {
   useEffect(() => {
     if (step !== 5 || !selectedPlace || !date) return;
     let cancelled = false;
-    const params = new URLSearchParams({
-      date,
-      timeKnown: String(timeKnown),
-      placeId: selectedPlace.id,
-    });
-    if (timeKnown && time) params.set("time", time);
-    fetch(`/api/reading/review?${params.toString()}`)
+    fetch("/api/reading/review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        date,
+        timeKnown,
+        placeId: selectedPlace.id,
+        ...(timeKnown && time ? { time } : {}),
+      }),
+    })
       .then(async (res) => {
         const data = (await res.json()) as { error?: string } & ReviewData;
         if (cancelled) return;

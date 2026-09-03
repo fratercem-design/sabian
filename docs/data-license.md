@@ -54,7 +54,10 @@ write the validated result to `src/lib/sabian/generated/full-dataset.json`
 Any imported dataset must be clearly licensed or demonstrably public domain
 before it is activated. Until provenance is established, the active dataset
 should remain the 120-record demo fixture and any candidate file should be
-quarantined (for example, `data/quarantine/`) rather than deployed.
+quarantined **outside the project root** (never under `data/`) so it cannot be
+pulled into a deployment trace or accidentally committed. Do not move a
+candidate file into `src/lib/sabian/generated/` until the license/hash gate
+is satisfied.
 
 ## Importing an authorized dataset
 

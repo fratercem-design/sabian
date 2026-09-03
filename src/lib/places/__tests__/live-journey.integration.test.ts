@@ -52,7 +52,7 @@ describe("live geocoding full journey (mocked HTTP)", () => {
 
   it("search -> signed token -> review -> create all agree", async () => {
     const { GET: placesGet } = await import("@/app/api/places/route");
-    const { GET: reviewGet } = await import("@/app/api/reading/review/route");
+    const { POST: reviewPost } = await import("@/app/api/reading/review/route");
     const { POST: readingsPost } = await import("@/app/api/readings/route");
 
     // 1. Search via the LIVE provider.
@@ -73,10 +73,17 @@ describe("live geocoding full journey (mocked HTTP)", () => {
     expect(sel.id).toContain(".");
 
     // 2. Review resolves the SAME server-validated place from the token.
-    const reviewRes = await reviewGet(
-      new Request(
-        `http://localhost/api/reading/review?date=1990-06-15&time=14:30&timeKnown=true&placeId=${encodeURIComponent(sel.id)}`
-      )
+    const reviewRes = await reviewPost(
+      new Request("http://localhost/api/reading/review", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          date: "1990-06-15",
+          time: "14:30",
+          timeKnown: true,
+          placeId: sel.id,
+        }),
+      })
     );
     expect(reviewRes.status).toBe(200);
     const review = (await reviewRes.json()) as {
@@ -130,11 +137,18 @@ describe("live geocoding full journey (mocked HTTP)", () => {
   });
 
   it("rejects a forged place token at review", async () => {
-    const { GET: reviewGet } = await import("@/app/api/reading/review/route");
-    const res = await reviewGet(
-      new Request(
-        "http://localhost/api/reading/review?date=1990-06-15&time=14:30&timeKnown=true&placeId=forged.token"
-      )
+    const { POST: reviewPost } = await import("@/app/api/reading/review/route");
+    const res = await reviewPost(
+      new Request("http://localhost/api/reading/review", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          date: "1990-06-15",
+          time: "14:30",
+          timeKnown: true,
+          placeId: "forged.token",
+        }),
+      })
     );
     expect(res.status).toBe(400);
   });

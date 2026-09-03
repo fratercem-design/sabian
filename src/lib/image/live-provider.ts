@@ -150,7 +150,7 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
         signal: controller.signal,
       });
       if (!res.ok) {
-        throw new Error(`Live image provider HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+        throw new Error(`Live image provider returned HTTP ${res.status}`);
       }
       const data = (await res.json()) as { data?: Array<{ url?: string; b64_json?: string }>; output?: string[] };
       const url0 = data.data?.[0]?.url ?? data.data?.[0]?.b64_json;

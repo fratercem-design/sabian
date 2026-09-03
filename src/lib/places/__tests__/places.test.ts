@@ -309,7 +309,7 @@ describe("LivePlaceSearchProvider (Task 7)", () => {
     await provider.search("London");
     expect(capturedHeaders).toBeDefined();
     expect(capturedHeaders!["Authorization"]).toBe("Bearer secret-key-123");
-    expect(capturedHeaders!["X-Api-Key"]).toBe("secret-key-123");
+    expect(capturedHeaders!["X-Api-Key"]).toBeUndefined();
   });
 
   it("retries once on 5xx error before failing", async () => {
