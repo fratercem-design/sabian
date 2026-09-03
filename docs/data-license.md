@@ -43,6 +43,19 @@ Every symbol record (`src/lib/sabian/model.ts`):
 | `reflectionQuestion` | A question for the reader |
 | `visualMotifs` | Motifs used for image prompts |
 
+## Operator-supplied dataset import
+
+The repository includes a parser script (`scripts/parse-sabian-symbols.ts`) and an
+import pipeline (`npm run import:symbols -- path/to/dataset.json`). These tools
+accept an operator-supplied, licensed or public-domain 360-record dataset and
+write the validated result to `src/lib/sabian/generated/full-dataset.json`
+(gitignored).
+
+Any imported dataset must be clearly licensed or demonstrably public domain
+before it is activated. Until provenance is established, the active dataset
+should remain the 120-record demo fixture and any candidate file should be
+quarantined (for example, `data/quarantine/`) rather than deployed.
+
 ## Importing an authorized dataset
 
 1. Produce a JSON array conforming to `SabianSymbolSchema` (see `src/lib/sabian/model.ts`).

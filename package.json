@@ -21,9 +21,10 @@
     "migrate:postgres": "tsx scripts/migrate-sqlite-to-postgres.ts",
     "smoke:postgres": "tsx scripts/smoke-test-postgres.ts",
     "scan:client-secrets": "node scripts/scan-client-secrets.mjs",
+    "assert:build-trace": "node scripts/assert-build-trace.mjs",
     "e2e": "playwright test",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run test:integration && npm run validate:symbols && npm run build",
-    "verify:full": "npm run verify && npm run e2e && npm run scan:client-secrets",
+    "verify:full": "npm run verify && npm run e2e && npm run scan:client-secrets && npm run assert:build-trace",
     "verify:manifest": "tsx scripts/write-verification-manifest.ts"
   },
   "dependencies": {

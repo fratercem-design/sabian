@@ -105,11 +105,14 @@ function main() {
   record("npm run validate:symbols", r.exitCode, {
     note: r.stdout.includes("INCOMPLETE")
       ? "INCOMPLETE by design while the licensed 360-symbol dataset is not imported."
-      : "Active 360-symbol dataset passed structure, provenance, and rights-status validation.",
+      : "Active 360-symbol dataset passed structural validation (count, uniqueness, global-index consistency) and self-declared provenance/right-status fields. It does not prove license authenticity.",
   });
 
   r = run("npm", ["run", "build"]);
   record("npm run build", r.exitCode);
+
+  r = run("npm", ["run", "assert:build-trace"]);
+  record("npm run assert:build-trace", r.exitCode);
 
   r = run("npm", ["run", "scan:client-secrets"]);
   record("npm run scan:client-secrets", r.exitCode);

@@ -36,7 +36,7 @@ describe("reading service integration", () => {
     expect(reading.artwork!.sun.source).toBe("placeholder");
   });
 
-  it("is marked demo when mock providers are used even with a licensed symbol dataset", async () => {
+  it("is marked demo when mock providers and fixture symbols are used", async () => {
     const service = createReadingService();
     const reading = await service.create({
       displayName: "Demo Marker",
@@ -50,7 +50,7 @@ describe("reading service integration", () => {
     expect(reading.isDemo).toBe(true);
     expect(reading.providers.interpretation).toMatch(/mock/i);
     expect(reading.providers.image).toMatch(/mock/i);
-    expect(reading.providers.symbolDatasetIsDemo).toBe(false);
+    expect(reading.providers.symbolDatasetIsDemo).toBe(true);
   });
 
   it("keeps the seven required story chapter titles", async () => {

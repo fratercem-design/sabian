@@ -11,7 +11,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
-import { currentSourceState, type SourceState } from "@/lib/providers/source-state";
 
 export interface ManifestCommand {
   command: string;
@@ -24,7 +23,7 @@ export interface ManifestCommand {
 
 export interface VerificationManifest {
   commit: string;
-  sourceState?: SourceState;
+  sourceState?: { head: string; dirty: boolean; fingerprint: string };
   sourceStateStable?: boolean;
   generatedAt: string;
   nodeVersion: string;
@@ -55,13 +54,25 @@ function currentHead(): string {
   }
 }
 
+function currentDirty(): boolean {
+  try {
+    const status = execSync("git status --porcelain", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return status.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export function manifestPath(): string {
   return join(process.cwd(), "verification-manifest.json");
 }
 
 export function loadVerificationManifest(): ManifestState {
-  const sourceState = currentSourceState();
-  const head = sourceState.head || currentHead();
+  const head = currentHead();
+  const dirty = currentDirty();
   let manifest: VerificationManifest | null = null;
   try {
     if (existsSync(manifestPath())) {
@@ -72,11 +83,6 @@ export function loadVerificationManifest(): ManifestState {
   }
   const available = manifest !== null && typeof manifest.commit === "string";
   const matchesHead = available && head !== "" && manifest!.commit === head;
-  const matchesSource = Boolean(
-    matchesHead &&
-      manifest?.sourceStateStable !== false &&
-      manifest?.sourceState?.fingerprint &&
-      manifest.sourceState.fingerprint === sourceState.fingerprint
-  );
-  return { available, matchesHead, matchesSource, currentDirty: sourceState.dirty, head, manifest };
+  const matchesSource = matchesHead && !dirty;
+  return { available, matchesHead, matchesSource, currentDirty: dirty, head, manifest };
 }

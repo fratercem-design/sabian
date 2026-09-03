@@ -1,0 +1,17 @@
+Quarantine unverified Sabian dataset and harden build trace
+
+- Moved the unverified 360-symbol dataset out of the project root to
+  C:\Users\johnb\sabian-quarantine\full-dataset.json so it is no longer
+  included in the Next.js server trace.
+- Removed source-state fingerprinting from app runtime;
+  verification-manifest.ts now only reads the generated manifest and
+  compares HEAD/commit without dynamic file access.
+- Restored demo-fallback tests and Sabian validation regex word boundaries.
+- Added scripts/assert-build-trace.mjs and npm run assert:build-trace to
+  fail the build if .next/**/*.nft.json includes data/*.db*, operator-only
+  corpora, tests, or scripts.
+- Updated docs/data-license.md to describe operator-supplied import and
+  quarantine expectations.
+- Removed stray apostrophe file at repo root.
+
+Co-authored-by: CommandCodeBot <noreply@commandcode.ai>
