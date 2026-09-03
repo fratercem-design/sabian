@@ -54,3 +54,5 @@ sabian-story-tests/
 
 # verification manifest (generated locally by npm run verify:manifest — reflects a real run, never committed)
 /verification-manifest.json
+
+.vercel
