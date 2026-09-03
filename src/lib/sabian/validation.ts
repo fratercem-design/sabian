@@ -41,7 +41,7 @@ export interface ValidationResult {
 
 const keyOf = (s: { sign: string; degree: number }) => `${s.sign} ${s.degree}`;
 
-const FIXTURE_MARKERS = /demo|fixture|placeholder|unrecorded/i;
+const FIXTURE_MARKERS = /\b(demo|fixture|placeholder|unrecorded)\b/i;
 
 export function validateDataset(symbols: SabianSymbol[], source: string): ValidationResult {
   const invalid: string[] = [];

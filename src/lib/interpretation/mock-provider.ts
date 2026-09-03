@@ -56,7 +56,7 @@ function gateText(input: InterpretationInput, key: "sun" | "moon" | "ascendant",
     interpretation: `The image of "${title}" speaks to a ${nature.quality} quality within you — ${nature.image}. This symbol may suggest that your ${key === "sun" ? "conscious purpose" : key === "moon" ? "emotional nature" : "approach to the world"} is touched by ${pick(rand, ["a slow unfolding", "a sudden recognition", "a quiet insistence", "an unexpected lightness"])}.`,
     light: `In its lighter expression, this degree can support ${pick(rand, ["clarity of intent", "gentle persistence", "an open hand", "a steady gaze"])}.`,
     shadow: `Unexamined, it may pull toward ${pick(rand, ["rigidity", "withdrawal", "over-identification", "restless doubt"])} — an invitation to awareness, not a verdict.`,
-    reflectionQuestion: symbol?.reflectionQuestion ?? "Where in your life is this image already at work?",
+    reflectionQuestion: symbol?.reflectionQuestion?.trim() || "Where in your life is this image already at work?",
   };
 }
 

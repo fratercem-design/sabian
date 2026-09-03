@@ -100,11 +100,9 @@ describe("Sabian import pipeline (Task 4)", () => {
     expect(result.missing.length).toBe(240);
   });
 
-  it("getSymbolDataset falls back to the demo fixture when no imported dataset exists", () => {
-    // The generated/ dir is gitignored and not present in CI, so this should
-    // resolve to the demo fixture.
+  it("getSymbolDataset loads the imported 360-record dataset when present", () => {
     const ds = getSymbolDataset();
-    expect(ds.length).toBeLessThanOrEqual(120);
-    expect(isDemoDataset()).toBe(true);
+    expect(ds.length).toBe(360);
+    expect(isDemoDataset()).toBe(false);
   });
 });
