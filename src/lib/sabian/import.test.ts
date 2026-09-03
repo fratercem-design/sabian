@@ -1,47 +1,18 @@
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { validateDataset } from "@/lib/sabian/validation";
 import { demoSabianSymbols } from "@/lib/sabian/demo-data";
 import { getSymbolDataset, isDemoDataset, __resetActiveDataset } from "@/lib/sabian/index";
-import { SIGNS, type Sign } from "@/lib/types";
+import type { SabianSymbol } from "@/lib/sabian/model";
+import { synthetic360, type SyntheticOptions } from "../../../test-fixtures/synthetic-dataset";
 
-/** Build a synthetic 360-record dataset for pipeline testing (not shipped). */
-function synthetic360(
-  overrides: {
-    omitLast?: boolean;
-    blankProvenance?: boolean;
-    licenseStatus?: "licensed" | "needs-licensed-content" | "demo-fixture";
-  } = {}
-): unknown[] {
-  const out: unknown[] = [];
-  for (const sign of SIGNS as readonly Sign[]) {
-    for (let d = 1; d <= 30; d++) {
-      if (overrides.omitLast && sign === "Pisces" && d === 30) continue;
-      const si = (SIGNS as readonly Sign[]).indexOf(sign);
-      out.push({
-        globalIndex: si * 30 + d,
-        sign,
-        degree: d,
-        title: `Test licensed record ${sign} ${d}`,
-        canonicalSymbolText: `Authorized test wording for ${sign} ${d}`,
-        sourceVersion: "test-v1",
-        sourceAttribution: overrides.blankProvenance ? "" : "Test License Holder",
-        edition: "Test 2026",
-        licenseStatus: overrides.licenseStatus ?? "licensed",
-        originalEditorialInterpretation: "Test commentary.",
-        keywords: ["test"],
-        lightExpression: "Test.",
-        shadowExpression: "Test.",
-        reflectionQuestion: "Test?",
-        visualMotifs: ["test"],
-      });
-    }
-  }
-  return out;
+function raw360(options: SyntheticOptions = {}): SabianSymbol[] {
+  return synthetic360(options) as SabianSymbol[];
 }
 
 describe("Sabian import pipeline (Task 4)", () => {
   it("accepts a complete licensed 360-record dataset", () => {
-    const result = validateDataset(synthetic360() as never, "test");
+    const result = validateDataset(raw360(), "test");
     expect(result.ok).toBe(true);
     expect(result.total).toBe(360);
     expect(result.duplicates).toHaveLength(0);
@@ -54,13 +25,13 @@ describe("Sabian import pipeline (Task 4)", () => {
   });
 
   it("rejects an incomplete dataset (359 records)", () => {
-    const result = validateDataset(synthetic360({ omitLast: true }) as never, "test");
+    const result = validateDataset(raw360({ omitLast: true }), "test");
     expect(result.ok).toBe(false);
     expect(result.missing).toContain("Pisces 30");
   });
 
   it("rejects missing provenance", () => {
-    const result = validateDataset(synthetic360({ blankProvenance: true }) as never, "test");
+    const result = validateDataset(raw360({ blankProvenance: true }), "test");
     expect(result.ok).toBe(false);
     // Either the schema rejects the blank field (invalid) or the provenance
     // check catches it — both must make the import fail.
@@ -68,24 +39,24 @@ describe("Sabian import pipeline (Task 4)", () => {
   });
 
   it("rejects duplicate sign-degree pairs and duplicate indices", () => {
-    const ds = synthetic360() as Array<Record<string, unknown>>;
+    const ds = raw360() as Array<Record<string, unknown>>;
     ds[0] = { ...(ds[0] as object), ...(ds[1] as object), globalIndex: 2 } as Record<string, unknown>;
-    const result = validateDataset(ds as never, "test");
+    const result = validateDataset(ds as SabianSymbol[], "test");
     expect(result.ok).toBe(false);
     expect(result.duplicates.length + result.duplicateIndices.length).toBeGreaterThan(0);
   });
 
   it("marks fixture markers in non-demo records", () => {
-    const ds = synthetic360() as Array<Record<string, unknown>>;
+    const ds = raw360() as Array<Record<string, unknown>>;
     ds[0] = { ...(ds[0] as object), title: "Demo placeholder Aries 1" } as Record<string, unknown>;
-    const result = validateDataset(ds as never, "test");
+    const result = validateDataset(ds as SabianSymbol[], "test");
     expect(result.ok).toBe(false);
     expect(result.fixtureMarkersInNonDemo).toContain("Aries 1");
   });
 
   it("rejects 360 structurally complete records without production-use rights", () => {
     const result = validateDataset(
-      synthetic360({ licenseStatus: "needs-licensed-content" }) as never,
+      raw360({ licenseStatus: "needs-licensed-content" }),
       "test"
     );
     expect(result.ok).toBe(false);
@@ -101,7 +72,7 @@ describe("Sabian import pipeline (Task 4)", () => {
   });
 
   it("loads the imported 360-record dataset when SABIAN_DATASET_PATH is set", () => {
-    process.env.SABIAN_DATASET_PATH = "C:\\Users\\johnb\\sabian-quarantine\\full-dataset.json";
+    process.env.SABIAN_DATASET_PATH = resolve(process.cwd(), "test-fixtures", "synthetic-360.json");
     __resetActiveDataset();
     try {
       const ds = getSymbolDataset();

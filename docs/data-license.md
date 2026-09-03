@@ -48,16 +48,16 @@ Every symbol record (`src/lib/sabian/model.ts`):
 The repository includes a parser script (`scripts/parse-sabian-symbols.ts`) and an
 import pipeline (`npm run import:symbols -- path/to/dataset.json`). These tools
 accept an operator-supplied, licensed or public-domain 360-record dataset and
-write the validated result to `src/lib/sabian/generated/full-dataset.json`
-(gitignored).
+write the validated result to the path configured by `SABIAN_DATASET_PATH`
+(default: `src/lib/sabian/generated/full-dataset.json`, gitignored).
 
 Any imported dataset must be clearly licensed or demonstrably public domain
 before it is activated. Until provenance is established, the active dataset
 should remain the 120-record demo fixture and any candidate file should be
 quarantined **outside the project root** (never under `data/`) so it cannot be
-pulled into a deployment trace or accidentally committed. Do not move a
-candidate file into `src/lib/sabian/generated/` until the license/hash gate
-is satisfied.
+pulled into a deployment trace or accidentally committed. Activate a candidate
+file only by setting `SABIAN_DATASET_PATH` to its absolute path after the
+license/hash gate is satisfied.
 
 ## Importing an authorized dataset
 
@@ -69,8 +69,9 @@ is satisfied.
    - global-index consistency with sign+degree,
    - a non-empty `sourceAttribution`/`sourceVersion` on every record (schema-level),
    - per-record `licenseStatus`.
-3. Wire the dataset into `src/lib/sabian/index.ts` (the lookup currently used by the
-   reading service), replacing the demo fixture.
+3. Set `SABIAN_DATASET_PATH` to the absolute path of the imported file. The
+   loader in `src/lib/sabian/index.ts` reads this path at runtime and validates
+   the dataset before activation.
 4. Keep canonical/licensed wording in `licensedSourceText` and original commentary in
    `originalEditorialInterpretation` — never merge them.
 
@@ -96,4 +97,4 @@ is satisfied.
 
 ## Import pipeline (Task 4)
 
-`npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers, and every record is explicitly `licensed` or `public-domain-original`. `needs-licensed-content` and `demo-fixture` records are rejected even when all 360 slots exist. The imported dataset lands in src/lib/sabian/generated/ (gitignored — never committed) and is revalidated at application startup before activation. Until an approved dataset is supplied, the app retains the 120 fictional placeholders and every reading is labeled incomplete demo content.
+`npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers, and every record is explicitly `licensed` or `public-domain-original`. `needs-licensed-content` and `demo-fixture` records are rejected even when all 360 slots exist. The imported dataset is written to `SABIAN_DATASET_PATH` (gitignored — never committed) and is revalidated at application startup before activation. Until an approved dataset is supplied, the app retains the 120 fictional placeholders and every reading is labeled incomplete demo content.

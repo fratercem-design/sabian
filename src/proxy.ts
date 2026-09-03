@@ -18,10 +18,40 @@ export const config = {
   matcher: ["/api/:path*"],
 };
 
+/**
+ * Derive a per-client key for rate limiting from a request.
+ *
+ * Prefers headers that the client cannot set, and only uses X-Forwarded-For
+ * when the deployment explicitly declares how many trusted proxy hops sit in
+ * front of the application. With no trusted proxies declared, X-Forwarded-For
+ * is ignored because the leftmost value is attacker-controlled.
+ */
+export function getClientKey(request: NextRequest): string {
+  const trustedProxyHops = Number(process.env.TRUSTED_PROXY_HOPS ?? "0");
+
+  const cf = request.headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
+
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+
+  const xff = request.headers.get("x-forwarded-for");
+  if (xff && trustedProxyHops > 0) {
+    const hops = xff
+      .split(",")
+      .map((h) => h.trim())
+      .filter(Boolean);
+    const index = hops.length - 1 - trustedProxyHops;
+    if (index >= 0 && index < hops.length) {
+      return hops[index];
+    }
+  }
+
+  return "unknown";
+}
+
 function applyRateLimit(request: NextRequest): NextResponse | null {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-    ?? request.headers.get("x-real-ip")
-    ?? "unknown";
+  const ip = getClientKey(request);
 
   const result = defaultRateLimiter.check(ip);
   const headers = new Headers();

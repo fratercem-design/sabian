@@ -22,7 +22,7 @@ export default defineConfig({
     env: {
       DATABASE_URL: `file:${TEST_INTEGRATION_DB}`,
       ART_CACHE_DIR: TEST_ART_CACHE_DIR,
-      SABIAN_DATASET_PATH: "C:\\Users\\johnb\\sabian-quarantine\\full-dataset.json",
+      SABIAN_DATASET_PATH: path.resolve(import.meta.dirname, "test-fixtures", "synthetic-360.json"),
     },
   },
   resolve: {
