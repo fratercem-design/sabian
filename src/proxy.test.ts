@@ -66,6 +66,31 @@ describe("getClientKey", () => {
     expect(source).toBe("untrusted");
   });
 
+  // The original test sent both headers together to assert precedence between
+  // them. Under the current model neither is trusted, so the meaningful
+  // assertion is that presenting both still yields no trusted identity.
+  it("does NOT trust cf-connecting-ip and x-real-ip even when both are sent", () => {
+    const { key, source } = getClientKey(
+      req({ "cf-connecting-ip": "203.0.113.1", "x-real-ip": "192.168.1.1" })
+    );
+    expect(source).toBe("untrusted");
+    expect(key).not.toBe("203.0.113.1");
+    expect(key).not.toBe("192.168.1.1");
+  });
+
+  // Regression guard for the likeliest route back to the bug: declaring a
+  // trusted proxy must trust ONLY the XFF chain, never re-enable the
+  // client-settable headers alongside it.
+  it("does not re-trust cf-connecting-ip when TRUSTED_PROXY_HOPS is set", () => {
+    process.env.TRUSTED_PROXY_HOPS = "1";
+    const r = req({
+      "cf-connecting-ip": "10.1.0.1",
+      "x-real-ip": "10.2.0.1",
+      "x-forwarded-for": "1.1.1.1, 198.51.100.5, 192.0.2.1",
+    });
+    expect(getClientKey(r)).toEqual({ key: "198.51.100.5", source: "trusted" });
+  });
+
   it("prefers the platform header over a forged proxy chain", () => {
     process.env.TRUSTED_PROXY_HOPS = "1";
     const r = req({
