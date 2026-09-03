@@ -79,8 +79,10 @@ Automated retention and cleanup are enforced via stored procedures and scheduled
 2. **Step 2: Database Runtime (implemented, locally contract-tested)**
    - `PostgresReadingRepository` uses a bounded `pg` pool and parameterized SQL behind the existing repository interface.
    - This does not prove a production database, schema, TLS policy, backups, or retention job.
-3. **Step 3: Dual-Read / Validation Verification**
-   - Verify connection pool health, transaction isolation (`READ COMMITTED`), and connection error handling.
+3. **Step 3: Controlled PostgreSQL Smoke Test**
+   - Run `DATABASE_URL=postgres://... npm run smoke:postgres` for a read-only connection/schema check.
+   - Run `DATABASE_URL=postgres://... npm run smoke:postgres -- --apply` for a full CRUD/cleanup verification. The test creates a temporary row, validates reads/updates/saves/cleanup, and deletes the row.
+   - This proves connection pool health, schema presence, the `cleanup_expired_readings()` stored procedure, and the `PostgresReadingRepository` end-to-end.
 4. **Step 4: Historical Data Migration (if migrating existing dev/beta records)**
    - Dry-run first: `npm run migrate:postgres -- --source=file:./data/sabian.db`.
    - After explicit operator approval, set `POSTGRES_MIGRATION_URL` and add `--apply` to stream records with parameterized inserts (`ON CONFLICT (id) DO NOTHING`) inside one transaction.

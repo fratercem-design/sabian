@@ -43,6 +43,7 @@ Then open http://localhost:3000 and click **Begin Your Reading**.
 | `npm run test:integration` | Vitest database-backed integration tests |
 | `npm run validate:symbols` | Validate the Sabian dataset (360 unique records expected) |
 | `npm run migrate:postgres -- --source=file:./data/sabian.db` | Dry-run SQLite → PostgreSQL transformation (never connects without `--apply`) |
+| `npm run smoke:postgres` | PostgreSQL connection/schema check; add `--apply` for full CRUD/cleanup smoke test |
 | `npm run cleanup:readings` | Remove readings + art cache entries older than the retention policy |
 | `npm run scan:client-secrets` | Sentinel-secret scan of the client bundle |
 | `npm run e2e` | Playwright browser tests (journey, DST/validation, unknown time, 390px/1440px, quality) |

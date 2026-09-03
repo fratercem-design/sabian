@@ -199,7 +199,7 @@ function dbStatus(): DatabaseStatus {
       kind: "configured-untested",
       backend: "postgres",
       readinessNote:
-        "PostgreSQL runtime is implemented and parameterized; a controlled schema/CRUD/cleanup smoke test is still required.",
+        "PostgreSQL runtime is implemented and parameterized; run `DATABASE_URL=... npm run smoke:postgres -- --apply` for a controlled schema/CRUD/cleanup verification.",
     };
   }
   return {

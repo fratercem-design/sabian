@@ -19,6 +19,7 @@
     "goldmaster:generate": "node scripts/generate-goldmaster.mjs",
     "cleanup:readings": "tsx scripts/cleanup-readings.ts",
     "migrate:postgres": "tsx scripts/migrate-sqlite-to-postgres.ts",
+    "smoke:postgres": "tsx scripts/smoke-test-postgres.ts",
     "scan:client-secrets": "node scripts/scan-client-secrets.mjs",
     "e2e": "playwright test",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run test:integration && npm run validate:symbols && npm run build",
