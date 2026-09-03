@@ -1,59 +1,103 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { getClientKey } from "./proxy";
+import { describe, expect, it, afterEach } from "vitest";
+import type { NextRequest } from "next/server";
+import { getClientKey } from "@/proxy";
 
-function makeRequest(headers: Record<string, string>): Request {
-  return new Request("http://localhost/api/test", { headers });
+/** A real Request — getClientKey only reads headers, but keep it faithful. */
+function req(headers: Record<string, string>): NextRequest {
+  return new Request("http://localhost/api/test", { headers }) as unknown as NextRequest;
 }
 
-describe("getClientKey", () => {
-  it("ignores x-forwarded-for by default", () => {
-    const request = makeRequest({
-      "x-forwarded-for": "10.0.0.1, 10.0.0.2",
-    });
-    expect(getClientKey(request as never)).toBe("unknown");
-  });
-
-  it("prefers cf-connecting-ip", () => {
-    const request = makeRequest({
-      "cf-connecting-ip": "203.0.113.1",
-      "x-real-ip": "192.168.1.1",
-    });
-    expect(getClientKey(request as never)).toBe("203.0.113.1");
-  });
-
-  it("falls back to x-real-ip", () => {
-    const request = makeRequest({
-      "x-real-ip": "192.168.1.1",
-    });
-    expect(getClientKey(request as never)).toBe("192.168.1.1");
-  });
+// Save and restore rather than delete: the variable may be set in the ambient
+// environment, and clobbering it would leak into unrelated tests.
+const originalHops = process.env.TRUSTED_PROXY_HOPS;
+afterEach(() => {
+  if (originalHops === undefined) {
+    delete process.env.TRUSTED_PROXY_HOPS;
+  } else {
+    process.env.TRUSTED_PROXY_HOPS = originalHops;
+  }
 });
 
-describe("getClientKey with TRUSTED_PROXY_HOPS", () => {
-  const originalEnv = process.env.TRUSTED_PROXY_HOPS;
+describe("getClientKey", () => {
+  it("trusts x-vercel-forwarded-for (set by the platform edge)", () => {
+    expect(getClientKey(req({ "x-vercel-forwarded-for": "203.0.113.7" }))).toEqual({
+      key: "203.0.113.7",
+      source: "trusted",
+    });
+  });
 
-  it("uses the rightmost untrusted hop when trusted proxies are configured", () => {
+  // Regression guard: these headers are client-settable. Trusting either one
+  // let an attacker mint an unlimited number of rate-limit buckets simply by
+  // varying the header, fully bypassing the limiter.
+  it("does NOT trust cf-connecting-ip", () => {
+    const { key, source } = getClientKey(req({ "cf-connecting-ip": "10.1.0.1" }));
+    expect(source).toBe("untrusted");
+    expect(key).not.toBe("10.1.0.1");
+  });
+
+  it("does NOT trust x-real-ip", () => {
+    const { key, source } = getClientKey(req({ "x-real-ip": "10.2.0.1" }));
+    expect(source).toBe("untrusted");
+    expect(key).not.toBe("10.2.0.1");
+  });
+
+  it("ignores x-forwarded-for when no trusted hop count is configured", () => {
+    const { source } = getClientKey(req({ "x-forwarded-for": "10.0.0.1" }));
+    expect(source).toBe("untrusted");
+  });
+
+  it("collapses spoofed headers onto ONE shared key, not one bucket each", () => {
+    const a = getClientKey(req({ "cf-connecting-ip": "10.1.0.1" }));
+    const b = getClientKey(req({ "x-real-ip": "10.2.0.9" }));
+    const c = getClientKey(req({ "x-forwarded-for": "10.3.0.4" }));
+    expect(new Set([a.key, b.key, c.key]).size).toBe(1);
+  });
+
+  it("takes the rightmost untrusted hop when TRUSTED_PROXY_HOPS is set", () => {
     process.env.TRUSTED_PROXY_HOPS = "1";
-    const request = makeRequest({
-      "x-forwarded-for": "10.0.0.1, 10.0.0.2, 10.0.0.3",
-    });
-    // With 1 trusted proxy hop, the client is the second entry from the right.
-    expect(getClientKey(request as never)).toBe("10.0.0.2");
+    // client-forged, real-client, trusted-proxy
+    const r = req({ "x-forwarded-for": "1.1.1.1, 198.51.100.5, 192.0.2.1" });
+    expect(getClientKey(r)).toEqual({ key: "198.51.100.5", source: "trusted" });
   });
 
-  it("falls back to unknown when xff has too few hops", () => {
+  it("rejects a forged chain shorter than the declared hop count", () => {
     process.env.TRUSTED_PROXY_HOPS = "2";
-    const request = makeRequest({
-      "x-forwarded-for": "10.0.0.1",
-    });
-    expect(getClientKey(request as never)).toBe("unknown");
+    const { source } = getClientKey(req({ "x-forwarded-for": "1.1.1.1" }));
+    expect(source).toBe("untrusted");
   });
 
-  afterEach(() => {
-    if (originalEnv === undefined) {
-      delete process.env.TRUSTED_PROXY_HOPS;
-    } else {
-      process.env.TRUSTED_PROXY_HOPS = originalEnv;
-    }
+  // The original test sent both headers together to assert precedence between
+  // them. Under the current model neither is trusted, so the meaningful
+  // assertion is that presenting both still yields no trusted identity.
+  it("does NOT trust cf-connecting-ip and x-real-ip even when both are sent", () => {
+    const { key, source } = getClientKey(
+      req({ "cf-connecting-ip": "203.0.113.1", "x-real-ip": "192.168.1.1" })
+    );
+    expect(source).toBe("untrusted");
+    expect(key).not.toBe("203.0.113.1");
+    expect(key).not.toBe("192.168.1.1");
+  });
+
+  // Regression guard for the likeliest route back to the bug: declaring a
+  // trusted proxy must trust ONLY the XFF chain, never re-enable the
+  // client-settable headers alongside it.
+  it("does not re-trust cf-connecting-ip when TRUSTED_PROXY_HOPS is set", () => {
+    process.env.TRUSTED_PROXY_HOPS = "1";
+    const r = req({
+      "cf-connecting-ip": "10.1.0.1",
+      "x-real-ip": "10.2.0.1",
+      "x-forwarded-for": "1.1.1.1, 198.51.100.5, 192.0.2.1",
+    });
+    expect(getClientKey(r)).toEqual({ key: "198.51.100.5", source: "trusted" });
+  });
+
+  it("prefers the platform header over a forged proxy chain", () => {
+    process.env.TRUSTED_PROXY_HOPS = "1";
+    const r = req({
+      "x-vercel-forwarded-for": "203.0.113.7",
+      "cf-connecting-ip": "10.1.0.1",
+      "x-forwarded-for": "1.1.1.1, 2.2.2.2",
+    });
+    expect(getClientKey(r).key).toBe("203.0.113.7");
   });
 });

@@ -57,7 +57,7 @@ describe("TokenBucketRateLimiter", () => {
     expect(limiter.check("ip-a", now + 1500).remaining).toBe(0);
   });
 
-  it("evicts oldest buckets when maxKeys is exceeded", () => {
+  it("evicts least-recently-active buckets once past the eviction threshold", () => {
     const limiter = new TokenBucketRateLimiter({
       capacity: 10,
       refillPerSecond: 1,
@@ -66,15 +66,50 @@ describe("TokenBucketRateLimiter", () => {
     });
 
     const now = Date.now();
+    // Eviction is amortized: the map is allowed 10% headroom over maxKeys
+    // before a batch is dropped, so it takes more than maxKeys+1 keys to
+    // trigger. Add enough to cross the threshold.
     limiter.check("ip-1", now);
     limiter.check("ip-2", now + 1);
     limiter.check("ip-3", now + 2);
-
-    // ip-1 is the oldest and should be evicted when ip-4 is added.
     limiter.check("ip-4", now + 3);
+    limiter.check("ip-5", now + 4);
 
-    // ip-1 was evicted, so it gets a fresh bucket with capacity - 1 = 9 remaining.
-    const first = limiter.check("ip-1", now + 4);
-    expect(first.remaining).toBe(9);
+    // Oldest goes first: ip-1 was evicted, so it gets a fresh full bucket.
+    expect(limiter.check("ip-1", now + 5).remaining).toBe(9);
+
+    // The most recent key kept its partially-spent bucket.
+    expect(limiter.check("ip-5", now + 6).remaining).toBe(8);
+  });
+});
+
+describe("memory bounds", () => {
+  it("keeps the bucket map bounded under key flooding", () => {
+    const limiter = new TokenBucketRateLimiter({
+      capacity: 5,
+      refillPerSecond: 1,
+      windowSeconds: 60,
+      maxKeys: 50,
+    });
+
+    for (let i = 0; i < 5000; i++) limiter.check(`ip-${i}`, 1_000_000 + i);
+
+    // Bounded by maxKeys plus the 10% eviction headroom.
+    expect(limiter.size).toBeLessThanOrEqual(55);
+  });
+
+  it("recreates an evicted bucket at full capacity (fails open, never locks out)", () => {
+    const limiter = new TokenBucketRateLimiter({
+      capacity: 5,
+      refillPerSecond: 1,
+      windowSeconds: 60,
+      maxKeys: 10,
+    });
+
+    limiter.check("victim", 1_000_000);
+    for (let i = 0; i < 500; i++) limiter.check(`flood-${i}`, 2_000_000 + i);
+
+    const after = limiter.check("victim", 3_000_000);
+    expect(after.ok).toBe(true);
   });
 });
