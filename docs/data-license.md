@@ -4,7 +4,10 @@
 
 The repository ships with an **original 360-record dataset**
 (`datasets/original-sabian-symbols.json`): 360 unique records, one per zodiacal degree,
-every record with `licenseStatus: "public-domain-original"`. The short symbolic phrases and
+every record with `licenseStatus: "licensed"` and the project itself as the rights
+holder. These phrases were written for this project in 2026, so they are the project's
+own copyrighted work — `public-domain-original` is deliberately NOT used, since applying
+it to original 2026 wording would read as dedicating that work to the public domain. The short symbolic phrases and
 all editorial commentary were generated for this project and are **not** the historical
 Sabian Symbols. No Sabian book or website was transcribed.
 
@@ -20,6 +23,22 @@ Sabian Symbols. No Sabian book or website was transcribed.
 
 **This is not an authorized or canonical set of 360 symbol texts.** An authorized Sabian
 dataset is a prerequisite for production/commercial use.
+
+## How the active dataset is resolved
+
+`src/lib/sabian/index.ts` resolves in this order, validating each candidate and
+falling through on failure:
+
+1. `SABIAN_DATASET_PATH` — an operator-supplied licensed dataset, read from disk at
+   runtime so licensed corpora never enter the build artifact. A configured-but-
+   unreadable path logs an error rather than failing silently.
+2. The bundled `datasets/original-sabian-symbols.json`, statically imported.
+3. The 120-record demo fixture.
+
+The bundled dataset is imported statically on purpose. A path read only through
+`readFileSync` is invisible to Next's file tracer, so it is not bundled into a
+serverless deployment — which previously meant production silently served the demo
+fixture while every local check passed.
 
 ## Data model
 

@@ -119,9 +119,14 @@ function generate(): SabianSymbol[] {
         title,
         canonicalSymbolText: phrase,
         sourceVersion: "original-1.0",
-        sourceAttribution: "Original symbolic phrases generated for this project",
+        // These phrases were written for this project in 2026, so they are the
+        // project's own copyrighted work. "public-domain-original" is reserved
+        // for wording that can be shown to be genuinely public domain (see
+        // docs/data-license.md); applying it here would read as dedicating
+        // original work to the public domain.
+        sourceAttribution: "The Sabian Story — original content, all rights reserved",
         edition: "Original 2026",
-        licenseStatus: "public-domain-original" as LicenseStatus,
+        licenseStatus: "licensed" as LicenseStatus,
         originalEditorialInterpretation: interpretationFor(sign, degree, phrase),
         keywords: keywordsFor(sign, degree),
         lightExpression: interpretationFor(sign, degree, phrase),
