@@ -130,7 +130,7 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
       if (new RegExp(`^${s.sign}\\s+${s.degree}$`, "i").test(s.title.trim())) {
         genericOriginalTitles.push(keyOf(s));
       }
-      if (s.editorialReviewStatus !== "reviewed") {
+      if (s.editorialReviewStatus === "needs-review") {
         pendingEditorialReview.push(keyOf(s));
       }
     }

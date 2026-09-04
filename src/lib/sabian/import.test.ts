@@ -155,7 +155,6 @@ describe("bundled dataset activation", () => {
       const firstHash = getActiveDatasetHash();
       first[0] = { ...first[0], canonicalSymbolText: "Authorized changed wording for Aries 1" };
       writeFileSync(file, JSON.stringify(first));
-      __resetActiveDataset();
       expect(getActiveDatasetHash()).not.toBe(firstHash);
     } finally {
       if (previous === undefined) delete process.env.SABIAN_DATASET_PATH;

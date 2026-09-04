@@ -144,7 +144,7 @@ function generate(): SabianSymbol[] {
         sourceAttribution: "The Sabian Story — project-owned original degree imagery",
         edition: "Original 2026",
         licenseStatus: "project-owned-original" as LicenseStatus,
-        editorialReviewStatus: "reviewed" as const,
+        editorialReviewStatus: "automated-checks-passed" as const,
         licensedSourceText: "",
         originalEditorialInterpretation: interpretationFor(title, phrase),
         keywords: keywordsFor(sign, degree),

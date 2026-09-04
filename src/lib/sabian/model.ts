@@ -33,7 +33,7 @@ export const LicenseStatusSchema = z.enum([
   "needs-licensed-content",
 ]);
 
-export const EditorialReviewStatusSchema = z.enum(["reviewed", "needs-review"]);
+export const EditorialReviewStatusSchema = z.enum(["reviewed", "automated-checks-passed", "needs-review"]);
 
 export const SabianSymbolSchema = z
   .object({
@@ -48,7 +48,7 @@ export const SabianSymbolSchema = z
     sourceAttribution: z.string().min(1),
     edition: z.string().default(""),
     licenseStatus: LicenseStatusSchema,
-    /** Human/editorial disposition for production-facing original content. */
+    /** Distinguishes automated checks from a separate editor's approval. */
     editorialReviewStatus: EditorialReviewStatusSchema.default("needs-review"),
     /** Back-compat alias kept for existing consumers. */
     licensedSourceText: z.string().default(""),

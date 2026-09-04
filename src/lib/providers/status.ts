@@ -118,7 +118,7 @@ function sabianStatus(): ProviderStatus {
       externalData: "None — content is local.",
       readinessNote:
         count === 360
-          ? "Project-owned original imagery loaded; 360 distinct texts, descriptive titles, and editorial status validated."
+          ? "Project-owned original imagery loaded; 360 distinct texts and descriptive titles pass automated editorial checks. Human editorial approval is separate."
           : "Project-owned dataset is short of the full 360 degree images.",
     };
   }

@@ -30,7 +30,7 @@ describe("Sabian dataset", () => {
     expect(result.ok).toBe(false); // incomplete, as expected for demo
   });
 
-  it("ships 360 distinct, edited project-owned images", () => {
+  it("ships 360 distinct project-owned images with automated editorial checks", () => {
     const result = validateDataset(bundledOriginal, "bundled original");
     expect(result.ok).toBe(true);
     expect(result.duplicateCanonicalTexts).toHaveLength(0);
@@ -38,6 +38,7 @@ describe("Sabian dataset", () => {
     expect(result.genericOriginalTitles).toHaveLength(0);
     expect(result.pendingEditorialReview).toHaveLength(0);
     expect(result.licenseStatuses).toEqual({ "project-owned-original": 360 });
+    expect(bundledOriginal.every((record) => record.editorialReviewStatus === "automated-checks-passed")).toBe(true);
   });
 
   it("rejects repeated authoritative wording and obvious article errors", () => {

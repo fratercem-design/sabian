@@ -18,7 +18,7 @@
  *  - provenance fields populated (sourceAttribution, sourceVersion)
  *  - non-demo records contain no fixture markers and carry canonicalSymbolText
  *  - every canonical text is distinct, with no obvious article errors
- *  - project-owned originals have descriptive titles and reviewed status
+ *  - project-owned originals have descriptive titles and completed automated or editorial checks
  *
  * This script never invents, scrapes, or copies Sabian content. It only
  * validates and imports a file the operator supplies.

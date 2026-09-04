@@ -79,7 +79,15 @@ export function isDemoDataset(): boolean {
 
 /** Stable hash of the exact active records, bounded to dataset content only. */
 export function getActiveDatasetHash(): string {
-  return createHash("sha256").update(JSON.stringify(loadActive())).digest("hex");
+  // Read only the explicitly selected file, without scanning the project.
+  // Do not reuse the reading cache: readiness must notice a file changed
+  // after this process first loaded it.
+  const configuredPath = process.env.SABIAN_DATASET_PATH;
+  const dataset = configuredPath
+    ? validated(JSON.parse(readFileSync(configuredPath, "utf8")), configuredPath)
+    : loadActive();
+  if (!dataset) throw new Error("Configured dataset failed validation while checking freshness.");
+  return createHash("sha256").update(JSON.stringify(dataset)).digest("hex");
 }
 
 export type ActiveDatasetKind =

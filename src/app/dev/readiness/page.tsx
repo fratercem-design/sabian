@@ -195,8 +195,8 @@ export default function ReadinessPage() {
               </ul>
               {manifestState.manifest.audit && (
                 <p className="text-xs text-silver-mist">
-                  npm audit: {manifestState.manifest.audit.vulnerabilities} vulnerabilities (full tree),{" "}
-                  {manifestState.manifest.audit.omitDevVulnerabilities} (production-only).
+                  npm audit: {manifestState.manifest.audit.vulnerabilities ?? "unavailable"} vulnerabilities (full tree),{" "}
+                  {manifestState.manifest.audit.omitDevVulnerabilities ?? "unavailable"} (production-only).
                 </p>
               )}
             </>

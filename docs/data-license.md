@@ -49,7 +49,7 @@ Every symbol record (`src/lib/sabian/model.ts`):
 | `sourceVersion` | Dataset version string |
 | `sourceAttribution` | Who provided/licensed the wording |
 | `licenseStatus` | `project-owned-original` \| `public-domain-original` \| `licensed` \| `demo-fixture` \| `needs-licensed-content` |
-| `editorialReviewStatus` | `reviewed` or `needs-review` |
+| `editorialReviewStatus` | `automated-checks-passed` for generated records; `reviewed` requires separate editorial approval; `needs-review` blocks activation |
 | `canonicalSymbolText` | Exact authoritative wording used by the reading pipeline |
 | `licensedSourceText` | Optional verbatim third-party licensed wording; empty for project-owned originals |
 | `originalEditorialInterpretation` | Newly written commentary, never merged with source text |

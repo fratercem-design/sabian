@@ -27,7 +27,8 @@ npm ci
 npm audit
 ```
 
-**Result: passed — 0 vulnerabilities** (full dependency tree).
+**Result: unavailable** — the npm security endpoint timed out during this run.
+No current vulnerability count can be inferred from that failure.
 
 ## 3. `npm audit --omit=dev`
 
@@ -35,7 +36,7 @@ npm audit
 npm audit --omit=dev
 ```
 
-**Result: passed — 0 vulnerabilities** (production-only).
+**Result: unavailable** — the npm security endpoint timed out during this run.
 
 ## 4. Lint
 
@@ -104,6 +105,10 @@ All 360 records use project-owned original wording and descriptive titles;
 than copied from a third-party corpus. The validator rejects repeated images,
 obvious A/An errors, generic titles, pending review status, duplicates, missing
 degrees, unresolved rights status, and inconsistent global indices.
+
+The generated corpus records `automated-checks-passed`, not human editorial
+approval. These checks establish distinct text and basic grammar; they do not
+prove that every image has a distinct psychological meaning or finished literary quality.
 
 ## 9. Production build
 
@@ -201,5 +206,6 @@ mock artwork, or demo-fixture symbols) and persists via `providers` metadata.
   schema, TLS connection, CRUD/cleanup smoke test, backup, or restore has been exercised.
 - **Production deployment** — verified locally only; no hosting, TLS, backups,
   or load behavior tested.
-- **npm audit claims** — 0 vulnerabilities at time of writing for both full and
-  production-only trees; this is a point-in-time result, not a guarantee.
+- **npm audit claims** — current full and production-only counts are unavailable
+  because the registry security endpoint timed out. Earlier zero-count audits do
+  not certify the current run.

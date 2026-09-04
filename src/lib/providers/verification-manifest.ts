@@ -32,7 +32,7 @@ export interface VerificationManifest {
   nodeVersion: string;
   platform: string;
   commands: ManifestCommand[];
-  audit?: { vulnerabilities: number; omitDevVulnerabilities: number };
+  audit?: { vulnerabilities: number | null; omitDevVulnerabilities: number | null };
 }
 
 export interface ManifestState {

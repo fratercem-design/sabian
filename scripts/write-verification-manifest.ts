@@ -55,9 +55,9 @@ function readVitestCounts(jsonPath: string): { passed?: number; total?: number }
   }
 }
 
-function parseAuditVulnerabilities(stdout: string): number {
-  const m = stdout.match(/found (\d+) vulnerabilit/i);
-  return m ? Number(m[1]) : 0;
+function parseAuditVulnerabilities(stdout: string): number | null {
+  const m = stdout.match(/(?:found\s+)?(\d+) vulnerabilit/i);
+  return m ? Number(m[1]) : null;
 }
 
 function main() {
@@ -119,10 +119,19 @@ function main() {
   r = run("npm", ["run", "scan:client-secrets"]);
   record("npm run scan:client-secrets", r.exitCode);
 
-  const auditFull = run("npm", ["audit"]);
-  const auditDev = run("npm", ["audit", "--omit=dev"]);
+  const auditFull = run("npm", ["audit", "--fetch-retries=0", "--fetch-timeout=20000"]);
+  const auditDev = run("npm", ["audit", "--omit=dev", "--fetch-retries=0", "--fetch-timeout=20000"]);
+  const fullVulnerabilities = parseAuditVulnerabilities(auditFull.stdout);
+  const productionVulnerabilities = parseAuditVulnerabilities(auditDev.stdout);
   record("npm audit", auditFull.exitCode, {
-    note: `${parseAuditVulnerabilities(auditFull.stdout)} vulnerabilities (full tree)`,
+    note: fullVulnerabilities === null
+      ? "Vulnerability count unavailable: the audit did not return a valid result."
+      : `${fullVulnerabilities} vulnerabilities (full tree)`,
+  });
+  record("npm audit --omit=dev", auditDev.exitCode, {
+    note: productionVulnerabilities === null
+      ? "Vulnerability count unavailable: the audit did not return a valid result."
+      : `${productionVulnerabilities} vulnerabilities (production-only)`,
   });
 
   r = run("npx", ["playwright", "test"]);
@@ -150,8 +159,8 @@ function main() {
     platform: `${process.platform} ${process.arch}`,
     commands,
     audit: {
-      vulnerabilities: parseAuditVulnerabilities(auditFull.stdout),
-      omitDevVulnerabilities: parseAuditVulnerabilities(auditDev.stdout),
+      vulnerabilities: fullVulnerabilities,
+      omitDevVulnerabilities: productionVulnerabilities,
     },
   };
 

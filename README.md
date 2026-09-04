@@ -184,7 +184,7 @@ caches. Exact commands and counts are in
 [docs/verification.md](docs/verification.md).
 
 - [x] Clean `npm ci` from the committed lockfile
-- [x] `npm audit` and `npm audit --omit=dev` — 0 vulnerabilities each
+- [ ] Current dependency audit — npm security endpoint timed out; vulnerability counts are unavailable
 - [x] Lint (ESLint, 0 errors / 0 warnings)
 - [x] Strict typecheck (`tsc --noEmit`)
 - [x] Unit tests (Vitest 4, 216 passed)
@@ -199,12 +199,13 @@ caches. Exact commands and counts are in
 - [x] Story is 1,200–1,800 words (tested)
 - [x] All mock/incomplete readings store `isDemo=true` (from provider metadata)
 - [x] Dataset validation: 360/360 project-owned original records, 360 distinct
-      texts and titles, zero article errors, zero pending editorial statuses
+      texts and titles, zero detected article errors; automated editorial checks passed
 
 What remains unproven — live AI, live image generation, any optional historical
 Sabian corpus, a controlled live PostgreSQL/schema/retention check, and production deployment —
-is stated precisely in docs/verification.md. **No claim of "no audit
-findings" is made beyond the two point-in-time `npm audit` results above.**
+is stated precisely in docs/verification.md. Human editorial approval of the
+generated corpus remains separate from its automated checks. Current dependency
+vulnerability counts are unavailable while the npm security endpoint times out.
 
 ## Decisions required before monetization
 
