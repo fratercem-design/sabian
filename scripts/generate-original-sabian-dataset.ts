@@ -2,7 +2,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { SabianSymbolSchema } from "../src/lib/sabian/model";
 import { SIGNS } from "../src/lib/types";
-import type { SabianSymbol, LicenseStatus, Sign } from "../src/lib/sabian/model";
+import type { Sign } from "../src/lib/types";
+import type { SabianSymbol, LicenseStatus } from "../src/lib/sabian/model";
 
 const outPath = resolve(process.cwd(), "datasets", "original-sabian-symbols.json");
 
@@ -94,18 +95,18 @@ function reflectionFor(_sign: Sign, _degree: number, phrase: string): string {
   return reflections[(seed * 5) % reflections.length];
 }
 
-function keywordsFor(_sign: Sign, _degree: number, _phrase: string): string[] {
-  return ["original", "symbolic", _sign.toLowerCase(), "degree"];
+function keywordsFor(sign: Sign, degree: number): string[] {
+  return ["original", "symbolic", sign.toLowerCase(), `degree-${degree}`];
 }
 
-function visualMotifsFor(_sign: Sign, _degree: number, phrase: string): string[] {
-  const globalIndex = SIGNS.indexOf(_sign) * 30 + _degree;
+function visualMotifsFor(sign: Sign, degree: number): string[] {
+  const globalIndex = SIGNS.indexOf(sign) * 30 + degree;
   return visualMotifsList[globalIndex % visualMotifsList.length];
 }
 
 function generate(): SabianSymbol[] {
   const out: SabianSymbol[] = [];
-  for (const sign of SIGNS) {
+  for (const sign of SIGNS as unknown as Sign[]) {
     const signIndex = SIGNS.indexOf(sign);
     for (let degree = 1; degree <= 30; degree++) {
       const globalIndex = signIndex * 30 + degree;
@@ -122,11 +123,11 @@ function generate(): SabianSymbol[] {
         edition: "Original 2026",
         licenseStatus: "public-domain-original" as LicenseStatus,
         originalEditorialInterpretation: interpretationFor(sign, degree, phrase),
-        keywords: keywordsFor(sign, degree, phrase),
+        keywords: keywordsFor(sign, degree),
         lightExpression: interpretationFor(sign, degree, phrase),
-        shadowExpression: shadowFor(sign, degree, phrase),
+        shadowExpression: shadowFor(),
         reflectionQuestion: reflectionFor(sign, degree, phrase),
-        visualMotifs: visualMotifsFor(sign, degree, phrase),
+        visualMotifs: visualMotifsFor(sign, degree),
       };
       out.push(SabianSymbolSchema.parse(record));
     }
