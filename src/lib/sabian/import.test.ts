@@ -83,14 +83,61 @@ describe("Sabian import pipeline (Task 4)", () => {
     }
   });
 
-  it("falls back to the demo fixture when SABIAN_DATASET_PATH is not set", () => {
-    delete process.env.SABIAN_DATASET_PATH;
+  // Previously this asserted that an unset SABIAN_DATASET_PATH yields the demo
+  // fixture. That is no longer true, and the old expectation was the shape of
+  // a real production bug: the dataset loaded only via readFileSync, was never
+  // bundled, and the "correct" demo fallback silently served 120 placeholder
+  // records in production. The demo fixture is now the LAST resort, not the
+  // default. What is worth pinning instead is the precedence.
+  it("prefers an operator-supplied dataset over the bundled original", () => {
+    const previous = process.env.SABIAN_DATASET_PATH;
+    process.env.SABIAN_DATASET_PATH = resolve("test-fixtures/synthetic-360.json");
     __resetActiveDataset();
     try {
       const ds = getSymbolDataset();
-      expect(ds.length).toBe(120);
-      expect(isDemoDataset()).toBe(true);
+      expect(ds).toHaveLength(360);
+      expect(isDemoDataset()).toBe(false);
+      // The synthetic fixture, not the bundled original.
+      expect(ds[0].sourceAttribution).toBe("synthetic test dataset");
     } finally {
+      if (previous === undefined) delete process.env.SABIAN_DATASET_PATH;
+      else process.env.SABIAN_DATASET_PATH = previous;
+      __resetActiveDataset();
+    }
+  });
+
+});
+
+describe("bundled dataset activation", () => {
+  // Regression guard for a silent production failure: the dataset was once
+  // loaded ONLY via readFileSync(SABIAN_DATASET_PATH). That path is invisible
+  // to Next's file tracer, so the file was never bundled into the serverless
+  // lambda and production silently served the 120-record demo fixture while
+  // every local check passed. The bundled dataset must activate on its own.
+  it("activates the bundled original dataset with no env var set", () => {
+    const previous = process.env.SABIAN_DATASET_PATH;
+    delete process.env.SABIAN_DATASET_PATH;
+    __resetActiveDataset();
+    try {
+      expect(getSymbolDataset()).toHaveLength(360);
+      expect(isDemoDataset()).toBe(false);
+    } finally {
+      if (previous === undefined) delete process.env.SABIAN_DATASET_PATH;
+      else process.env.SABIAN_DATASET_PATH = previous;
+      __resetActiveDataset();
+    }
+  });
+
+  it("falls back to the bundled dataset when the configured path is unreadable", () => {
+    const previous = process.env.SABIAN_DATASET_PATH;
+    process.env.SABIAN_DATASET_PATH = "does/not/exist.json";
+    __resetActiveDataset();
+    try {
+      expect(getSymbolDataset()).toHaveLength(360);
+      expect(isDemoDataset()).toBe(false);
+    } finally {
+      if (previous === undefined) delete process.env.SABIAN_DATASET_PATH;
+      else process.env.SABIAN_DATASET_PATH = previous;
       __resetActiveDataset();
     }
   });

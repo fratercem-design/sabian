@@ -5,8 +5,11 @@
  * missing degrees and consistent global indices. Run with:
  *   npm run validate:symbols [-- path/to/symbols.json]
  *
- * With no argument, validates the demo fixture and reports the (expected)
- * incomplete state.
+ * With no argument it validates the dataset the application would actually
+ * activate, mirroring the resolution order in src/lib/sabian/index.ts:
+ * SABIAN_DATASET_PATH, then the bundled original dataset, then the demo
+ * fixture. This is what `npm run verify` runs, so the pipeline checks what
+ * ships rather than a fixture that is incomplete by design.
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -24,18 +27,19 @@ function main() {
     printResult(result);
     process.exit(result.ok ? 0 : 1);
   }
-  const generated = resolve(
-    process.cwd(),
-    "src",
-    "lib",
-    "sabian",
-    "generated",
-    "full-dataset.json"
-  );
-  if (existsSync(generated)) {
-    const raw = JSON.parse(readFileSync(generated, "utf8")) as SabianSymbol[];
-    const result = validateDataset(raw, generated);
+  // Mirror the loader: operator-supplied dataset first, then the bundled one.
+  const candidates = [
+    process.env.SABIAN_DATASET_PATH,
+    "datasets/original-sabian-symbols.json",
+  ].filter((c): c is string => Boolean(c));
+
+  for (const candidate of candidates) {
+    const file = resolve(process.cwd(), candidate);
+    if (!existsSync(file)) continue;
+    const raw = JSON.parse(readFileSync(file, "utf8")) as SabianSymbol[];
+    const result = validateDataset(raw, file);
     printResult(result);
+    // A dataset the app would activate must be valid, or the build fails.
     process.exit(result.ok ? 0 : 1);
   }
 

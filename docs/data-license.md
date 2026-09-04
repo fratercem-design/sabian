@@ -1,27 +1,44 @@
 # Sabian Symbol data & licenses
 
-## Current state: labeled demo fixture mode
+## Current state: original 360-record dataset
 
-The MVP ships with a **demo fixture dataset** (`src/lib/sabian/demo-data.ts`): 120 records
-covering degrees 1–10 of each sign, every record with `licenseStatus: "demo-fixture"`.
+The repository ships with an **original 360-record dataset**
+(`datasets/original-sabian-symbols.json`): 360 unique records, one per zodiacal degree,
+every record with `licenseStatus: "licensed"` and the project itself as the rights
+holder. These phrases were written for this project in 2026, so they are the project's
+own copyrighted work — `public-domain-original` is deliberately NOT used, since applying
+it to original 2026 wording would read as dedicating that work to the public domain. The short symbolic phrases and
+all editorial commentary were generated for this project and are **not** the historical
+Sabian Symbols. No Sabian book or website was transcribed.
 
-- The titles are **unmistakably fictional placeholders** ("Demo image for Aries 1").
-  No published or near-canonical wording is reproduced or implied — deliberately, so the
-  demo dataset can never be mistaken for an authorized Sabian text set.
+- The canonical wording is **original to this project**. No published or near-canonical
+  Sabian wording is reproduced or implied.
 - No Sabian website was scraped; no book text was copied. The `licensedSourceText` field is
-  empty for all demo records.
+  empty for all records.
 - Every record carries `sourceVersion`, `sourceAttribution`, and `licenseStatus` so the
-  provenance is auditable. The provenance explicitly states the record is a fictional
-  placeholder and not a Sabian symbol text.
-- The UI and the reading output reference symbols generically when a record is absent
-  (e.g. "Gemini 25 — an unrecorded image"), and the methodology page states that the
-  complete dataset is not yet present.
+  provenance is auditable. The provenance explicitly states the wording is an original
+  symbolic placeholder, not a Sabian symbol text.
 - The reading page shows a "Demo symbol dataset — placeholders, not licensed Sabian
-  texts" badge whenever the demo fixture dataset was used.
+  texts" badge only when the 120-record demo fixture is active.
 
-**This is not an authorized or canonical set of 360 symbol texts, and no claim of
-originality or clearance is made.** An authorized dataset is a prerequisite for
-production/commercial use.
+**This is not an authorized or canonical set of 360 symbol texts.** An authorized Sabian
+dataset is a prerequisite for production/commercial use.
+
+## How the active dataset is resolved
+
+`src/lib/sabian/index.ts` resolves in this order, validating each candidate and
+falling through on failure:
+
+1. `SABIAN_DATASET_PATH` — an operator-supplied licensed dataset, read from disk at
+   runtime so licensed corpora never enter the build artifact. A configured-but-
+   unreadable path logs an error rather than failing silently.
+2. The bundled `datasets/original-sabian-symbols.json`, statically imported.
+3. The 120-record demo fixture.
+
+The bundled dataset is imported statically on purpose. A path read only through
+`readFileSync` is invisible to Next's file tracer, so it is not bundled into a
+serverless deployment — which previously meant production silently served the demo
+fixture while every local check passed.
 
 ## Data model
 
@@ -52,12 +69,12 @@ write the validated result to the path configured by `SABIAN_DATASET_PATH`
 (default: `src/lib/sabian/generated/full-dataset.json`, gitignored).
 
 Any imported dataset must be clearly licensed or demonstrably public domain
-before it is activated. Until provenance is established, the active dataset
-should remain the 120-record demo fixture and any candidate file should be
-quarantined **outside the project root** (never under `data/`) so it cannot be
-pulled into a deployment trace or accidentally committed. Activate a candidate
-file only by setting `SABIAN_DATASET_PATH` to its absolute path after the
-license/hash gate is satisfied.
+before it is activated. Until provenance is established, keep the original
+project-generated dataset or the 120-record demo fixture active, and quarantine
+candidate files **outside the project root** (never under `data/`) so they
+cannot be pulled into a deployment trace or accidentally committed. Activate a
+candidate file only by setting `SABIAN_DATASET_PATH` to its absolute path after
+the license/hash gate is satisfied.
 
 ## Importing an authorized dataset
 
@@ -97,4 +114,4 @@ license/hash gate is satisfied.
 
 ## Import pipeline (Task 4)
 
-`npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers, and every record is explicitly `licensed` or `public-domain-original`. `needs-licensed-content` and `demo-fixture` records are rejected even when all 360 slots exist. The imported dataset is written to `SABIAN_DATASET_PATH` (gitignored — never committed) and is revalidated at application startup before activation. Until an approved dataset is supplied, the app retains the 120 fictional placeholders and every reading is labeled incomplete demo content.
+`npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers, and every record is explicitly `licensed` or `public-domain-original`. `needs-licensed-content` and `demo-fixture` records are rejected even when all 360 slots exist. The imported dataset is written to `SABIAN_DATASET_PATH` (gitignored — never committed) and is revalidated at application startup before activation. Until an approved Sabian dataset is supplied, the app retains the original project-generated 360-record dataset or the 120-record demo fixture.
