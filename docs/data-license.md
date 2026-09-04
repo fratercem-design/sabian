@@ -4,34 +4,31 @@
 
 The repository ships with an **original 360-record dataset**
 (`datasets/original-sabian-symbols.json`): 360 unique records, one per zodiacal degree,
-every record with `licenseStatus: "licensed"` and the project itself as the rights
-holder. These phrases were written for this project in 2026, so they are the project's
-own copyrighted work — `public-domain-original` is deliberately NOT used, since applying
-it to original 2026 wording would read as dedicating that work to the public domain. The short symbolic phrases and
-all editorial commentary were generated for this project and are **not** the historical
-Sabian Symbols. No Sabian book or website was transcribed.
+every record with `licenseStatus: "project-owned-original"` and the project as the
+rights holder. These phrases were written for this project in 2026 and are not a
+third-party licensed or public-domain corpus. The symbolic phrases and editorial
+commentary are **not** historical Sabian wording. No Sabian book or website was transcribed.
 
 - The canonical wording is **original to this project**. No published or near-canonical
   Sabian wording is reproduced or implied.
 - No Sabian website was scraped; no book text was copied. The `licensedSourceText` field is
   empty for all records.
-- Every record carries `sourceVersion`, `sourceAttribution`, and `licenseStatus` so the
-  provenance is auditable. The provenance explicitly states the wording is an original
-  symbolic placeholder, not a Sabian symbol text.
+- Every record carries `sourceVersion`, `sourceAttribution`, `licenseStatus`, and
+  `editorialReviewStatus` so the provenance and review disposition are auditable.
 - The reading page shows a "Demo symbol dataset — placeholders, not licensed Sabian
   texts" badge only when the 120-record demo fixture is active.
 
-**This is not an authorized or canonical set of 360 symbol texts.** An authorized Sabian
-dataset is a prerequisite for production/commercial use.
+**This is the product's project-owned original degree-image system.** It does not claim
+to reproduce any historical author's rendering. If the product later promises historical
+wording, that separate corpus requires documented permission or public-domain evidence.
 
 ## How the active dataset is resolved
 
-`src/lib/sabian/index.ts` resolves in this order, validating each candidate and
-falling through on failure:
+`src/lib/sabian/index.ts` resolves in this order, validating each candidate:
 
 1. `SABIAN_DATASET_PATH` — an operator-supplied licensed dataset, read from disk at
    runtime so licensed corpora never enter the build artifact. A configured-but-
-   unreadable path logs an error rather than failing silently.
+   unreadable or invalid path fails closed; the app will not serve different content.
 2. The bundled `datasets/original-sabian-symbols.json`, statically imported.
 3. The 120-record demo fixture.
 
@@ -51,8 +48,10 @@ Every symbol record (`src/lib/sabian/model.ts`):
 | `title` | Short image title |
 | `sourceVersion` | Dataset version string |
 | `sourceAttribution` | Who provided/licensed the wording |
-| `licenseStatus` | `public-domain-original` \| `licensed` \| `demo-fixture` \| `needs-licensed-content` |
-| `licensedSourceText` | Verbatim authorized wording (kept separate from commentary) |
+| `licenseStatus` | `project-owned-original` \| `public-domain-original` \| `licensed` \| `demo-fixture` \| `needs-licensed-content` |
+| `editorialReviewStatus` | `reviewed` or `needs-review` |
+| `canonicalSymbolText` | Exact authoritative wording used by the reading pipeline |
+| `licensedSourceText` | Optional verbatim third-party licensed wording; empty for project-owned originals |
 | `originalEditorialInterpretation` | Newly written commentary, never merged with source text |
 | `keywords` | 0–6 keyword tags |
 | `lightExpression` | Constructive framing |
@@ -85,12 +84,16 @@ the license/hash gate is satisfied.
    - no missing degrees,
    - global-index consistency with sign+degree,
    - a non-empty `sourceAttribution`/`sourceVersion` on every record (schema-level),
-   - per-record `licenseStatus`.
+   - per-record `licenseStatus`,
+   - 360 distinct authoritative texts,
+   - zero obvious `A`/`An` errors,
+   - descriptive titles and completed editorial status for project-owned originals.
 3. Set `SABIAN_DATASET_PATH` to the absolute path of the imported file. The
    loader in `src/lib/sabian/index.ts` reads this path at runtime and validates
    the dataset before activation.
-4. Keep canonical/licensed wording in `licensedSourceText` and original commentary in
-   `originalEditorialInterpretation` — never merge them.
+4. Keep the authoritative wording in `canonicalSymbolText`; mirror third-party licensed
+   wording in `licensedSourceText` only when applicable. Keep commentary in
+   `originalEditorialInterpretation`.
 
 ## Rights and attribution expectations
 
@@ -98,8 +101,8 @@ the license/hash gate is satisfied.
   Dane Rudhyar's 1973 *The Astrological Mandala*) have a complex copyright history.
   Different publishers hold rights to different renderings. **Do not** transcribe books or
   websites into the dataset.
-- For commercial use, license a dataset or obtain written permission from the rights
-  holder, and record the license terms in `sourceAttribution` + `sourceVersion`.
+- For third-party historical wording, license a dataset or obtain written permission from
+  the rights holder, and record the terms in `sourceAttribution` + `sourceVersion`.
 - `licenseStatus: "public-domain-original"` should only be used for wording you can
   demonstrate is genuinely public domain.
 
@@ -114,4 +117,4 @@ the license/hash gate is satisfied.
 
 ## Import pipeline (Task 4)
 
-`npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers, and every record is explicitly `licensed` or `public-domain-original`. `needs-licensed-content` and `demo-fixture` records are rejected even when all 360 slots exist. The imported dataset is written to `SABIAN_DATASET_PATH` (gitignored — never committed) and is revalidated at application startup before activation. Until an approved Sabian dataset is supplied, the app retains the original project-generated 360-record dataset or the 120-record demo fixture.
+`npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, 360 distinct authoritative texts, zero obvious article errors, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers, and every record has a recognized rights status. `needs-licensed-content` and `demo-fixture` records are rejected even when all 360 slots exist. The imported dataset is written to `SABIAN_DATASET_PATH` (gitignored — never committed) and is revalidated at application startup before activation. A configured path that cannot be loaded fails closed. When no external path is configured, the app uses the bundled project-owned original dataset.

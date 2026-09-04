@@ -64,7 +64,11 @@ function printResult(r: ValidationResult) {
   console.log(`Invalid:       ${r.invalid.length ? r.invalid.slice(0, 5).join("; ") : "none"}`);
   console.log(`Licenses:      ${JSON.stringify(r.licenseStatuses)}`);
   console.log(`Rights gaps:   ${r.unresolvedLicenseRecords.length}`);
-  console.log(`Result:        ${r.ok ? "PASS — exactly 360 unique records" : "INCOMPLETE (see above)"}`);
+  console.log(`Unique texts:  ${r.uniqueCanonicalTexts} / ${r.total}`);
+  console.log(`Article errors:${r.articleErrors.length.toString().padStart(3, " ")}`);
+  console.log(`Generic titles:${r.genericOriginalTitles.length.toString().padStart(3, " ")}`);
+  console.log(`Review pending:${r.pendingEditorialReview.length.toString().padStart(3, " ")}`);
+  console.log(`Result:        ${r.ok ? "PASS — 360 structurally and semantically distinct records" : "INCOMPLETE (see above)"}`);
 }
 
 main();

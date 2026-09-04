@@ -1,6 +1,7 @@
 /**
- * Parse the raw Sabian symbol text into the SabianSymbol JSON format and
- * write it to data/sabian-symbols.json for import.
+ * Parse candidate historical wording into a quarantined SabianSymbol JSON
+ * file. Parsing never asserts a license; the output remains blocked from
+ * activation until provenance and permission are documented record by record.
  *
  * Usage:
  *   npx tsx scripts/parse-sabian-symbols.ts
@@ -55,11 +56,12 @@ function parseLine(line: string, index: number) {
     degree,
     title: makeTitle(text),
     canonicalSymbolText: text,
-    sourceVersion: "1925-original",
-    sourceAttribution: "Original 1925 Sabian Symbol texts (public domain)",
-    edition: "1925 original",
-    licenseStatus: "public-domain-original",
-    licensedSourceText: text,
+    sourceVersion: "candidate-source-unverified",
+    sourceAttribution: "Candidate historical wording — provenance and permission required",
+    edition: "Unverified candidate edition",
+    licenseStatus: "needs-licensed-content",
+    editorialReviewStatus: "needs-review",
+    licensedSourceText: "",
     originalEditorialInterpretation: "Original editorial interpretation pending.",
     keywords: [],
     lightExpression: "",
@@ -92,7 +94,8 @@ function main() {
   }
 
   writeFileSync(OUT, JSON.stringify(symbols, null, 2));
-  console.log(`Wrote ${symbols.length} symbols to ${OUT}`);
+  console.log(`Wrote ${symbols.length} quarantined candidate symbols to ${OUT}`);
+  console.log("Activation remains blocked until provenance, permission, and editorial review are documented.");
 }
 
 main();

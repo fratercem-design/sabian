@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createReadingService } from "@/lib/reading/service";
 import { createReadingRepository, type ReadingRepository } from "@/lib/db/reading-repository";
+import { findSymbolByGlobalIndex, getSymbolDataset } from "@/lib/sabian";
 
 describe("reading service integration", () => {
   let repo: ReadingRepository;
@@ -34,6 +35,9 @@ describe("reading service integration", () => {
     expect(reading.artwork).toBeDefined();
     expect(Object.keys(reading.artwork!)).toEqual(["sun", "moon", "ascendant", "soul-portrait"]);
     expect(reading.artwork!.sun.source).toBe("placeholder");
+    const sunPlacement = reading.chart.placements.find((placement) => placement.key === "sun")!;
+    const activeSun = findSymbolByGlobalIndex(getSymbolDataset(), sunPlacement.globalIndex)!;
+    expect(reading.interpretation!.sun.symbol).toBe(activeSun.canonicalSymbolText);
   });
 
   it("is marked demo when mock providers are used even with a licensed symbol dataset", async () => {

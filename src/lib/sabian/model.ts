@@ -3,15 +3,16 @@
  *
  * Every symbol record carries:
  *  - A stable identity: globalIndex (1–360), sign, degree (1–30).
- *  - Canonical content: canonicalSymbolText (verbatim authorized wording),
- *    title, source, edition, licenseStatus.
+ *  - Active symbolic content: canonicalSymbolText, title, source, edition,
+ *    ownership/license status, and editorial review status.
  *  - Original editorial commentary: originalEditorialInterpretation,
  *    keywords, lightExpression, shadowExpression, reflectionQuestion,
  *    visualMotifs.
  *
- * Canonical or licensed source wording is ALWAYS kept in canonicalSymbolText
- * (and licensedSourceText) and NEVER merged into the editorial fields. No
- * Sabian website or book text is scraped or reproduced here.
+ * The authoritative wording used by readings is kept in canonicalSymbolText.
+ * Verbatim third-party licensed wording may also be mirrored in
+ * licensedSourceText, but project-owned original imagery leaves that field
+ * empty. Source text is never merged into the editorial fields.
  */
 
 import { z } from "zod";
@@ -20,15 +21,19 @@ import { SIGNS } from "@/lib/types";
 export type LicenseStatus =
   | "public-domain-original"
   | "licensed"
+  | "project-owned-original"
   | "demo-fixture"
   | "needs-licensed-content";
 
 export const LicenseStatusSchema = z.enum([
   "public-domain-original",
   "licensed",
+  "project-owned-original",
   "demo-fixture",
   "needs-licensed-content",
 ]);
+
+export const EditorialReviewStatusSchema = z.enum(["reviewed", "needs-review"]);
 
 export const SabianSymbolSchema = z
   .object({
@@ -36,13 +41,15 @@ export const SabianSymbolSchema = z
     sign: z.enum(SIGNS),
     degree: z.number().int().min(1).max(30),
     title: z.string().min(1),
-    /** Verbatim authorized canonical wording (empty for demo fixtures). */
+    /** Authoritative wording for this record (empty for demo fixtures). */
     canonicalSymbolText: z.string().default(""),
     /** Source/edition provenance. */
     sourceVersion: z.string().min(1),
     sourceAttribution: z.string().min(1),
     edition: z.string().default(""),
     licenseStatus: LicenseStatusSchema,
+    /** Human/editorial disposition for production-facing original content. */
+    editorialReviewStatus: EditorialReviewStatusSchema.default("needs-review"),
     /** Back-compat alias kept for existing consumers. */
     licensedSourceText: z.string().default(""),
     originalEditorialInterpretation: z.string().min(1),

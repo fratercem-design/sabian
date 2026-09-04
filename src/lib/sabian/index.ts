@@ -9,14 +9,17 @@
  *     is traced into the deployment bundle.
  *  3. The 120-record demo fixture.
  *
- * Every candidate is validated before activation; an invalid one falls through
- * to the next rather than shipping broken content.
+ * Every candidate is validated before activation. An explicitly configured
+ * dataset fails closed if unavailable or invalid; silently serving a different
+ * corpus would conceal an operator error. The bundled dataset may still fall
+ * back to the visibly incomplete demo fixture if the committed file is broken.
  *
  * The static import matters on serverless hosts. A path read with readFileSync
  * is invisible to Next's file tracer, so a runtime-only dataset is not bundled
  * into the lambda and silently degrades to the demo fixture in production.
  */
 
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import originalDataset from "../../../datasets/original-sabian-symbols.json";
 import { demoSabianSymbols } from "@/lib/sabian/demo-data";
@@ -43,15 +46,12 @@ function loadActive(): SabianSymbol[] {
         active = fromDisk;
         return active;
       }
-      console.error(
-        `[sabian] SABIAN_DATASET_PATH=${path} failed validation; ignoring it.`
-      );
+      throw new Error(`SABIAN_DATASET_PATH=${path} failed dataset validation.`);
     } catch (err) {
-      // Never fail silently here: a configured-but-unusable dataset is a
-      // deployment error, and the fallback below would otherwise hide it.
-      console.error(
-        `[sabian] Could not read SABIAN_DATASET_PATH=${path}: ` +
-          `${err instanceof Error ? err.message : String(err)}`
+      throw new Error(
+        `[sabian] Configured dataset is unavailable; refusing to fall back: ${
+          err instanceof Error ? err.message : String(err)
+        }`
       );
     }
   }
@@ -75,6 +75,24 @@ export function getSymbolDataset(): SabianSymbol[] {
 /** True when the ACTIVE dataset is the demo fixture (incomplete). */
 export function isDemoDataset(): boolean {
   return loadActive() === demoSabianSymbols;
+}
+
+/** Stable hash of the exact active records, bounded to dataset content only. */
+export function getActiveDatasetHash(): string {
+  return createHash("sha256").update(JSON.stringify(loadActive())).digest("hex");
+}
+
+export type ActiveDatasetKind =
+  | "demo-fixture"
+  | "project-owned-original"
+  | "authorized-source";
+
+export function getActiveDatasetKind(): ActiveDatasetKind {
+  const dataset = loadActive();
+  if (dataset === demoSabianSymbols) return "demo-fixture";
+  return dataset.every((record) => record.licenseStatus === "project-owned-original")
+    ? "project-owned-original"
+    : "authorized-source";
 }
 
 /** Reset the cached active dataset. Only for tests. */

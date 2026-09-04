@@ -53,7 +53,7 @@ describe("provider matrix — honest taxonomy (truth dashboard)", () => {
     const checks = getReadinessChecks();
     expect(checks.chartVerified).toBe(true);
     expect(checks.timezoneVerified).toBe(true);
-    expect(checks.sabianFullyLicensed).toBe(true);
+    expect(checks.symbolContentReady).toBe(true);
     // Story and image still use mock providers, so the beta is not yet safe.
     expect(checks.storyLiveVerified).toBe(false);
     expect(checks.imageLiveVerified).toBe(false);

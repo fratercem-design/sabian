@@ -85,6 +85,7 @@ function buildPrompt(input: InterpretationInput, fingerprint: string): string {
       sign: s.sign,
       degree: s.degree,
       title: s.title,
+      symbolText: s.symbolText,
       licensedSourceText: s.licensedSourceText ?? "",
       keywords: s.keywords,
       lightExpression: s.lightExpression,
@@ -110,7 +111,7 @@ function fingerprint(input: InterpretationInput): string {
   // generation (idempotency) without sending the same prompt twice.
   const canonical = JSON.stringify({
     placements: input.placements,
-    symbols: input.symbols.map((s) => [s.globalIndex, s.title, s.keywords]),
+    symbols: input.symbols.map((s) => [s.globalIndex, s.title, s.symbolText, s.keywords]),
     birthDate: input.birthDate,
     birthTime: input.birthTime ?? null,
     timeKnown: input.timeKnown,

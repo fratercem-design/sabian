@@ -85,8 +85,10 @@ export default function MethodPage() {
             <p className="mt-4 leading-relaxed text-parchment-200">
               This is a testing-phase product. In demo mode the interpretation and artwork come
               from deterministic local fixtures and are clearly labeled as such. The Sabian symbol
-              dataset currently contains a small development fixture, not an authorized complete
-              set of 360 texts. Nothing in this experience is a medical, legal, or financial
+              dataset contains 360 project-owned original degree images. They are not presented as
+              historical wording by Elsie Wheeler, Marc Edmund Jones, or Dane Rudhyar. The exact
+              active image is shown in each reading and passed to the interpretation provider.
+              Nothing in this experience is a medical, legal, or financial
               opinion, and nothing predicts your future. Its purpose is reflection and
               entertainment: a contemplative way to meet your own images.
             </p>

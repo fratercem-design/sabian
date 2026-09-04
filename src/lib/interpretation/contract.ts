@@ -99,6 +99,8 @@ export type InterpretationInput = {
     sign: string;
     degree: number;
     title: string;
+    /** Exact authoritative wording selected from the active dataset. */
+    symbolText: string;
     licensedSourceText?: string;
     licenseStatus?: string;
     keywords: string[];

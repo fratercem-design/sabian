@@ -218,6 +218,10 @@ export class ReadingService {
         sign: p.sign,
         degree: p.sabianDegree,
         title: symbol?.title ?? `${p.sign} ${p.sabianDegree} — an unrecorded image`,
+        symbolText:
+          symbol?.canonicalSymbolText?.trim() ||
+          symbol?.licensedSourceText?.trim() ||
+          `${p.sign} ${p.sabianDegree} — an unrecorded image`,
         licensedSourceText: symbol?.licensedSourceText ?? "",
         licenseStatus: symbol?.licenseStatus ?? "needs-licensed-content",
         keywords: symbol?.keywords ?? [],

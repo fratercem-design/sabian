@@ -17,6 +17,8 @@
  *  - no missing indices
  *  - provenance fields populated (sourceAttribution, sourceVersion)
  *  - non-demo records contain no fixture markers and carry canonicalSymbolText
+ *  - every canonical text is distinct, with no obvious article errors
+ *  - project-owned originals have descriptive titles and reviewed status
  *
  * This script never invents, scrapes, or copies Sabian content. It only
  * validates and imports a file the operator supplies.
@@ -60,6 +62,10 @@ function main() {
   console.log(`Fixture marks: ${result.fixtureMarkersInNonDemo.length ? result.fixtureMarkersInNonDemo.join(", ") : "none"}`);
   console.log(`Licenses:      ${JSON.stringify(result.licenseStatuses)}`);
   console.log(`Rights gaps:   ${result.unresolvedLicenseRecords.length}`);
+  console.log(`Unique texts:  ${result.uniqueCanonicalTexts} / ${result.total}`);
+  console.log(`Article errors:${result.articleErrors.length.toString().padStart(3, " ")}`);
+  console.log(`Generic titles:${result.genericOriginalTitles.length.toString().padStart(3, " ")}`);
+  console.log(`Review pending:${result.pendingEditorialReview.length.toString().padStart(3, " ")}`);
   console.log(`Per-sign 30:   ${Object.entries(result.perSignCounts).every(([, n]) => n === 30)}`);
 
   if (!result.ok) fail(`dataset does not meet all 360-symbol requirements (see above)`);

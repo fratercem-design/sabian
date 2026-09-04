@@ -21,8 +21,9 @@ No prices, checkout flows, subscriptions, or payment credentials exist.
 
 ## Decisions required before monetization
 
-1. **Authorized Sabian dataset** — which 360-symbol dataset to license, from whom, at what
-   terms; how `licensedSourceText` is delivered to the UI; attribution requirements.
+1. **Symbol content policy** — keep the bundled project-owned original 360-image set, or
+   separately license historical wording and document its terms and attribution. The active
+   authoritative wording is delivered to the UI as `symbolText`.
 2. **Live text provider** — which provider (Anthropic/OpenAI/other), which model, output
    schema versioning, cost controls, and retry/prompt-safety policy. The
    `InterpretationProvider` interface and Zod contract are ready; the live implementation

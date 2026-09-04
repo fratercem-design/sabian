@@ -1,14 +1,14 @@
 # Verification results
 
-Commands were run on **Windows, Node v24.18.0**. A fresh `npm ci` baseline was
-run in an isolated copy, followed by a source-fingerprinted full verification
-of the current working tree. Date: 2026-08-27.
+Commands were run on **Windows, Node v24.18.0**. Verification covers the repaired
+project-owned 360-image dataset and the exact active-text reading path. Date:
+2026-09-03.
 
 ## Isolated environment
 
 The dependency baseline ran in an isolated copy with `npm ci`. The final
-`npm run verify:manifest` run certified the exact dirty-worktree fingerprint
-for commit `bcba8fb`. Every test uses a per-run temporary database and artwork
+`npm run verify:manifest` records the exact dirty-worktree fingerprint and a
+separate bounded hash of the active symbol dataset. Every test uses a per-run temporary database and artwork
 cache (`vitest.tmpdir.mts` + `vitest.setup.ts`); the Playwright server uses
 `.e2e-tmp/`. No verification command touched `data/sabian.db` or the real
 artwork cache.
@@ -59,7 +59,7 @@ npm run typecheck   # tsc --noEmit
 npm test            # vitest run
 ```
 
-**Result: passed — 194/194 tests** across 14 files. Coverage includes longitude
+**Result: passed — 216/216 tests** across 16 files. Coverage includes longitude
 and Sabian boundaries, Swiss-Ephemeris gold masters, North Node convention,
 DST gap/overlap handling, licensed-dataset rejection gates, live-provider
 contracts, signed place tokens, production configuration failure, readiness
@@ -80,26 +80,30 @@ live-geocoding search → signed token → review → create), using isolated te
 npm run validate:symbols
 ```
 
-**Result: INCOMPLETE by design** — the MVP is in **labeled demo-data mode**:
+**Result: passed** — the bundled project-owned original dataset is complete and
+passes structural and semantic content gates:
 
 ```
-Source:        demo fixture (src/lib/sabian/demo-data.ts)
-Total records: 120
-Unique:        120 / 360
+Source:        datasets/original-sabian-symbols.json
+Total records: 360
+Unique:        360 / 360
 Duplicates:    none
-Missing:       240
+Missing:       0
 Invalid:       none
-Licenses:      {"demo-fixture":120}
-Rights gaps:   120
-Result:        INCOMPLETE (see above)
+Licenses:      {"project-owned-original":360}
+Rights gaps:   0
+Unique texts:  360 / 360
+Article errors:  0
+Generic titles:  0
+Review pending:  0
+Result:        PASS — 360 structurally and semantically distinct records
 ```
 
-All 120 records use **unmistakably fictional placeholder titles** ("Demo image
-for Aries 1"), `licenseStatus: "demo-fixture"`, empty `licensedSourceText`, and
-fictional provenance fields. **No authorized 360-symbol dataset is imported.**
-The validator itself is proven: it detects duplicates, missing degrees, and
-inconsistent global indices, and would report PASS for a full authorized
-dataset.
+All 360 records use project-owned original wording and descriptive titles;
+`licensedSourceText` stays empty because the active content is original rather
+than copied from a third-party corpus. The validator rejects repeated images,
+obvious A/An errors, generic titles, pending review status, duplicates, missing
+degrees, unresolved rights status, and inconsistent global indices.
 
 ## 9. Production build
 
@@ -139,7 +143,8 @@ The journey test **fetches the saved reading JSON and compares displayed
 placements (sign, DMS, Sabian degree) against it**, verifies the internal
 consistency of longitude/sign/DMS/Sabian/global-index for every placement, and
 asserts coordinates, timezone, historical offset, and resolved UTC appear on
-the review step **before submission**.
+the review step **before submission**. It also asserts that the exact
+`canonicalSymbolText` selected for the Sun is visible in the rendered reading.
 
 ## 11. Live browser check for failed resources, console errors, overlays, keyboard navigation, visible focus
 
@@ -188,10 +193,9 @@ mock artwork, or demo-fixture symbols) and persists via `providers` metadata.
 - **Live AI interpretation** — only the deterministic mock is tested; no real
   provider call.
 - **Live image generation** — only the deterministic SVG provider is tested.
-- **Complete licensed Sabian content** — the app runs in labeled demo-data
-  mode (120 fictional placeholders); no authorized 360-entry dataset is
-  imported.
-- **Commercial licensing** — no licenses beyond MIT open-source dependencies.
+- **Optional historical Sabian wording** — the active 360-image corpus is
+  project-owned original material. No historical third-party rendering has
+  been activated or tested.
 - **PostgreSQL** — the runtime repository and migration path are implemented
   with parameterized SQL and local contract tests, but no real PostgreSQL
   schema, TLS connection, CRUD/cleanup smoke test, backup, or restore has been exercised.

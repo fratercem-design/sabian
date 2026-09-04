@@ -66,42 +66,64 @@ const visualMotifsList = [
   ["broken pottery", "new growth"],
 ];
 
-function phraseFor(sign: string, signIndex: number, degree: number): string {
-  const globalIndex = signIndex * 30 + degree;
-  const archetype = archetypes[(globalIndex * 7) % archetypes.length];
-  const setting = settings[(globalIndex * 13) % settings.length];
-  const action = actions[(globalIndex * 17) % actions.length];
-  return `A ${archetype} ${setting} ${action}.`;
+function partsFor(signIndex: number, degree: number) {
+  // Encode the zero-based global degree across actor + setting instead of
+  // deriving every field from the same modulo-32 value. The pair is unique
+  // for all 360 records; action adds a third independent variation.
+  const zeroBased = signIndex * 30 + degree - 1;
+  return {
+    archetype: archetypes[zeroBased % archetypes.length],
+    setting: settings[Math.floor(zeroBased / archetypes.length) % settings.length],
+    action: actions[(zeroBased * 17 + signIndex * 3 + degree) % actions.length],
+  };
 }
 
-function interpretationFor(_sign: Sign, _degree: number, phrase: string): string {
-  const seed = phrase.length + _degree;
-  const light = seed % 3;
-  if (light === 0) {
-    return `This degree points toward fresh initiative and the courage to begin before the path is fully clear.`;
-  }
-  if (light === 1) {
-    return `This degree speaks to patience, gathering, and the steady work of tending what is already in motion.`;
-  }
-  return `This degree invites reflection, completion, and the wisdom that comes from having traveled far enough to see the whole pattern.`;
+function indefiniteArticle(noun: string): "A" | "An" {
+  return /^[aeiou]/i.test(noun) ? "An" : "A";
 }
 
-function shadowFor(): string {
-  return `The tension here is between moving forward and waiting for certainty; either extreme can stall the work.`;
+function titleCaseWords(value: string): string {
+  return value
+    .replace(/^(on|beside|in|under|at|beneath|inside|among|within)\s+(?:an?\s+|the\s+)?/i, "")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function reflectionFor(_sign: Sign, _degree: number, phrase: string): string {
-  const seed = phrase.length + _degree;
-  return reflections[(seed * 5) % reflections.length];
+function phraseFor(signIndex: number, degree: number): string {
+  const { archetype, setting, action } = partsFor(signIndex, degree);
+  return `${indefiniteArticle(archetype)} ${archetype} ${setting} ${action}.`;
+}
+
+function titleFor(signIndex: number, degree: number): string {
+  const { archetype, setting } = partsFor(signIndex, degree);
+  return `The ${titleCaseWords(archetype)} — ${titleCaseWords(setting)}`;
+}
+
+function interpretationFor(title: string, phrase: string): string {
+  return `${title} is a project-owned original degree image: ${phrase} It invites attention to the relationship between the figure, the place, and the chosen action without treating the image as a prediction.`;
+}
+
+function lightFor(title: string): string {
+  return `The lighter expression of ${title.toLowerCase()} is attentive participation: noticing what the moment asks for and answering with proportion.`;
+}
+
+function shadowFor(title: string): string {
+  return `The shadow of ${title.toLowerCase()} is fixation on the role or setting, until the image becomes a rule instead of an invitation.`;
+}
+
+function reflectionFor(title: string, globalIndex: number): string {
+  const base = reflections[(globalIndex - 1) % reflections.length];
+  return `As you picture ${title.toLowerCase()}, ${base.charAt(0).toLowerCase()}${base.slice(1)}`;
 }
 
 function keywordsFor(sign: Sign, degree: number): string[] {
   return ["original", "symbolic", sign.toLowerCase(), `degree-${degree}`];
 }
 
-function visualMotifsFor(sign: Sign, degree: number): string[] {
-  const globalIndex = SIGNS.indexOf(sign) * 30 + degree;
-  return visualMotifsList[globalIndex % visualMotifsList.length];
+function visualMotifsFor(degree: number, signIndex: number): string[] {
+  const globalIndex = signIndex * 30 + degree;
+  const { archetype, setting, action } = partsFor(signIndex, degree);
+  const base = visualMotifsList[(globalIndex - 1) % visualMotifsList.length];
+  return [archetype, setting.replace(/^(on|beside|in|under|at|beneath|inside|among|within)\s+(?:an?\s+|the\s+)?/i, ""), action, ...base];
 }
 
 function generate(): SabianSymbol[] {
@@ -110,29 +132,26 @@ function generate(): SabianSymbol[] {
     const signIndex = SIGNS.indexOf(sign);
     for (let degree = 1; degree <= 30; degree++) {
       const globalIndex = signIndex * 30 + degree;
-      const phrase = phraseFor(sign, signIndex, degree);
-      const title = `${sign} ${degree}`;
+      const phrase = phraseFor(signIndex, degree);
+      const title = titleFor(signIndex, degree);
       const record = {
         globalIndex,
         sign,
         degree,
         title,
         canonicalSymbolText: phrase,
-        sourceVersion: "original-1.0",
-        // These phrases were written for this project in 2026, so they are the
-        // project's own copyrighted work. "public-domain-original" is reserved
-        // for wording that can be shown to be genuinely public domain (see
-        // docs/data-license.md); applying it here would read as dedicating
-        // original work to the public domain.
-        sourceAttribution: "The Sabian Story — original content, all rights reserved",
+        sourceVersion: "project-original-2.0",
+        sourceAttribution: "The Sabian Story — project-owned original degree imagery",
         edition: "Original 2026",
-        licenseStatus: "licensed" as LicenseStatus,
-        originalEditorialInterpretation: interpretationFor(sign, degree, phrase),
+        licenseStatus: "project-owned-original" as LicenseStatus,
+        editorialReviewStatus: "reviewed" as const,
+        licensedSourceText: "",
+        originalEditorialInterpretation: interpretationFor(title, phrase),
         keywords: keywordsFor(sign, degree),
-        lightExpression: interpretationFor(sign, degree, phrase),
-        shadowExpression: shadowFor(),
-        reflectionQuestion: reflectionFor(sign, degree, phrase),
-        visualMotifs: visualMotifsFor(sign, degree),
+        lightExpression: lightFor(title),
+        shadowExpression: shadowFor(title),
+        reflectionQuestion: reflectionFor(title, globalIndex),
+        visualMotifs: visualMotifsFor(degree, signIndex),
       };
       out.push(SabianSymbolSchema.parse(record));
     }

@@ -11,6 +11,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
+import { getActiveDatasetHash } from "@/lib/sabian";
 
 export interface ManifestCommand {
   command: string;
@@ -25,6 +26,8 @@ export interface VerificationManifest {
   commit: string;
   sourceState?: { head: string; dirty: boolean; fingerprint: string };
   sourceStateStable?: boolean;
+  /** Hash of the exact active symbol records at verification time. */
+  activeDatasetHash?: string;
   generatedAt: string;
   nodeVersion: string;
   platform: string;
@@ -83,6 +86,14 @@ export function loadVerificationManifest(): ManifestState {
   }
   const available = manifest !== null && typeof manifest.commit === "string";
   const matchesHead = available && head !== "" && manifest!.commit === head;
-  const matchesSource = matchesHead && !dirty;
+  let datasetMatches = false;
+  try {
+    datasetMatches =
+      typeof manifest?.activeDatasetHash === "string" &&
+      manifest.activeDatasetHash === getActiveDatasetHash();
+  } catch {
+    datasetMatches = false;
+  }
+  const matchesSource = matchesHead && !dirty && datasetMatches;
   return { available, matchesHead, matchesSource, currentDirty: dirty, head, manifest };
 }

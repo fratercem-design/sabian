@@ -1,8 +1,10 @@
 import { resolve } from "node:path";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 import { validateDataset } from "@/lib/sabian/validation";
 import { demoSabianSymbols } from "@/lib/sabian/demo-data";
-import { getSymbolDataset, isDemoDataset, __resetActiveDataset } from "@/lib/sabian/index";
+import { getActiveDatasetHash, getSymbolDataset, isDemoDataset, __resetActiveDataset } from "@/lib/sabian/index";
 import type { SabianSymbol } from "@/lib/sabian/model";
 import { synthetic360, type SyntheticOptions } from "../../../test-fixtures/synthetic-dataset";
 
@@ -128,13 +130,33 @@ describe("bundled dataset activation", () => {
     }
   });
 
-  it("falls back to the bundled dataset when the configured path is unreadable", () => {
+  it("fails closed when the configured path is unreadable", () => {
     const previous = process.env.SABIAN_DATASET_PATH;
     process.env.SABIAN_DATASET_PATH = "does/not/exist.json";
     __resetActiveDataset();
     try {
-      expect(getSymbolDataset()).toHaveLength(360);
-      expect(isDemoDataset()).toBe(false);
+      expect(() => getSymbolDataset()).toThrow(/refusing to fall back/i);
+    } finally {
+      if (previous === undefined) delete process.env.SABIAN_DATASET_PATH;
+      else process.env.SABIAN_DATASET_PATH = previous;
+      __resetActiveDataset();
+    }
+  });
+
+  it("changes the bounded active-dataset hash when a configured corpus changes", () => {
+    const previous = process.env.SABIAN_DATASET_PATH;
+    const directory = mkdtempSync(resolve(tmpdir(), "sabian-dataset-hash-"));
+    const file = resolve(directory, "symbols.json");
+    const first = raw360();
+    writeFileSync(file, JSON.stringify(first));
+    process.env.SABIAN_DATASET_PATH = file;
+    __resetActiveDataset();
+    try {
+      const firstHash = getActiveDatasetHash();
+      first[0] = { ...first[0], canonicalSymbolText: "Authorized changed wording for Aries 1" };
+      writeFileSync(file, JSON.stringify(first));
+      __resetActiveDataset();
+      expect(getActiveDatasetHash()).not.toBe(firstHash);
     } finally {
       if (previous === undefined) delete process.env.SABIAN_DATASET_PATH;
       else process.env.SABIAN_DATASET_PATH = previous;

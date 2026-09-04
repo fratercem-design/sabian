@@ -16,6 +16,7 @@ import { writeFileSync, readFileSync, mkdtempSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { currentSourceState } from "@/lib/providers/source-state";
+import { getActiveDatasetHash } from "@/lib/sabian";
 
 interface Cmd {
   command: string;
@@ -61,6 +62,7 @@ function parseAuditVulnerabilities(stdout: string): number {
 
 function main() {
   const sourceStateAtStart = currentSourceState();
+  const activeDatasetHashAtStart = getActiveDatasetHash();
   const tmp = mkdtempSync(join(tmpdir(), "sabian-verify-"));
   const unitJson = join(tmp, "unit.json");
   const integrationJson = join(tmp, "integration.json");
@@ -105,7 +107,7 @@ function main() {
   record("npm run validate:symbols", r.exitCode, {
     note: r.stdout.includes("INCOMPLETE")
       ? "INCOMPLETE by design while the licensed 360-symbol dataset is not imported."
-      : "Active 360-symbol dataset passed structural validation (count, uniqueness, global-index consistency) and self-declared provenance/right-status fields. It does not prove license authenticity.",
+      : "Active dataset passed structural and semantic validation: 360 records and distinct texts, consistent indices, grammar/title/review gates, and recorded ownership or license status.",
   });
 
   r = run("npm", ["run", "build"]);
@@ -142,6 +144,7 @@ function main() {
     commit: sourceStateAtStart.head || "unknown",
     sourceState: sourceStateAtStart,
     sourceStateStable,
+    activeDatasetHash: activeDatasetHashAtStart,
     generatedAt: new Date().toISOString(),
     nodeVersion: process.version,
     platform: `${process.platform} ${process.arch}`,

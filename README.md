@@ -13,8 +13,9 @@ This is a **testing-phase product**. Everything runs in deterministic demo mode 
 box: no API keys, no paid providers, no account required. Demo interpretation and demo
 artwork are clearly labeled in the UI and in the data. Live AI providers and live image
 generation are not yet wired for real use; the provider interfaces exist so they can be
-added without changing the core architecture. **No live AI, no live image generation, no
-complete licensed Sabian dataset, and no production deployment are claimed as tested in
+  added without changing the core architecture. The bundled degree imagery is a complete,
+  project-owned original set; it is not historical Sabian wording. **No live AI, no live
+  image generation, no historical licensed corpus, and no production deployment are claimed as tested in
 this phase** — see [Verification](#verification) for exactly what was proven.
 
 ## Quick start
@@ -95,7 +96,7 @@ src/
                         documented Placidus houses, Sabian degree convention
     time/               Historical time-zone resolution (moment-timezone, IANA data)
     places/             PlaceSearchProvider (local index in demo mode)
-    sabian/             Symbol schema, demo fixture dataset, validation
+    sabian/             Symbol schema, active project-owned dataset, validation
     interpretation/     InterpretationProvider + Zod contract
     image/              ImageGenerationProvider + shared visual style
     art/                Prompt-hash artwork cache (no duplicate generation)
@@ -155,15 +156,14 @@ are invented.
 
 ## Sabian content and rights
 
-This MVP ships a **small, clearly labeled demo fixture dataset** (120 records,
-degrees 1–10 of each sign) so the complete engine and interface can be
-exercised. Every record uses an **unmistakably fictional placeholder title**
-("Demo image for Aries 1") with `licenseStatus: "demo-fixture"`, empty
-`licensedSourceText`, and fictional provenance — **no published or
-near-canonical wording is reproduced or implied**, and nothing has been
-scraped or copied. It does **not** contain an authorized set of 360 symbol
-texts. Importing an authorized dataset is a prerequisite for production — see
-[docs/data-license.md](docs/data-license.md) and `npm run validate:symbols`.
+This MVP ships a **project-owned original 360-record degree-image dataset**.
+Each degree has distinct wording, a descriptive title, editorial fields, and
+`licenseStatus: "project-owned-original"`. The authoritative wording travels
+through the reading pipeline as `symbolText`; `licensedSourceText` remains empty
+because these records are original material rather than third-party licensed
+copy. No historical Sabian book or website wording is included. See
+[docs/data-license.md](docs/data-license.md) and `npm run validate:symbols` for
+the exact contract and semantic gates.
 
 ## Methodology
 
@@ -187,7 +187,7 @@ caches. Exact commands and counts are in
 - [x] `npm audit` and `npm audit --omit=dev` — 0 vulnerabilities each
 - [x] Lint (ESLint, 0 errors / 0 warnings)
 - [x] Strict typecheck (`tsc --noEmit`)
-- [x] Unit tests (Vitest 4, 194 passed)
+- [x] Unit tests (Vitest 4, 216 passed)
 - [x] Integration tests (isolated SQLite, 12 passed)
 - [x] Production build (`next build`)
 - [x] Playwright suite (13 passed): saved-data comparison journey, DST
@@ -198,19 +198,18 @@ caches. Exact commands and counts are in
 - [x] `timeKnown=true` without a time is rejected (HTTP 400)
 - [x] Story is 1,200–1,800 words (tested)
 - [x] All mock/incomplete readings store `isDemo=true` (from provider metadata)
-- [x] Dataset validation: 120 demo records, all fictional placeholders,
-      unique, clearly labeled; authorized 360-entry dataset not yet imported
-      (explicitly stated)
+- [x] Dataset validation: 360/360 project-owned original records, 360 distinct
+      texts and titles, zero article errors, zero pending editorial statuses
 
-What remains unproven — live AI, live image generation, complete licensed
-Sabian content, a controlled live PostgreSQL/schema/retention check, commercial licensing, and production deployment —
+What remains unproven — live AI, live image generation, any optional historical
+Sabian corpus, a controlled live PostgreSQL/schema/retention check, and production deployment —
 is stated precisely in docs/verification.md. **No claim of "no audit
 findings" is made beyond the two point-in-time `npm audit` results above.**
 
 ## Decisions required before monetization
 
-See [docs/entitlements.md](docs/entitlements.md) for the full list, including: which
-authorized Sabian dataset to license; which live text/image providers to integrate; how
+See [docs/entitlements.md](docs/entitlements.md) for the full list, including: whether
+to retain the project-owned imagery or license an optional historical corpus; which live text/image providers to integrate; how
 place search should work in production (geocoding provider, quotas); the PostgreSQL
 migration; retention policy tuning; and payment/entitlement enforcement choices.
 
@@ -218,6 +217,6 @@ migration; retention policy tuning; and payment/entitlement enforcement choices.
 
 The application code in this repository is provided for evaluation of this testing-phase
 MVP. Third-party licenses: astronomy-engine (MIT), moment-timezone (MIT), node:sqlite
-(built into Node.js), Next.js (MIT), React (MIT), Tailwind CSS (MIT). The demo Sabian
-fixture records are original fictional placeholders written for this project (see
+(built into Node.js), Next.js (MIT), React (MIT), Tailwind CSS (MIT). The bundled
+360-record degree imagery is project-owned original material (see
 [docs/data-license.md](docs/data-license.md)).

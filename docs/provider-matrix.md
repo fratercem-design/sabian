@@ -24,7 +24,7 @@ Status of every provider. **Derived from actual configuration and wiring**
 | Astrology (chart) | `ChartCalculationProvider` | `AstronomyEngineChartProvider` (astronomy-engine, MIT) | local-verified | — | None — all calculation is local and deterministic |
 | Geocoding | `PlaceSearchProvider` | `LocalPlaceSearchProvider` (deterministic place index) | local-verified | `GEOCODING_API_URL`, `GEOCODING_API_KEY`, `GEOCODING_PROVIDER` | None locally; a live provider sends only the free-text query |
 | Historical timezone | `TimeZoneResolver` (`lib/time/birthtime.ts`) | moment-timezone with bundled IANA tz database | local-verified | — | None — IANA data is bundled locally |
-| Sabian content | `SabianDataset` (`lib/sabian`) | demo fixture: **120 of 360** fictional placeholders | demo-fixture | — | None |
+| Degree-image content | `SabianDataset` (`lib/sabian`) | **360 of 360** project-owned original images | local-verified | `SABIAN_DATASET_PATH` | None |
 | Story generation | `InterpretationProvider` | `MockInterpretationProvider` (deterministic demo story) | mock | `TEXT_PROVIDER`, `TEXT_API_KEY`, `TEXT_MODEL` | None (mock); live sends validated chart JSON + symbol records |
 | Image generation | `ImageGenerationProvider` | `MockImageGenerationProvider` (deterministic SVG emblem) | mock | `IMAGE_PROVIDER`, `IMAGE_API_KEY`, `IMAGE_MODEL` | None (mock); live sends a sanitized visual prompt only |
 | Database | `ReadingRepository` | SQLite via node:sqlite, or PostgreSQL via bounded `pg` pool | local-verified (sqlite); configured-untested (PostgreSQL) | `DATABASE_URL`, `POSTGRES_POOL_MAX`, `POSTGRES_CONNECTION_TIMEOUT_MS` | None for SQLite; encrypted connection metadata and reading records for PostgreSQL |
@@ -52,7 +52,7 @@ server-side via the place index. A mocked end-to-end journey test
 | Geocoding (local) | Returns empty list for no match | None | n/a | n/a | No |
 | Geocoding (live) | Throws a descriptive error; review/create resolve nothing | One retry on 5xx/network | 10s | Not yet implemented | Depends on provider |
 | Timezone | Throws on unknown zone / DST gap / invalid date | None needed (deterministic) | n/a | n/a | No |
-| Sabian | Missing degree falls back to "unrecorded image" placeholder text | None | n/a | n/a | No |
+| Degree images | An explicitly configured unreadable or invalid dataset fails closed; no silent fallback | None | n/a | n/a | No |
 | Story (mock) | Always succeeds | Zod validation retries once on invalid output | n/a | n/a | No |
 | Story (live) | Graceful failure; deterministic chart preserved | One retry on validation failure | Not yet implemented | Not yet implemented | Yes, once wired — per-reading token cost |
 | Image (mock) | Always succeeds; SVG data URL | None | n/a | n/a | No |
@@ -61,8 +61,8 @@ server-side via the place index. A mocked end-to-end journey test
 ## Status logic
 
 A reading is labeled **"Demonstration Reading"** whenever any capability that a
-complete reading depends on is demo, mock, unavailable, or unverified — including
-the incomplete Sabian dataset. The label is rendered from
+complete reading depends on is demo, mock, unavailable, or unverified. The bundled
+project-owned 360-image dataset is validated and is not itself a demo blocker. The label is rendered from
 `getProviderMatrix().isDemonstration`, which reads `env` and the active dataset at
 request time; it is never hard-coded green. Local-verified chart, timezone, and
 SQLite are production-grade local code and do NOT by themselves mark a reading as a

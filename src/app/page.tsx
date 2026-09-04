@@ -38,16 +38,16 @@ export default function LandingPage() {
       {/* What are the Sabian Symbols */}
       <Section>
         <div className="mx-auto max-w-3xl text-center">
-          <Eyebrow>The 360 Sabian Symbols</Eyebrow>
+          <Eyebrow>360 Original Degree Images</Eyebrow>
           <h2 className="font-display text-3xl font-medium text-parchment-100 md:text-4xl">
             Every degree of the zodiac holds an image
           </h2>
           <p className="mt-6 leading-relaxed text-silver-moon">
             The zodiac is a circle of 360 degrees, and the Sabian tradition attaches one symbolic
-            image to each degree — a woman rising from the sea, an old schoolmaster, a bridge being
-            built. These images form a language of pictures for contemplating a life. Your birth
-            chart places planets and points among these degrees, and this experience reads the
-            images your sky points to — as invitations to reflection, never as verdicts.
+            image to each degree. This testing preview uses a project-owned original set of 360
+            degree images rather than wording from a historical book or website. Your birth chart
+            places planets and points among these degrees, and this experience reads the exact
+            original images selected by your sky as invitations to reflection, never as verdicts.
           </p>
         </div>
       </Section>
@@ -99,12 +99,13 @@ export default function LandingPage() {
             <div className="space-y-4 text-sm leading-relaxed">
               <p>
                 <strong className="text-gold-600">Your Sun</strong> at <em>Taurus 27°</em>, the
-                Sabian image of <em>“A clear mountain stream”</em> — a quality of steady,
+                original degree image of <em>“A mechanic beside a still lake lifts a curtain”</em> — a quality of steady,
                 deepening purpose.
               </p>
               <p>
                 <strong className="text-gold-600">Your Moon</strong> at <em>Gemini 3°</em>, an image
-                of curiosity that gathers many voices before it speaks.
+                of <em>“A stranger beside a still lake counts the stars”</em> — curiosity that
+                gathers many voices before it speaks.
               </p>
               <p className="border-t border-gold/20 pt-4 italic">
                 Every reading weaves these images into a seven-chapter story, with original artwork

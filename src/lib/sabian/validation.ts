@@ -1,7 +1,7 @@
 /**
  * Sabian Symbol dataset validation — importable module.
  *
- * Strict requirements for an AUTHORIZED dataset (Task 4):
+ * Strict requirements for an active complete dataset:
  *  - exactly 360 records
  *  - every sign has exactly 30 records
  *  - every sign-degree pair is unique
@@ -9,6 +9,9 @@
  *  - no missing indices
  *  - provenance fields populated on every record
  *  - non-demo mode contains no fixture markers
+ *  - all 360 authoritative images are distinct
+ *  - obvious indefinite-article errors are absent
+ *  - project-owned original records have descriptive titles and review status
  *
  * The demo fixture (120 fictional placeholders) is always INCOMPLETE and
  * labeled accordingly. The CLI entry point (scripts/validate-symbols.ts)
@@ -35,6 +38,16 @@ export interface ValidationResult {
   fixtureMarkersInNonDemo: string[];
   /** Records whose license status does not authorize production use. */
   unresolvedLicenseRecords: string[];
+  /** Canonical wording assigned to more than one degree. */
+  duplicateCanonicalTexts: string[];
+  /** Count of distinct non-empty canonical texts. */
+  uniqueCanonicalTexts: number;
+  /** Records beginning with an obvious A/An grammar error. */
+  articleErrors: string[];
+  /** Project-owned original records with generic sign-degree titles. */
+  genericOriginalTitles: string[];
+  /** Project-owned original records that still need editorial review. */
+  pendingEditorialReview: string[];
   source: string;
   licenseStatuses: Record<string, number>;
 }
@@ -94,6 +107,9 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
   const missingProvenance: string[] = [];
   const fixtureMarkersInNonDemo: string[] = [];
   const unresolvedLicenseRecords: string[] = [];
+  const articleErrors: string[] = [];
+  const genericOriginalTitles: string[] = [];
+  const pendingEditorialReview: string[] = [];
   for (const s of parsed) {
     if (!s.sourceAttribution.trim() || !s.sourceVersion.trim()) {
       missingProvenance.push(keyOf(s));
@@ -104,10 +120,31 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
         fixtureMarkersInNonDemo.push(keyOf(s));
       }
     }
-    if (s.licenseStatus !== "licensed" && s.licenseStatus !== "public-domain-original") {
+    if (!["licensed", "public-domain-original", "project-owned-original"].includes(s.licenseStatus)) {
       unresolvedLicenseRecords.push(keyOf(s));
     }
+    if (/^A\s+[aeiou]/i.test(s.canonicalSymbolText.trim())) {
+      articleErrors.push(keyOf(s));
+    }
+    if (s.licenseStatus === "project-owned-original") {
+      if (new RegExp(`^${s.sign}\\s+${s.degree}$`, "i").test(s.title.trim())) {
+        genericOriginalTitles.push(keyOf(s));
+      }
+      if (s.editorialReviewStatus !== "reviewed") {
+        pendingEditorialReview.push(keyOf(s));
+      }
+    }
   }
+
+  const canonicalTextKeys = new Map<string, string[]>();
+  for (const s of parsed) {
+    const text = s.canonicalSymbolText.trim().toLocaleLowerCase();
+    if (!text) continue;
+    canonicalTextKeys.set(text, [...(canonicalTextKeys.get(text) ?? []), keyOf(s)]);
+  }
+  const duplicateCanonicalTexts = [...canonicalTextKeys.values()]
+    .filter((keys) => keys.length > 1)
+    .flat();
 
   const licenseStatuses: Record<string, number> = {};
   for (const s of parsed) {
@@ -123,7 +160,11 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
     Object.values(perSignCounts).every((n) => n === 30) &&
     missingProvenance.length === 0 &&
     fixtureMarkersInNonDemo.length === 0 &&
-    unresolvedLicenseRecords.length === 0;
+    unresolvedLicenseRecords.length === 0 &&
+    duplicateCanonicalTexts.length === 0 &&
+    articleErrors.length === 0 &&
+    genericOriginalTitles.length === 0 &&
+    pendingEditorialReview.length === 0;
 
   return {
     ok,
@@ -137,6 +178,11 @@ export function validateDataset(symbols: SabianSymbol[], source: string): Valida
     missingProvenance,
     fixtureMarkersInNonDemo,
     unresolvedLicenseRecords,
+    duplicateCanonicalTexts,
+    uniqueCanonicalTexts: canonicalTextKeys.size,
+    articleErrors,
+    genericOriginalTitles,
+    pendingEditorialReview,
     source,
     licenseStatuses,
   };

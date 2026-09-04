@@ -15,7 +15,7 @@ function sampleInput(): InterpretationInput {
       { key: "ascendant", name: "Ascendant", sign: "Cancer", degree: 1, minute: 42, second: 0, sabianDegree: 2, globalIndex: 92 },
     ],
     symbols: [
-      { globalIndex: 85, sign: "Gemini", degree: 25, title: "Demo image for Gemini 25", keywords: ["demo"], lightExpression: "", shadowExpression: "", reflectionQuestion: "" },
+      { globalIndex: 85, sign: "Gemini", degree: 25, title: "The Test Messenger", symbolText: "A messenger raises a lantern.", keywords: ["demo"], lightExpression: "", shadowExpression: "", reflectionQuestion: "" },
     ],
   };
 }
@@ -160,5 +160,6 @@ describe("LiveInterpretationProvider (Task 5)", () => {
     });
     await provider.generate(sampleInput());
     expect(sentBody).toMatch(/Calculation fingerprint \(idempotency\): sb-/);
+    expect(sentBody).toContain("A messenger raises a lantern.");
   });
 });

@@ -1,4 +1,5 @@
 import { test, expect, type Page, type APIRequestContext } from "@playwright/test";
+import originalDataset from "../datasets/original-sabian-symbols.json";
 
 /**
  * The primary browser journey, end to end, with SAVED-DATA verification:
@@ -110,7 +111,7 @@ test("complete journey with saved-data comparison: landing → reading → reloa
   const saved = await getSavedReading(request, id);
   expect(saved.id).toBe(id);
   expect(saved.displayName).toBe("Avery Testington");
-  expect(saved.isDemo).toBe(true); // mock providers + demo symbols
+  expect(saved.isDemo).toBe(true); // mock interpretation and artwork providers
   expect(saved.saved).toBe(false); // not saved by default
 
   // The saved JSON must be internally consistent: longitude ↔ sign ↔ DMS ↔
@@ -145,6 +146,12 @@ test("complete journey with saved-data comparison: landing → reading → reloa
       ).toBeVisible();
     }
   }
+
+  // The authoritative wording for the selected Sun degree must reach the UI
+  // exactly; a generic sign-degree label is not a symbol image.
+  const savedSun = saved.chart.placements.find((p) => p.key === "sun")!;
+  const activeSunSymbol = originalDataset.find((s) => s.globalIndex === savedSun.globalIndex)!;
+  await expect(page.getByText(activeSunSymbol.canonicalSymbolText, { exact: true })).toBeVisible();
 
   // The planetary chorus displays sign + Sabian degree for the rest
   // (mercury..pluto only; the North Node is not a chorus card).

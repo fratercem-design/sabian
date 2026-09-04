@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 const CHECK_LABELS: Record<string, string> = {
   chartVerified: "Chart engine independently verified (gold-master)",
   timezoneVerified: "Historical timezone resolver verified (bundled IANA)",
-  sabianFullyLicensed: "Full 360-symbol Sabian dataset licensed & imported",
+  symbolContentReady: "360 project-owned or authorized degree images loaded and validated",
   storyLiveVerified: "Story provider live-verified with a controlled call",
   imageLiveVerified: "Artwork provider live-verified with a controlled call",
   geocodingOperational: "Birthplace resolution operational (fixture or live-verified)",
@@ -143,7 +143,7 @@ export default function ReadinessPage() {
             </div>
           </div>
           <p className="text-xs text-silver-mist">
-            Sabian dataset active state: {demo ? "demo fixture" : "imported dataset"} — {symbolCount}/360
+            Symbol dataset active state: {demo ? "demo fixture" : matrix.sabian.implementation} — {symbolCount}/360
             symbols loaded.
           </p>
         </section>
@@ -172,7 +172,7 @@ export default function ReadinessPage() {
               </p>
               {!manifestState.matchesSource && (
                 <p className="rounded border border-ember/40 bg-ember/10 px-3 py-2 text-xs text-ember">
-                  This manifest does not match the exact current source state
+                  This manifest does not match the exact current source or active symbol dataset
                   {manifestState.currentDirty ? " (the worktree has uncommitted changes)" : ""}. It was generated
                   for commit {manifestState.manifest.commit}; current HEAD is {manifestState.head || "unknown"}.
                   The results below may be stale — re-run{" "}

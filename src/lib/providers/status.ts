@@ -20,7 +20,7 @@
  */
 
 import { env } from "@/lib/config";
-import { getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
+import { getActiveDatasetKind, getSymbolDataset, isDemoDataset } from "@/lib/sabian/index";
 
 export type ProviderKind =
   | "local-verified"
@@ -98,6 +98,7 @@ function sabianStatus(): ProviderStatus {
   // Inspect the ACTIVE dataset at runtime rather than assuming the demo.
   const count = getSymbolDataset().length;
   const demo = isDemoDataset();
+  const datasetKind = getActiveDatasetKind();
   if (demo) {
     return {
       interfaceName: "SabianDataset (lib/sabian)",
@@ -108,11 +109,24 @@ function sabianStatus(): ProviderStatus {
       readinessNote: "Incomplete demo content; an authorized 360-symbol dataset must be imported.",
     };
   }
+  if (datasetKind === "project-owned-original") {
+    return {
+      interfaceName: "SabianDataset (lib/sabian)",
+      implementation: `project-owned original degree imagery (${count}/360)`,
+      kind: count === 360 ? "local-verified" : "demo-fixture",
+      envVars: ["SABIAN_DATASET_PATH"],
+      externalData: "None — content is local.",
+      readinessNote:
+        count === 360
+          ? "Project-owned original imagery loaded; 360 distinct texts, descriptive titles, and editorial status validated."
+          : "Project-owned dataset is short of the full 360 degree images.",
+    };
+  }
   return {
     interfaceName: "SabianDataset (lib/sabian)",
     implementation: `imported dataset (${count}/360 symbols)`,
     kind: count === 360 ? "local-verified" : "demo-fixture",
-    envVars: [],
+    envVars: ["SABIAN_DATASET_PATH"],
     externalData: "None — content is local.",
     readinessNote:
       count === 360
@@ -254,7 +268,7 @@ export function getProviderMatrix(): ProviderMatrix {
 export interface ReadinessChecks {
   chartVerified: boolean;
   timezoneVerified: boolean;
-  sabianFullyLicensed: boolean;
+  symbolContentReady: boolean;
   storyLiveVerified: boolean;
   imageLiveVerified: boolean;
   geocodingOperational: boolean;
@@ -267,7 +281,7 @@ export function getReadinessChecks(): ReadinessChecks {
   return {
     chartVerified: m.astrology.kind === "local-verified",
     timezoneVerified: m.timezone.kind === "local-verified",
-    sabianFullyLicensed: m.sabian.kind === "local-verified" && symbolCount === 360,
+    symbolContentReady: m.sabian.kind === "local-verified" && symbolCount === 360,
     storyLiveVerified: m.story.kind === "tested-live",
     imageLiveVerified: m.image.kind === "tested-live",
     geocodingOperational:

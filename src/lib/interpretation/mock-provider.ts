@@ -49,11 +49,12 @@ function gateText(input: InterpretationInput, key: "sun" | "moon" | "ascendant",
   const symbol = input.symbols.find((s) => s.globalIndex === placement?.globalIndex);
   const nature = SIGN_NATURE[placement?.sign ?? "Aries"] ?? SIGN_NATURE.Aries;
   const title = symbol?.title ?? "An unnamed image";
+  const symbolText = symbol?.symbolText?.trim() || title;
   return {
     title,
     placement: `${placement?.sign} ${placement?.degree}°${String(placement?.minute ?? 0).padStart(2, "0")}′ — Sabian ${placement?.sabianDegree}`,
-    symbol: `${title} (${placement?.sign} ${placement?.sabianDegree})`,
-    interpretation: `The image of "${title}" speaks to a ${nature.quality} quality within you — ${nature.image}. This symbol may suggest that your ${key === "sun" ? "conscious purpose" : key === "moon" ? "emotional nature" : "approach to the world"} is touched by ${pick(rand, ["a slow unfolding", "a sudden recognition", "a quiet insistence", "an unexpected lightness"])}.`,
+    symbol: symbolText,
+    interpretation: `The image "${symbolText}" speaks to a ${nature.quality} quality within you — ${nature.image}. This symbol may suggest that your ${key === "sun" ? "conscious purpose" : key === "moon" ? "emotional nature" : "approach to the world"} is touched by ${pick(rand, ["a slow unfolding", "a sudden recognition", "a quiet insistence", "an unexpected lightness"])}.`,
     light: `In its lighter expression, this degree can support ${pick(rand, ["clarity of intent", "gentle persistence", "an open hand", "a steady gaze"])}.`,
     shadow: `Unexamined, it may pull toward ${pick(rand, ["rigidity", "withdrawal", "over-identification", "restless doubt"])} — an invitation to awareness, not a verdict.`,
     reflectionQuestion: symbol?.reflectionQuestion?.trim() || "Where in your life is this image already at work?",
@@ -89,7 +90,7 @@ export class MockInterpretationProvider implements InterpretationProvider {
           sabianDegree: p.sabianDegree,
           sign: p.sign,
           keywords: (symbol?.keywords.length ? symbol.keywords : ["reflection", "threshold", p.sign.toLowerCase()]),
-          interpretation: `${p.name} rests in ${p.sign} ${p.degree}°, at the ${p.sabianDegree}${ordinal(p.sabianDegree)} degree — ${nature.image}. The symbol "${symbol?.title ?? "an unnamed image"}" may suggest how this part of your nature seeks ${pick(rand, ["expression", "integration", "recognition", "steady form"])}.`,
+          interpretation: `${p.name} rests in ${p.sign} ${p.degree}°, at the ${p.sabianDegree}${ordinal(p.sabianDegree)} degree — ${nature.image}. The symbol "${symbol?.symbolText ?? symbol?.title ?? "an unnamed image"}" may suggest how this part of your nature seeks ${pick(rand, ["expression", "integration", "recognition", "steady form"])}.`,
           relationship: `Together with the Sun and Moon, ${p.name} adds ${pick(rand, ["a counterweight", "a deeper tone", "an enabling force", "a quiet counterpoint"])} to the overall story.`,
         };
       });
