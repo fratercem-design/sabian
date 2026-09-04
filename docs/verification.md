@@ -193,19 +193,34 @@ reading); the seven required chapter titles are asserted.
 Service test asserts `isDemo` is derived from provider metadata (mock text,
 mock artwork, or demo-fixture symbols) and persists via `providers` metadata.
 
+## Live provider smoke tests
+
+Controlled live verification scripts are provided. They are read-only by default;
+add `--apply` to actually call the external provider.
+
+- Story: `TEXT_PROVIDER=anthropic TEXT_API_KEY=... TEXT_MODEL=... npm run smoke:story -- --apply`
+- Image: `IMAGE_PROVIDER=openai IMAGE_API_KEY=... IMAGE_MODEL=... npm run smoke:image -- --apply`
+- PostgreSQL: `DATABASE_URL=postgres://... npm run smoke:postgres -- --apply`
+
+Until these smoke tests pass with real credentials, the readiness dashboard
+correctly reports the corresponding providers as mock, configured-untested, or
+unavailable.
+
 ## What remains unproven (stated precisely)
 
-- **Live AI interpretation** — only the deterministic mock is tested; no real
-  provider call.
-- **Live image generation** — only the deterministic SVG provider is tested.
+- **Live AI interpretation** — only the deterministic mock is tested; a smoke
+  script exists but a real provider call is required to move to `tested-live`.
+- **Live image generation** — only the deterministic SVG provider is tested; a
+  smoke script exists but a real provider call is required to move to `tested-live`.
 - **Optional historical Sabian wording** — the active 360-image corpus is
   project-owned original material. No historical third-party rendering has
   been activated or tested.
 - **PostgreSQL** — the runtime repository and migration path are implemented
-  with parameterized SQL and local contract tests, but no real PostgreSQL
-  schema, TLS connection, CRUD/cleanup smoke test, backup, or restore has been exercised.
+  with parameterized SQL and local contract tests, but a real PostgreSQL schema,
+  TLS connection, CRUD/cleanup smoke test, backup, or restore must be exercised
+  with `npm run smoke:postgres -- --apply`.
 - **Production deployment** — verified locally only; no hosting, TLS, backups,
   or load behavior tested.
 - **npm audit claims** — current full and production-only counts are unavailable
-  because the registry security endpoint timed out. Earlier zero-count audits do
+  because the npm registry security endpoint timed out. Earlier zero-count audits do
   not certify the current run.

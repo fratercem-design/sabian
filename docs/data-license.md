@@ -62,10 +62,16 @@ Every symbol record (`src/lib/sabian/model.ts`):
 ## Operator-supplied dataset import
 
 The repository includes a parser script (`scripts/parse-sabian-symbols.ts`) and an
-import pipeline (`npm run import:symbols -- path/to/dataset.json`). These tools
-accept an operator-supplied, licensed or public-domain 360-record dataset and
-write the validated result to the path configured by `SABIAN_DATASET_PATH`
-(default: `src/lib/sabian/generated/full-dataset.json`, gitignored).
+import pipeline (`SABIAN_DATASET_PATH=/path/to/dataset.json npm run import:symbols -- path/to/source.json`).
+The import tool validates an operator-supplied, licensed or public-domain
+360-record dataset and writes the result to the path configured by
+`SABIAN_DATASET_PATH`.
+
+`SABIAN_DATASET_PATH` is **required** and must point outside the project root.
+The loader in `src/lib/sabian/index.ts` reads that path at runtime, so the
+imported corpus never enters the build artifact and cannot be accidentally
+committed. No default output path is provided, because writing an imported
+dataset into the repository would risk both.
 
 Any imported dataset must be clearly licensed or demonstrably public domain
 before it is activated. Until provenance is established, keep the original
@@ -117,4 +123,4 @@ the license/hash gate is satisfied.
 
 ## Import pipeline (Task 4)
 
-`npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, 360 distinct authoritative texts, zero obvious article errors, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers, and every record has a recognized rights status. `needs-licensed-content` and `demo-fixture` records are rejected even when all 360 slots exist. The imported dataset is written to `SABIAN_DATASET_PATH` (gitignored — never committed) and is revalidated at application startup before activation. A configured path that cannot be loaded fails closed. When no external path is configured, the app uses the bundled project-owned original dataset.
+`SABIAN_DATASET_PATH=/path/to/dataset.json npm run import:symbols -- path/to/dataset.json` validates and imports an operator-supplied licensed/public-domain 360-record dataset. The import FAILS unless: exactly 360 records, 30 per sign, unique sign-degree pairs, unique global indices 1..360, no missing indices, 360 distinct authoritative texts, zero obvious article errors, populated provenance (sourceAttribution, sourceVersion, edition), non-demo records carry canonicalSymbolText and contain no fixture markers, and every record has a recognized rights status. `needs-licensed-content` and `demo-fixture` records are rejected even when all 360 slots exist. The imported dataset is written to the absolute path in `SABIAN_DATASET_PATH` (kept outside the repo and never committed) and is revalidated at application startup before activation. A configured path that cannot be loaded fails closed. When no external path is configured, the app uses the bundled project-owned original dataset.

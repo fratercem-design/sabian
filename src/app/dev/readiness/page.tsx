@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 const CHECK_LABELS: Record<string, string> = {
   chartVerified: "Chart engine independently verified (gold-master)",
   timezoneVerified: "Historical timezone resolver verified (bundled IANA)",
-  symbolContentReady: "360 project-owned or authorized degree images loaded and validated",
+  symbolContentReady: "360 project-owned or authorized degree images loaded, validated, and human-editorially reviewed",
   storyLiveVerified: "Story provider live-verified with a controlled call",
   imageLiveVerified: "Artwork provider live-verified with a controlled call",
   geocodingOperational: "Birthplace resolution operational (fixture or live-verified)",

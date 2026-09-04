@@ -96,7 +96,8 @@ function timezoneStatus(): ProviderStatus {
 
 function sabianStatus(): ProviderStatus {
   // Inspect the ACTIVE dataset at runtime rather than assuming the demo.
-  const count = getSymbolDataset().length;
+  const dataset = getSymbolDataset();
+  const count = dataset.length;
   const demo = isDemoDataset();
   const datasetKind = getActiveDatasetKind();
   if (demo) {
@@ -110,6 +111,8 @@ function sabianStatus(): ProviderStatus {
     };
   }
   if (datasetKind === "project-owned-original") {
+    const allReviewed =
+      count === 360 && dataset.every((s) => s.editorialReviewStatus === "reviewed");
     return {
       interfaceName: "SabianDataset (lib/sabian)",
       implementation: `project-owned original degree imagery (${count}/360)`,
@@ -118,7 +121,9 @@ function sabianStatus(): ProviderStatus {
       externalData: "None — content is local.",
       readinessNote:
         count === 360
-          ? "Project-owned original imagery loaded; 360 distinct texts and descriptive titles pass automated editorial checks. Human editorial approval is separate."
+          ? allReviewed
+            ? "Project-owned original imagery loaded and human-editorial review is recorded."
+            : "Project-owned original imagery loaded and passes automated checks, but has not been marked as human-editorially reviewed."
           : "Project-owned dataset is short of the full 360 degree images.",
     };
   }
@@ -277,11 +282,14 @@ export interface ReadinessChecks {
 
 export function getReadinessChecks(): ReadinessChecks {
   const m = getProviderMatrix();
-  const symbolCount = getSymbolDataset().length;
+  const symbolDataset = getSymbolDataset();
+  const symbolCount = symbolDataset.length;
+  const allSymbolsReviewed =
+    symbolCount === 360 && symbolDataset.every((s) => s.editorialReviewStatus === "reviewed");
   return {
     chartVerified: m.astrology.kind === "local-verified",
     timezoneVerified: m.timezone.kind === "local-verified",
-    symbolContentReady: m.sabian.kind === "local-verified" && symbolCount === 360,
+    symbolContentReady: m.sabian.kind === "local-verified" && symbolCount === 360 && allSymbolsReviewed,
     storyLiveVerified: m.story.kind === "tested-live",
     imageLiveVerified: m.image.kind === "tested-live",
     geocodingOperational:

@@ -1,13 +1,13 @@
 /**
  * Sabian Symbol dataset import (Task 4).
  *
- * Validates a user-supplied, licensed or public-domain 360-record dataset and,
- * on success, writes it to src/lib/sabian/generated/full-dataset.json as the
- * ACTIVE dataset. The dataset is then loaded by src/lib/sabian/index.ts in
- * place of the demo fixture.
+ * Validates an operator-supplied, licensed or public-domain 360-record dataset
+ * and writes it to the path configured by SABIAN_DATASET_PATH. That path is
+ * read at runtime by src/lib/sabian/index.ts, so the corpus never enters the
+ * build artifact and never risks accidental commit.
  *
  * Usage:
- *   npm run import:symbols -- path/to/dataset.json [--source "description"]
+ *   SABIAN_DATASET_PATH=/path/to/active-dataset.json npm run import:symbols -- path/to/source.json [--source "description"]
  *
  * Requirements (all must hold or the import FAILS):
  *  - exactly 360 records
@@ -26,14 +26,10 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { validateDataset } from "../src/lib/sabian/validation.ts";
 import type { SabianSymbol } from "../src/lib/sabian/model.ts";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUT = process.env.SABIAN_DATASET_PATH
-  ? resolve(process.env.SABIAN_DATASET_PATH)
-  : resolve(__dirname, "..", "src", "lib", "sabian", "generated", "full-dataset.json");
+const OUT = process.env.SABIAN_DATASET_PATH ? resolve(process.env.SABIAN_DATASET_PATH) : null;
 
 function fail(msg: string): never {
   console.error(`IMPORT FAILED: ${msg}`);
@@ -41,8 +37,14 @@ function fail(msg: string): never {
 }
 
 function main() {
+  if (!OUT) {
+    fail(
+      "SABIAN_DATASET_PATH is not set. Set it to an absolute path outside the project root, then rerun:\n" +
+        "  SABIAN_DATASET_PATH=/path/to/dataset.json npm run import:symbols -- path/to/source.json"
+    );
+  }
   const fileArg = process.argv[2];
-  if (!fileArg) fail("usage: npm run import:symbols -- path/to/dataset.json [--source desc]");
+  if (!fileArg) fail("usage: SABIAN_DATASET_PATH=/path/to/dataset.json npm run import:symbols -- path/to/source.json [--source desc]");
   const sourceFlag = process.argv.find((a) => a.startsWith("--source="));
   const sourceDesc = sourceFlag ? sourceFlag.split("=")[1] : fileArg;
 
@@ -70,8 +72,8 @@ function main() {
 
   if (!result.ok) fail(`dataset does not meet all 360-symbol requirements (see above)`);
 
-  mkdirSync(dirname(OUT), { recursive: true });
-  writeFileSync(OUT, JSON.stringify(symbols, null, 2));
+  mkdirSync(dirname(OUT!), { recursive: true });
+  writeFileSync(OUT!, JSON.stringify(symbols, null, 2));
   console.log(`\nIMPORT OK — wrote ${symbols.length} records to ${OUT}`);
   console.log("The application will load this validated dataset automatically on its next start.");
 }
