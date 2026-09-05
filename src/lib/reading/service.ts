@@ -56,7 +56,7 @@ export const STAGE_LABELS: Record<PipelineStage, string> = {
   "resolving-place": "Resolving birthplace",
   "converting-time": "Converting historical time",
   "calculating-chart": "Calculating the natal chart",
-  "finding-symbols": "Finding the relevant Sabian Symbols",
+  "finding-symbols": "Finding the relevant degree images",
   "composing-interpretation": "Composing the interpretation",
   "creating-artwork": "Creating symbolic artwork",
   "weaving-story": "Weaving the personal story",

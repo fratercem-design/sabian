@@ -27,14 +27,19 @@ export default function MethodPage() {
       <Section>
         <div className="space-y-12">
           <div>
-            <h2 className="font-display text-2xl font-medium text-gold-300">What are the Sabian Symbols?</h2>
+            <h2 className="font-display text-2xl font-medium text-gold-300">What are degree images?</h2>
             <p className="mt-4 leading-relaxed text-parchment-200">
-              The Sabian Symbols are a set of 360 symbolic images, one associated with each degree
-              of the zodiac. They were first published in 1925 by the clairvoyant Elsie Wheeler
-              with the astrologer Marc Edmund Jones, and later re-imagined by Dane Rudhyar in his
-              1973 book <em>The Astrological Mandala</em>. Each image — “A woman rises from the
-              sea,” “A bridge being built” — is a small picture meant for contemplation rather
-              than prediction.
+              The degree-image tradition associates one symbolic picture with each of the 360
+              degrees of the zodiac. The best-known example is the Sabian Symbols, first
+              published in 1925 by Elsie Wheeler with Marc Edmund Jones and later re-imagined by
+              Dane Rudhyar. Each image — “A woman rises from the sea,” “A bridge being built” —
+              is a small picture meant for contemplation rather than prediction.
+            </p>
+            <p className="mt-4 leading-relaxed text-parchment-200">
+              This testing preview does not use historical Sabian wording. It uses a
+              project-owned original set of 360 degree images inspired by the same 360-degree
+              idea. The active wording, titles, and commentary are generated for this project
+              and are not claimed to be historical or canonical.
             </p>
           </div>
 
@@ -84,13 +89,14 @@ export default function MethodPage() {
             <h2 className="font-display text-2xl font-medium text-gold-300">Limitations and purpose</h2>
             <p className="mt-4 leading-relaxed text-parchment-200">
               This is a testing-phase product. In demo mode the interpretation and artwork come
-              from deterministic local fixtures and are clearly labeled as such. The Sabian symbol
-              dataset contains 360 project-owned original degree images. They are not presented as
-              historical wording by Elsie Wheeler, Marc Edmund Jones, or Dane Rudhyar. The exact
-              active image is shown in each reading and passed to the interpretation provider.
-              Nothing in this experience is a medical, legal, or financial
-              opinion, and nothing predicts your future. Its purpose is reflection and
-              entertainment: a contemplative way to meet your own images.
+              from deterministic local fixtures and are clearly labeled as such. The active
+              degree-image dataset contains 360 project-owned original phrases. They are not
+              presented as historical wording by Elsie Wheeler, Marc Edmund Jones, or Dane
+              Rudhyar, nor as an authorized Sabian corpus. The exact active image is shown in
+              each reading and passed to the interpretation provider. Nothing in this
+              experience is a medical, legal, or financial opinion, and nothing predicts your
+              future. Its purpose is reflection and entertainment: a contemplative way to meet
+              your own images.
             </p>
           </div>
         </div>

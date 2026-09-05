@@ -369,7 +369,7 @@ function DemoBadgeContainer({ reading, matrix }: { reading: Reading; matrix: Ret
       {mockArt && <DemoArtworkBadge />}
       {reading.providers?.symbolDatasetIsDemo && (
         <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-dust/40 bg-violet-deep/40 px-2.5 py-0.5 text-[11px] tracking-wideish text-silver-moon">
-          Demo symbol dataset — placeholders, not licensed Sabian texts
+          Demo symbol dataset — placeholders, not active degree images
         </span>
       )}
     </div>

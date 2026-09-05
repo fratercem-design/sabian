@@ -19,6 +19,10 @@ export default function LandingPage() {
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-silver-moon md:text-lg">
             {brand.heroStatement}
           </p>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-silver-mist">
+            This testing preview uses original project-owned degree images inspired by the
+            Sabian tradition. It does not contain historical Sabian wording.
+          </p>
           <div className="mt-10">
             <Button href="/reading/new" id="begin-reading">
               Begin Your Reading
@@ -43,11 +47,12 @@ export default function LandingPage() {
             Every degree of the zodiac holds an image
           </h2>
           <p className="mt-6 leading-relaxed text-silver-moon">
-            The zodiac is a circle of 360 degrees, and the Sabian tradition attaches one symbolic
-            image to each degree. This testing preview uses a project-owned original set of 360
-            degree images rather than wording from a historical book or website. Your birth chart
-            places planets and points among these degrees, and this experience reads the exact
-            original images selected by your sky as invitations to reflection, never as verdicts.
+            The zodiac is a circle of 360 degrees, and the degree-image tradition attaches one
+            symbolic picture to each degree. This testing preview uses a project-owned original
+            set of 360 degree images inspired by that tradition. It is not historical Sabian
+            wording. Your birth chart places planets and points among these degrees, and this
+            experience reads the exact original images selected by your sky as invitations to
+            reflection, never as verdicts.
           </p>
         </div>
       </Section>

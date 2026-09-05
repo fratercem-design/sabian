@@ -1,4 +1,4 @@
-# Sabian Symbol data & licenses
+# Degree-image data & licenses
 
 ## Current state: original 360-record dataset
 
@@ -8,6 +8,10 @@ every record with `licenseStatus: "project-owned-original"` and the project as t
 rights holder. These phrases were written for this project in 2026 and are not a
 third-party licensed or public-domain corpus. The symbolic phrases and editorial
 commentary are **not** historical Sabian wording. No Sabian book or website was transcribed.
+
+The wording is **inspired by the degree-image tradition** associated with the Sabian
+Symbols, but it is a newly created substitute. It is not presented as an
+authorized, canonical, or historical Sabian corpus.
 
 - The canonical wording is **original to this project**. No published or near-canonical
   Sabian wording is reproduced or implied.

@@ -3,7 +3,7 @@
 > Every degree contains an image. Every life unfolds a story.
 
 A testing-phase MVP web application that transforms a person's birth information into a
-correctly calculated natal chart, a personalized Sabian Symbol analysis, original symbolic
+correctly calculated natal chart, a personalized degree-image analysis, original symbolic
 artwork, and a custom mythic story — with a strict, auditable separation between
 deterministic calculation and AI-generated interpretation.
 
@@ -42,7 +42,7 @@ Then open http://localhost:3000 and click **Begin Your Reading**.
 | `npm run audit` / `npm run audit:prod` | `npm audit` (full / production-only) |
 | `npm test` | Vitest unit tests (isolated temp DB + art cache) |
 | `npm run test:integration` | Vitest database-backed integration tests |
-| `npm run validate:symbols` | Validate the Sabian dataset (360 unique records expected) |
+| `npm run validate:symbols` | Validate the active 360-record degree-image dataset |
 | `npm run migrate:postgres -- --source=file:./data/sabian.db` | Dry-run SQLite → PostgreSQL transformation (never connects without `--apply`) |
 | `npm run smoke:postgres` | PostgreSQL connection/schema check; add `--apply` for full CRUD/cleanup smoke test |
 | `npm run cleanup:readings` | Remove readings + art cache entries older than the retention policy |
@@ -154,14 +154,15 @@ No live billing exists. An entitlement layer is prepared (`src/lib/entitlements.
 unlocked while `TESTING_MODE_ENABLED=true` and `MONETIZATION_ENABLED=false`. No prices
 are invented.
 
-## Sabian content and rights
+## Degree-image content and rights
 
 This MVP ships a **project-owned original 360-record degree-image dataset**.
 Each degree has distinct wording, a descriptive title, editorial fields, and
 `licenseStatus: "project-owned-original"`. The authoritative wording travels
 through the reading pipeline as `symbolText`; `licensedSourceText` remains empty
 because these records are original material rather than third-party licensed
-copy. No historical Sabian book or website wording is included. See
+copy. The wording is inspired by the degree-image tradition associated with the
+Sabian Symbols but is **not** historical Sabian wording. See
 [docs/data-license.md](docs/data-license.md) and `npm run validate:symbols` for
 the exact contract and semantic gates.
 
@@ -199,7 +200,8 @@ caches. Exact commands and counts are in
 - [x] Story is 1,200–1,800 words (tested)
 - [x] All mock/incomplete readings store `isDemo=true` (from provider metadata)
 - [x] Dataset validation: 360/360 project-owned original records, 360 distinct
-      texts and titles, zero detected article errors; automated editorial checks passed
+      texts and titles, zero detected article errors; automated editorial checks passed;
+      not claimed as historical Sabian wording
 
 What remains unproven — live AI, live image generation, any optional historical
 Sabian corpus, a controlled live PostgreSQL/schema/retention check, and production deployment —

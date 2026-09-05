@@ -102,7 +102,7 @@ function sabianStatus(): ProviderStatus {
   const datasetKind = getActiveDatasetKind();
   if (demo) {
     return {
-      interfaceName: "SabianDataset (lib/sabian)",
+      interfaceName: "DegreeImageDataset (lib/sabian)",
       implementation: `demo fixture (${count}/360 fictional placeholders)`,
       kind: "demo-fixture",
       envVars: [],
@@ -114,7 +114,7 @@ function sabianStatus(): ProviderStatus {
     const allReviewed =
       count === 360 && dataset.every((s) => s.editorialReviewStatus === "reviewed");
     return {
-      interfaceName: "SabianDataset (lib/sabian)",
+      interfaceName: "DegreeImageDataset (lib/sabian)",
       implementation: `project-owned original degree imagery (${count}/360)`,
       kind: count === 360 ? "local-verified" : "demo-fixture",
       envVars: ["SABIAN_DATASET_PATH"],

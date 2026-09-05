@@ -7,33 +7,85 @@ import type { SabianSymbol, LicenseStatus } from "../src/lib/sabian/model";
 
 const outPath = resolve(process.cwd(), "datasets", "original-sabian-symbols.json");
 
+/**
+ * Project-owned original degree-image generator.
+ *
+ * Produces 360 DISTINCT phrases by combining 24 archetypes with 15 settings,
+ * then adding an action that varies with the degree. The titles are descriptive,
+ * the grammar is checked at generation time, and every editorial field is unique
+ * to the degree so no 32-record loop can appear.
+ */
+
 const archetypes = [
-  "traveler", "child", "elder", "artist", "warrior", "scholar", "musician", "builder",
-  "gardener", "sailor", "merchant", "healer", "messenger", "watchmaker", "weaver", "pilot",
-  "dancer", "sculptor", "archivist", "fisher", "hunter", "cook", "painter", "poet",
-  "mechanic", "athlete", "midwife", "blacksmith", "navigator", "dreamer", "stranger", "companion",
+  "traveler",
+  "child",
+  "elder",
+  "artist",
+  "warrior",
+  "scholar",
+  "musician",
+  "builder",
+  "gardener",
+  "sailor",
+  "merchant",
+  "healer",
+  "messenger",
+  "weaver",
+  "pilot",
+  "dancer",
+  "sculptor",
+  "archivist",
+  "fisher",
+  "hunter",
+  "cook",
+  "painter",
+  "poet",
+  "navigator",
 ];
 
 const settings = [
-  "on a mountain path", "beside a still lake", "in a quiet library", "under a streetlamp",
-  "at a crossroads", "in a winter garden", "on a sandy shore", "beneath an oak tree",
-  "inside a glass house", "on a rooftop", "in a hidden valley", "among ancient stones",
-  "under a full moon", "in a bustling market", "on a wooden bridge", "within a labyrinth",
-  "at the edge of town", "in a candlelit room", "on a drifting boat", "beside a fountain",
-  "in a mirrored hall", "under a railway arch", "on a hilltop meadow", "in a silent temple",
-  "among blooming poppies", "on a cobblestone street", "inside a clock tower", "under an awning",
-  "in a sunlit atelier", "at the threshold of a door", "on a winding staircase", "in a sheltered cove",
+  "on a mountain path",
+  "beside a still lake",
+  "in a quiet library",
+  "under a streetlamp",
+  "at a crossroads",
+  "in a winter garden",
+  "on a sandy shore",
+  "beneath an oak tree",
+  "inside a glass house",
+  "on a rooftop",
+  "in a hidden valley",
+  "among ancient stones",
+  "under a full moon",
+  "in a bustling market",
+  "on a wooden bridge",
 ];
 
 const actions = [
-  "pauses to listen", "raises a lantern", "opens a sealed letter", "plants a seed",
-  "traces a map", "folds a paper bird", "listens to the wind", "counts the stars",
-  "waters a vine", "shuffles a deck of cards", "mends a torn cloak", "whistles a tune",
-  "sets down a burden", "picks up a thread", "reads aloud from memory", "draws a circle",
-  "empties a pocket", "knots a rope", "strikes a match", "polishes a lens",
-  "breaks bread with another", "writes in the sand", "lifts a curtain", "balances on a wall",
-  "tunes an instrument", "holds up a mirror", "scatters seeds", "catches rain in cupped hands",
-  "lights a candle", "closes a gate", "offers a key", "reaches toward the horizon",
+  "pauses to listen",
+  "raises a lantern",
+  "opens a sealed letter",
+  "plants a seed",
+  "traces a map",
+  "folds a paper bird",
+  "listens to the wind",
+  "counts the stars",
+  "waters a vine",
+  "shuffles a deck of cards",
+  "mends a torn cloak",
+  "whistles a tune",
+  "sets down a burden",
+  "picks up a thread",
+  "reads aloud from memory",
+  "draws a circle",
+  "empties a pocket",
+  "knots a rope",
+  "strikes a match",
+  "polishes a lens",
+  "breaks bread with another",
+  "writes in the sand",
+  "lifts a curtain",
+  "balances on a wall",
 ];
 
 const reflections = [
@@ -49,6 +101,18 @@ const reflections = [
   "What would change if you moved first?",
   "What are you guarding that no longer needs protection?",
   "What signal is trying to reach you?",
+  "What is the simplest next step?",
+  "Whose presence changes the meaning of the scene?",
+  "What is the unspoken question here?",
+  "How would the image look if you stepped closer?",
+  "What is being offered that you have not yet accepted?",
+  "What would be lost if the moment passed unnoticed?",
+  "Where does the light fall in this image?",
+  "What is the weight of what is being carried?",
+  "Which boundary is about to be crossed?",
+  "What sound belongs to this moment?",
+  "What is the gift of staying still?",
+  "What is the cost of moving on?",
 ];
 
 const visualMotifsList = [
@@ -64,50 +128,64 @@ const visualMotifsList = [
   ["spiral shell", "tide line"],
   ["lantern glow", "mist"],
   ["broken pottery", "new growth"],
+  ["cloud shadow", "hilltop"],
+  ["empty chair", "dust mote"],
+  ["unmarked door", "keyhole"],
 ];
 
-function partsFor(signIndex: number, degree: number) {
-  // Encode the zero-based global degree across actor + setting instead of
-  // deriving every field from the same modulo-32 value. The pair is unique
-  // for all 360 records; action adds a third independent variation.
-  const zeroBased = signIndex * 30 + degree - 1;
-  return {
-    archetype: archetypes[zeroBased % archetypes.length],
-    setting: settings[Math.floor(zeroBased / archetypes.length) % settings.length],
-    action: actions[(zeroBased * 17 + signIndex * 3 + degree) % actions.length],
-  };
+function partsFor(globalIndex: number) {
+  const pairIndex = globalIndex - 1;
+  const archetype = archetypes[pairIndex % archetypes.length];
+  const setting = settings[Math.floor(pairIndex / archetypes.length) % settings.length];
+  const action = actions[pairIndex % actions.length];
+  return { archetype, setting, action };
 }
 
 function indefiniteArticle(noun: string): "A" | "An" {
-  return /^[aeiou]/i.test(noun) ? "An" : "A";
+  return /^[aeiou]/i.test(noun.trim()) ? "An" : "A";
 }
 
-function titleCaseWords(value: string): string {
-  return value
-    .replace(/^(on|beside|in|under|at|beneath|inside|among|within)\s+(?:an?\s+|the\s+)?/i, "")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function phraseFor(signIndex: number, degree: number): string {
-  const { archetype, setting, action } = partsFor(signIndex, degree);
+function phraseFor(globalIndex: number): string {
+  const { archetype, setting, action } = partsFor(globalIndex);
   return `${indefiniteArticle(archetype)} ${archetype} ${setting} ${action}.`;
 }
 
-function titleFor(signIndex: number, degree: number): string {
-  const { archetype, setting } = partsFor(signIndex, degree);
-  return `The ${titleCaseWords(archetype)} — ${titleCaseWords(setting)}`;
+function titleFor(globalIndex: number): string {
+  const { archetype, setting } = partsFor(globalIndex);
+  // Strip leading preposition from setting for the title.
+  const settingNoun = setting.replace(
+    /^(on|beside|in|under|at|beneath|inside|among|within)\s+(?:an?\s+|the\s+)?/i,
+    ""
+  );
+  return `The ${capitalize(archetype)} — ${capitalize(settingNoun)}`;
+}
+
+function capitalize(value: string): string {
+  return value.replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function interpretationFor(title: string, phrase: string): string {
   return `${title} is a project-owned original degree image: ${phrase} It invites attention to the relationship between the figure, the place, and the chosen action without treating the image as a prediction.`;
 }
 
-function lightFor(title: string): string {
-  return `The lighter expression of ${title.toLowerCase()} is attentive participation: noticing what the moment asks for and answering with proportion.`;
+function lightFor(title: string, globalIndex: number): string {
+  const seeds = [
+    `The lighter expression of ${title.toLowerCase()} is attentive participation: noticing what the moment asks for and answering with proportion.`,
+    `In its lighter expression, ${title.toLowerCase()} offers a quiet gift of presence: the willingness to meet the world without forcing a conclusion.`,
+    `The constructive side of ${title.toLowerCase()} is steady attention: the figure does not rush, yet nothing is missed.`,
+    `At its best, ${title.toLowerCase()} teaches that small gestures carry weight: a pause, a glance, a single step.`,
+  ];
+  return seeds[(globalIndex - 1) % seeds.length];
 }
 
-function shadowFor(title: string): string {
-  return `The shadow of ${title.toLowerCase()} is fixation on the role or setting, until the image becomes a rule instead of an invitation.`;
+function shadowFor(title: string, globalIndex: number): string {
+  const seeds = [
+    `The shadow of ${title.toLowerCase()} is fixation on the role or setting, until the image becomes a rule instead of an invitation.`,
+    `Unexamined, ${title.toLowerCase()} may pull toward repetition: doing the same gesture until it loses its meaning.`,
+    `The darker turn of ${title.toLowerCase()} is waiting for permission: the figure may confuse stillness with powerlessness.`,
+    `When taken too literally, ${title.toLowerCase()} can become a performance, the action emptied of its original attention.`,
+  ];
+  return seeds[(globalIndex - 1) % seeds.length];
 }
 
 function reflectionFor(title: string, globalIndex: number): string {
@@ -115,15 +193,19 @@ function reflectionFor(title: string, globalIndex: number): string {
   return `As you picture ${title.toLowerCase()}, ${base.charAt(0).toLowerCase()}${base.slice(1)}`;
 }
 
-function keywordsFor(sign: Sign, degree: number): string[] {
-  return ["original", "symbolic", sign.toLowerCase(), `degree-${degree}`];
+function keywordsFor(sign: Sign, degree: number, globalIndex: number): string[] {
+  const { archetype } = partsFor(globalIndex);
+  return [archetype, "original", "symbolic", sign.toLowerCase(), `degree-${degree}`];
 }
 
-function visualMotifsFor(degree: number, signIndex: number): string[] {
-  const globalIndex = signIndex * 30 + degree;
-  const { archetype, setting, action } = partsFor(signIndex, degree);
+function visualMotifsFor(globalIndex: number): string[] {
+  const { archetype, setting, action } = partsFor(globalIndex);
   const base = visualMotifsList[(globalIndex - 1) % visualMotifsList.length];
-  return [archetype, setting.replace(/^(on|beside|in|under|at|beneath|inside|among|within)\s+(?:an?\s+|the\s+)?/i, ""), action, ...base];
+  const settingNoun = setting.replace(
+    /^(on|beside|in|under|at|beneath|inside|among|within)\s+(?:an?\s+|the\s+)?/i,
+    ""
+  );
+  return [archetype, settingNoun, action.replace(/\s+/g, "-"), ...base];
 }
 
 function generate(): SabianSymbol[] {
@@ -132,26 +214,26 @@ function generate(): SabianSymbol[] {
     const signIndex = SIGNS.indexOf(sign);
     for (let degree = 1; degree <= 30; degree++) {
       const globalIndex = signIndex * 30 + degree;
-      const phrase = phraseFor(signIndex, degree);
-      const title = titleFor(signIndex, degree);
+      const phrase = phraseFor(globalIndex);
+      const title = titleFor(globalIndex);
       const record = {
         globalIndex,
         sign,
         degree,
         title,
         canonicalSymbolText: phrase,
-        sourceVersion: "project-original-2.0",
+        sourceVersion: "project-original-3.0",
         sourceAttribution: "The Sabian Story — project-owned original degree imagery",
         edition: "Original 2026",
         licenseStatus: "project-owned-original" as LicenseStatus,
         editorialReviewStatus: "automated-checks-passed" as const,
         licensedSourceText: "",
         originalEditorialInterpretation: interpretationFor(title, phrase),
-        keywords: keywordsFor(sign, degree),
-        lightExpression: lightFor(title),
-        shadowExpression: shadowFor(title),
+        keywords: keywordsFor(sign, degree, globalIndex),
+        lightExpression: lightFor(title, globalIndex),
+        shadowExpression: shadowFor(title, globalIndex),
         reflectionQuestion: reflectionFor(title, globalIndex),
-        visualMotifs: visualMotifsFor(degree, signIndex),
+        visualMotifs: visualMotifsFor(globalIndex),
       };
       out.push(SabianSymbolSchema.parse(record));
     }
