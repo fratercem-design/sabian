@@ -122,14 +122,14 @@ function sabianStatus(): ProviderStatus {
       readinessNote:
         count === 360
           ? allReviewed
-            ? "Project-owned original imagery loaded and human-editorial review is recorded."
-            : "Project-owned original imagery loaded and passes automated checks, but has not been marked as human-editorially reviewed."
+            ? "Project-owned original degree-image corpus loaded and human-editorial review is recorded."
+            : "Project-owned original degree-image corpus loaded and passes automated checks, but has not been marked as human-editorially reviewed."
           : "Project-owned dataset is short of the full 360 degree images.",
     };
   }
   return {
-    interfaceName: "SabianDataset (lib/sabian)",
-    implementation: `imported dataset (${count}/360 symbols)`,
+    interfaceName: "DegreeImageDataset (lib/sabian)",
+    implementation: `imported dataset (${count}/360 degree images)`,
     kind: count === 360 ? "local-verified" : "demo-fixture",
     envVars: ["SABIAN_DATASET_PATH"],
     externalData: "None — content is local.",
