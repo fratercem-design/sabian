@@ -376,3 +376,84 @@ The seeker gives meaning a structure. Capricorn is responsibility, endurance, in
 299. **Capricorn 29 · The Tower Door.** After the tower is complete, its architect installs a door at street level.
 300. **Capricorn 30 · The Crown Set Down.** At the end of service, the crown becomes a bowl for the next gathering.
 
+---
+
+## Aquarius · The Living Network
+
+The structure opens to the many. Aquarius is invention, fellowship, dissent, and the strange intelligence that appears between independent minds.
+
+301. **Aquarius 1 · The First Relay.** A lone receiver passes an unknown signal to the next rooftop.
+302. **Aquarius 2 · The Human Circuit.** A machine begins working when the people around it release each other's hands.
+303. **Aquarius 3 · The Water Bearer's Wire.** Water travels through a copper wire and arrives as music.
+304. **Aquarius 4 · The Open Frequency.** An abandoned radio band fills with messages from people who thought they were alone.
+305. **Aquarius 5 · The Committee of Strangers.** Twelve strangers design a door none of them will control.
+306. **Aquarius 6 · The Future's Spare Part.** An inventor finds an obsolete gear inside a machine from tomorrow.
+307. **Aquarius 7 · The Unowned Star.** A village votes to leave one bright star unnamed.
+308. **Aquarius 8 · The Dissenting Bell.** One bell rings a different note and saves the tower from collapse.
+309. **Aquarius 9 · The Circle of Antennas.** Each antenna points outward, yet together they receive one clear song.
+310. **Aquarius 10 · The Anonymous Gift.** A package circulates through the city, repaired and improved by every recipient.
+311. **Aquarius 11 · The Clockwise Rebel.** In a room turning left, one dancer turns right and reveals the floor is moving.
+312. **Aquarius 12 · The People's Telescope.** A telescope in the public square shows each viewer a different unfinished constellation.
+313. **Aquarius 13 · The Friendly Glitch.** A terminal error erases every rank from the attendance list.
+314. **Aquarius 14 · The Lantern Grid.** When one Lantern fails, its neighbors brighten without asking who deserves credit.
+315. **Aquarius 15 · The Empty Leaderboard.** Overnight, every score vanishes and the game becomes interesting again.
+316. **Aquarius 16 · The Weather Machine.** A machine built to stop the rain begins asking the gardens for consent.
+317. **Aquarius 17 · The Stranger's Vote.** The newest arrival notices the question everyone else forgot was optional.
+318. **Aquarius 18 · The Broken Broadcast Tower.** Birds nest in the ruined tower and carry its signal farther.
+319. **Aquarius 19 · The Assembly of Masks.** Every mask speaks once, then listens while the faces decide.
+320. **Aquarius 20 · The Free Current.** A locked generator powers the neighborhood after someone publishes the forgotten instructions.
+321. **Aquarius 21 · The Map of Connections.** Lines between strangers glow brighter than the names at either end.
+322. **Aquarius 22 · The Unscheduled Future.** A calendar opens to a date no authority has approved.
+323. **Aquarius 23 · The Shared Dream Terminal.** At midnight, a terminal prints one image dreamed by the whole city.
+324. **Aquarius 24 · The Network's Shadow.** Every screen goes dark except the one displaying who was excluded.
+325. **Aquarius 25 · The Volunteer Constellation.** Travelers stand apart in a field until their Lanterns form a new sign.
+326. **Aquarius 26 · The Machine That Forgets.** Once each year, the archive deletes its predictions and keeps its questions.
+327. **Aquarius 27 · The Open-Source Oracle.** The oracle reveals its mechanism and becomes more mysterious.
+328. **Aquarius 28 · The Signal Without a Center.** Music crosses the city though no one can locate the transmitter.
+329. **Aquarius 29 · The Last Fence Signal.** Every fence post lights, showing where the community has mistaken separation for safety.
+330. **Aquarius 30 · The Circle Enlarged.** The gathering moves every chair back one place to make room for the unseen arrival.
+
+---
+
+## Pisces · The Return to Mystery
+
+The many signals dissolve into the sea that carried them. Pisces is dream, compassion, surrender, and the return that preserves a thread of self.
+
+331. **Pisces 1 · The Dreaming Shore.** Sleeping Travelers leave footprints in sand they have not yet reached.
+332. **Pisces 2 · The Cup of Rain.** An empty cup fills beneath a cloudless night.
+333. **Pisces 3 · The Door Underwater.** A wooden door opens beneath the sea onto a dry room full of stars.
+334. **Pisces 4 · The Sleeping Choir.** A choir hums one note in sleep and wakes speaking different languages.
+335. **Pisces 5 · The Compassionate Net.** A fisher cuts the fullest net when a silver eye looks back.
+336. **Pisces 6 · The Dissolving Map.** Rain erases every border while leaving the roads intact.
+337. **Pisces 7 · The Borrowed Dream.** A child returns a dream to the elder who stopped believing it.
+338. **Pisces 8 · The Moon's Lost Ring.** Divers find a pale ring where the moon touched the water.
+339. **Pisces 9 · The Chapel of Tides.** Each wave removes one stone until the altar faces the open sea.
+340. **Pisces 10 · The Voice in the Static.** Static clears for one breath and speaks the listener's forgotten question.
+341. **Pisces 11 · The Moth at the Window.** A night moth waits outside until the dreamer turns off the false moon.
+342. **Pisces 12 · The River of Names.** Names float downstream while their bearers stand quietly on both banks.
+343. **Pisces 13 · The Weeping Statue.** A stone statue releases one warm tear and becomes ordinary stone again.
+344. **Pisces 14 · The Unfinished Lullaby.** A lullaby stops before its final note so the sleeper may choose the ending.
+345. **Pisces 15 · The Mirror Lake.** The lake reflects every star except the one directly overhead.
+346. **Pisces 16 · The Paper Boat Archive.** Records are folded into boats and launched only after copies are kept.
+347. **Pisces 17 · The Sleeper's Lantern.** A Lantern burns beneath the bed and lights the road inside the dream.
+348. **Pisces 18 · The Mercy of Fog.** Fog hides the mountain long enough for the lost climber to hear the nearby stream.
+349. **Pisces 19 · The Whale's Library.** In a whale's song, an archivist hears books that were never written.
+350. **Pisces 20 · The Leaking Hourglass.** Sand escapes the hourglass and becomes a beach beneath the Traveler's feet.
+351. **Pisces 21 · The Nameless Helper.** A hand reaches from the mist, guides the boat ashore, and withdraws before thanks.
+352. **Pisces 22 · The Dream Census.** At dawn, a clerk counts every dream and marks none as illegal.
+353. **Pisces 23 · The Two Seas.** One sea carries the Traveler outward while another moves quietly within.
+354. **Pisces 24 · The Veil with a Door.** A veil parts around a small door rather than revealing the whole beyond.
+355. **Pisces 25 · The Drowned Crown.** Fish swim through a crown resting harmlessly on the ocean floor.
+356. **Pisces 26 · The Last Photograph.** A photograph fades until only the embrace remains visible.
+357. **Pisces 27 · The Tide's Confession.** The retreating tide uncovers every message written beneath the pier.
+358. **Pisces 28 · The Soul's Cocoon.** A translucent cocoon opens, and no one can tell whether the butterfly entered or left.
+359. **Pisces 29 · The Lantern on the Water.** A floating Lantern reaches the horizon without going out.
+360. **Pisces 30 · The Signal Continues.** At the edge of dawn, one dark microphone waits for the Traveler still arriving.
+
+---
+
+## Reading Note
+
+The Psyche Symbols offer images for reflection and never issue orders. A degree gives the mind a scene in which to notice what is already moving.
+
+Take the symbol seriously. Take certainty lightly. Keep the Mirror in your own hands.
