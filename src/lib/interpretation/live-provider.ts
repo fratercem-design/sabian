@@ -125,8 +125,16 @@ function fingerprint(input: InterpretationInput): string {
   return `sb-${(h >>> 0).toString(16)}`;
 }
 
-const ProviderResponseSchema = z.object({
+const AnthropicResponseSchema = z.object({
   content: z.array(z.object({ text: z.string().min(1) })).min(1),
+});
+
+const OpenAiResponseSchema = z.object({
+  choices: z.array(
+    z.object({
+      message: z.object({ content: z.string().min(1) }),
+    })
+  ).min(1),
 });
 
 type HttpClient = (url: string, init: RequestInit) => Promise<Response>;
@@ -222,11 +230,8 @@ export class LiveInterpretationProvider implements InterpretationProvider {
       if (!res.ok) {
         throw new Error(`Live story provider returned HTTP ${res.status}`);
       }
-      const data = ProviderResponseSchema.safeParse(await res.json());
-      if (!data.success) {
-        throw new Error("Live story provider returned an unexpected response shape");
-      }
-      const text = data.data.content[0].text;
+      const responseBody: unknown = await res.json();
+      const text = this.extractText(responseBody);
       // Extract the JSON object from the response (models sometimes wrap it).
       const match = text.match(/\{[\s\S]*\}/);
       if (!match) throw new Error("Live story provider returned no JSON object");
@@ -239,6 +244,20 @@ export class LiveInterpretationProvider implements InterpretationProvider {
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  private extractText(responseBody: unknown): string {
+    if (this.providerId === "anthropic") {
+      const parsed = AnthropicResponseSchema.safeParse(responseBody);
+      if (parsed.success) return parsed.data.content[0].text;
+    }
+
+    if (this.providerId === "openai") {
+      const parsed = OpenAiResponseSchema.safeParse(responseBody);
+      if (parsed.success) return parsed.data.choices[0].message.content;
+    }
+
+    throw new Error("Live story provider returned an unexpected response shape");
   }
 }
 

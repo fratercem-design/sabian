@@ -123,6 +123,17 @@ describe("LiveInterpretationProvider (Task 5)", () => {
     expect(out.story[0].title).toBe("The First Image");
   });
 
+  it("parses an OpenAI chat-completions response", async () => {
+    const provider = new LiveInterpretationProvider({
+      provider: "openai",
+      apiKey: "test-key",
+      fetchImpl: fakeFetch({ choices: [{ message: { content: JSON.stringify(validOutput()) } }] }),
+    });
+    const out = await provider.generate(sampleInput());
+    expect(out.story).toHaveLength(7);
+    expect(out.story[0].title).toBe("The First Image");
+  });
+
   it("rejects an invalid (unparseable) provider response", async () => {
     const provider = new LiveInterpretationProvider({ provider: 'anthropic',
       apiKey: "test-key",
