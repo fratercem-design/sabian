@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import { brand } from "@/lib/config";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-midnight text-parchment-200 font-body antialiased">
         <div className="bg-grain pointer-events-none fixed inset-0 opacity-60" aria-hidden="true" />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
