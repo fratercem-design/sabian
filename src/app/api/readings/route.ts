@@ -52,33 +52,38 @@ const CreateReadingSchema = z
  * URLs. The response includes the reading with a random, non-guessable id.
  */
 export async function POST(request: Request) {
-  let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-  const parsed = CreateReadingSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      {
-        error: "Invalid birth data",
-        issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })),
-      },
-      { status: 400 }
-    );
-  }
-  const service = createReadingService();
-  try {
-    const reading = await service.create(parsed.data);
-    return NextResponse.json({ reading }, { status: 201 });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to create reading";
-    // Client-correctable input errors (DST gaps, etc.) are 400s; internal
-    // failures are 500s.
-    if (/never existed|Invalid calendar date|Invalid local time/.test(message)) {
-      return NextResponse.json({ error: message }, { status: 400 });
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
+    const parsed = CreateReadingSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid birth data",
+          issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })),
+        },
+        { status: 400 }
+      );
+    }
+    const service = createReadingService();
+    try {
+      const reading = await service.create(parsed.data);
+      return NextResponse.json({ reading }, { status: 201 });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create reading";
+      // Client-correctable input errors (DST gaps, etc.) are 400s; internal
+      // failures are 500s.
+      if (/never existed|Invalid calendar date|Invalid local time/.test(message)) {
+        return NextResponse.json({ error: message }, { status: 400 });
+      }
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unexpected server error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

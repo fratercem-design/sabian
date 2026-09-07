@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["astronomy-engine"],
   serverExternalPackages: ["astronomy-engine", "moment-timezone"],
   async headers() {
     return [

@@ -179,8 +179,17 @@ export default function ReadingForm() {
           consent: true,
         }),
       });
-      const data = (await res.json()) as { reading?: { id: string }; error?: string };
-      if (!res.ok || !data.reading) {
+      const raw = await res.text();
+      if (!res.ok || !raw) {
+        throw new Error(raw ? `Server error ${res.status}: ${raw}` : `Server returned empty response (status ${res.status}).`);
+      }
+      let data: { reading?: { id: string }; error?: string };
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        throw new Error(`Server returned non-JSON response (status ${res.status}): ${raw.slice(0, 200)}`);
+      }
+      if (!data.reading) {
         throw new Error(data.error ?? "Could not create your reading.");
       }
       router.push(`/reading/${data.reading.id}`);
