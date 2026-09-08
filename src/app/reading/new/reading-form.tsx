@@ -78,8 +78,21 @@ export default function ReadingForm() {
       }),
     })
       .then(async (res) => {
-        const data = (await res.json()) as { error?: string } & ReviewData;
+        const raw = await res.text();
         if (cancelled) return;
+        if (!raw) {
+          setReview(null);
+          setReviewError("Could not resolve this birth time.");
+          return;
+        }
+        let data: { error?: string } & ReviewData;
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          setReview(null);
+          setReviewError("Could not resolve this birth time.");
+          return;
+        }
         if (!res.ok) {
           setReview(null);
           setReviewError(data.error ?? "Could not resolve this birth time.");
@@ -107,7 +120,12 @@ export default function ReadingForm() {
       setSearching(true);
       try {
         const res = await fetch(`/api/places?q=${encodeURIComponent(placeQuery.trim())}`);
-        const data = (await res.json()) as { results: PlaceOption[] };
+        const raw = await res.text();
+        if (!raw) {
+          setPlaces([]);
+          return;
+        }
+        const data = JSON.parse(raw) as { results: PlaceOption[] };
         setPlaces(data.results ?? []);
       } catch {
         setPlaces([]);

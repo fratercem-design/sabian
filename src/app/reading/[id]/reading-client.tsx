@@ -34,7 +34,18 @@ export default function ReadingClient({
     const poll = async () => {
       try {
         const res = await fetch(`/api/readings/${initialId}`);
-        const data = (await res.json()) as { reading?: Reading; error?: string };
+        const raw = await res.text();
+        if (!raw) {
+          if (!cancelled) setTimeout(poll, 2000);
+          return;
+        }
+        let data: { reading?: Reading; error?: string };
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          if (!cancelled) setTimeout(poll, 2000);
+          return;
+        }
         if (cancelled) return;
         if (!data.reading) {
           setError(data.error ?? "Reading not found.");
