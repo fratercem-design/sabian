@@ -21,7 +21,7 @@ export default function LandingPage() {
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-silver-mist">
             This testing preview uses original project-owned degree images inspired by the
-            Sabian tradition. It does not contain historical Sabian wording.
+            degree-symbol tradition. It does not contain historical degree-symbol wording.
           </p>
           <div className="mt-10">
             <Button href="/reading/new" id="begin-reading">
@@ -39,7 +39,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* What are the Sabian Symbols */}
+      {/* What are the Psyche Symbols */}
       <Section>
         <div className="mx-auto max-w-3xl text-center">
           <Eyebrow>360 Original Degree Images</Eyebrow>
@@ -49,7 +49,7 @@ export default function LandingPage() {
           <p className="mt-6 leading-relaxed text-silver-moon">
             The zodiac is a circle of 360 degrees, and the degree-image tradition attaches one
             symbolic picture to each degree. This testing preview uses a project-owned original
-            set of 360 degree images inspired by that tradition. It is not historical Sabian
+            set of 360 degree images inspired by that tradition. It is not historical
             wording. Your birth chart places planets and points among these degrees, and this
             experience reads the exact original images selected by your sky as invitations to
             reflection, never as verdicts.

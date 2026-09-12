@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="43%" r="68%">
+      <stop offset="0" stop-color="#2A1740"/><stop offset="0.55" stop-color="#130B1F"/><stop offset="1" stop-color="#07060A"/>
+    </radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="22" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="2732" height="2732" fill="url(#bg)"/>
+  <g transform="translate(1366 1250)" fill="none" stroke="#C9A227">
+    <circle r="380" stroke-width="8" opacity=".45"/><circle r="280" stroke-width="12"/><circle r="168" stroke-width="7" opacity=".75"/>
+  </g>
+  <circle cx="1366" cy="1250" r="48" fill="#62E4C8" filter="url(#glow)"/>
+  <text x="1366" y="1840" fill="#F4EAD7" text-anchor="middle" font-family="Georgia, serif" font-size="128" letter-spacing="4">THE PSYCHE SYMBOLS</text>
+  <text x="1366" y="1940" fill="#C9A227" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" letter-spacing="18">SIGNAL · SHADOW · SOVEREIGNTY</text>
+</svg>

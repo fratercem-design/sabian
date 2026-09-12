@@ -25,6 +25,7 @@ import { env } from "@/lib/config";
 import { createArtCache } from "@/lib/art/art-cache";
 import { SHARED_VISUAL_STYLE, type ImageGenerationProvider } from "@/lib/image/provider";
 import type { GeneratedArtwork } from "@/lib/types";
+import { put } from "@vercel/blob";
 
 export type ImageKind = "sun" | "moon" | "ascendant" | "soul-portrait";
 
@@ -32,6 +33,8 @@ export interface LiveImageResult {
   imageUrl: string;
   assetId?: string;
 }
+
+type ImageAssetStorage = "inline" | "vercel-blob";
 
 type HttpClient = (url: string, init: RequestInit) => Promise<Response>;
 
@@ -63,6 +66,7 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
       timeoutMs?: number;
       fetchImpl?: HttpClient;
       provider?: string;
+      assetStorage?: ImageAssetStorage;
     } = {}
   ) {
     this.providerId = opts.provider ?? env.IMAGE_PROVIDER;
@@ -71,6 +75,7 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
     this.model = opts.model ?? env.IMAGE_MODEL;
     this.timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.fetchImpl = opts.fetchImpl ?? ((url, init) => fetch(url, init));
+    this.assetStorage = opts.assetStorage ?? env.IMAGE_ASSET_STORAGE;
     this.cache = createArtCache();
   }
 
@@ -79,6 +84,7 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
   private model: string | undefined;
   private timeoutMs: number;
   private fetchImpl: HttpClient;
+  private assetStorage: ImageAssetStorage;
   private cache: ReturnType<typeof createArtCache>;
 
   /** Generate one artwork with prompt-hash caching and one retry. */
@@ -96,7 +102,7 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
     let lastError: Error | null = null;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const result = await this.callImageApi(prompt);
+        const result = await this.callImageApi(prompt, cacheKey);
         const artwork: GeneratedArtwork = {
           key: cacheKey,
           imageUrl: result.imageUrl,
@@ -122,7 +128,45 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
     throw lastError ?? new Error("Live image generation failed");
   }
 
-  private async callImageApi(prompt: string): Promise<LiveImageResult> {
+  private async persistBase64Image(base64: string, cacheKey: string): Promise<LiveImageResult> {
+    if (this.assetStorage === "inline") {
+      return { imageUrl: `data:image/png;base64,${base64}` };
+    }
+    const blob = await put(
+      `sabian-art/${cacheKey}.png`,
+      Buffer.from(base64, "base64"),
+      {
+        access: "public",
+        addRandomSuffix: false,
+        allowOverwrite: true,
+        contentType: "image/png",
+        cacheControlMaxAge: 31_536_000,
+      }
+    );
+    return { imageUrl: blob.url, assetId: blob.pathname };
+  }
+
+  private async persistRemoteImage(imageUrl: string, cacheKey: string): Promise<LiveImageResult> {
+    if (this.assetStorage === "inline") return { imageUrl };
+    const source = await fetch(imageUrl);
+    if (!source.ok) throw new Error(`Generated image asset returned HTTP ${source.status}`);
+    const contentType = source.headers.get("content-type") ?? "image/png";
+    const extension = contentType.includes("webp")
+      ? "webp"
+      : contentType.includes("jpeg")
+        ? "jpg"
+        : "png";
+    const blob = await put(`sabian-art/${cacheKey}.${extension}`, Buffer.from(await source.arrayBuffer()), {
+      access: "public",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      contentType,
+      cacheControlMaxAge: 31_536_000,
+    });
+    return { imageUrl: blob.url, assetId: blob.pathname };
+  }
+
+  private async callImageApi(prompt: string, cacheKey: string): Promise<LiveImageResult> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
@@ -131,7 +175,14 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
       let body: unknown;
       if (provider === "openai") {
         url = "https://api.openai.com/v1/images/generations";
-        body = { model: this.model ?? "gpt-image-1", prompt, n: 1, size: "1024x1024" };
+        body = {
+          model: this.model ?? "gpt-image-2.5-flare",
+          prompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "medium",
+          output_format: "png",
+        };
       } else if (provider === "replicate") {
         url = "https://api.replicate.com/v1/predictions";
         body = { version: this.model, input: { prompt } };
@@ -153,11 +204,13 @@ export class LiveImageGenerationProvider implements ImageGenerationProvider {
         throw new Error(`Live image provider returned HTTP ${res.status}`);
       }
       const data = (await res.json()) as { data?: Array<{ url?: string; b64_json?: string }>; output?: string[] };
-      const url0 = data.data?.[0]?.url ?? data.data?.[0]?.b64_json;
+      const url0 = data.data?.[0]?.url;
+      const base64 = data.data?.[0]?.b64_json;
       const url1 = data.output?.[0];
+      if (base64) return await this.persistBase64Image(base64, cacheKey);
       const imageUrl = url0 ?? url1 ?? "";
       if (!imageUrl) throw new Error("Live image provider returned no image");
-      return { imageUrl, assetId: undefined };
+      return await this.persistRemoteImage(imageUrl, cacheKey);
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
         throw new Error(`Live image provider timed out after ${this.timeoutMs}ms`);

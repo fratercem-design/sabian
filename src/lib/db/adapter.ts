@@ -9,7 +9,7 @@
 import type { DatabaseSync as DatabaseSyncType } from "node:sqlite";
 import * as sqliteShim from "./sqlite-shim.cjs";
 import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, isAbsolute, resolve } from "node:path";
 import { env } from "@/lib/config";
 
 /**
@@ -45,6 +45,15 @@ export class SQLiteDb implements Db {
     let filePath = path;
     if (filePath.startsWith("file:")) filePath = filePath.replace(/^file:/, "").split("?")[0];
     if (filePath && filePath !== ":memory:") {
+      // SQLite accepts relative file URLs, but the working directory can
+      // differ between `next dev`, `next start`, and a process manager. Resolve
+      // them once so the parent directory is created where the app actually
+      // runs, and never hand a relative path to node:sqlite.
+      // The path is operator-configured at runtime; do not let Turbopack treat
+      // this dynamic fallback as permission to trace the whole repository.
+      filePath = isAbsolute(filePath)
+        ? filePath
+        : resolve(/* turbopackIgnore: true */ process.cwd(), filePath);
       mkdirSync(dirname(filePath), { recursive: true });
     }
     const Ctor = getDatabaseSyncCtor();

@@ -4,6 +4,10 @@ import ReadingForm from "./reading-form";
 
 export const metadata: Metadata = {
   title: "Begin Your Reading",
+  // The intake form carries birth details in progress. Nothing here should be
+  // indexed or previewed.
+  robots: { index: false, follow: false, nocache: true },
+  alternates: { canonical: null },
 };
 
 export default function NewReadingPage() {

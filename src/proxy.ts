@@ -9,14 +9,50 @@ import { defaultRateLimiter, untrustedFallbackLimiter } from "@/lib/rate-limit";
  *  - Rate-limit API endpoints per client.
  */
 export function proxy(request: NextRequest) {
-  const res = applyRateLimit(request);
-  if (res) return res;
-  return NextResponse.next();
+  const pathname = new URL(request.url).pathname;
+  const isApiRoute = pathname.startsWith("/api/");
+  const corsOrigin = allowedMobileOrigin(request.headers.get("origin"), process.env.NODE_ENV);
+
+  if (isApiRoute && request.method === "OPTIONS") {
+    if (!corsOrigin) {
+      return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
+    }
+    const preflight = new NextResponse(null, { status: 204 });
+    applyMobileCors(preflight, corsOrigin);
+    return preflight;
+  }
+
+  const response = isApiRoute ? (applyRateLimit(request) ?? NextResponse.next()) : NextResponse.next();
+  if (isApiRoute && corsOrigin) applyMobileCors(response, corsOrigin);
+  if (pathname.startsWith("/reading/")) {
+    response.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  }
+  return response;
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ["/api/:path*", "/reading/:path*"],
 };
+
+const STORE_APP_ORIGINS = new Set(["capacitor://localhost", "https://localhost"]);
+const DEV_APP_ORIGINS = new Set(["http://127.0.0.1:4174", "http://localhost:4174"]);
+
+/** Exact-origin CORS allowlist for the bundled Capacitor app. Never reflect arbitrary origins. */
+export function allowedMobileOrigin(origin: string | null, nodeEnv = "development"): string | null {
+  if (!origin) return null;
+  if (STORE_APP_ORIGINS.has(origin)) return origin;
+  if (nodeEnv !== "production" && DEV_APP_ORIGINS.has(origin)) return origin;
+  return null;
+}
+
+function applyMobileCors(response: NextResponse, origin: string) {
+  response.headers.set("Access-Control-Allow-Origin", origin);
+  response.headers.set("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
+  response.headers.set("Access-Control-Allow-Headers", "Content-Type");
+  response.headers.set("Access-Control-Max-Age", "600");
+  response.headers.append("Vary", "Origin");
+}
 
 /**
  * Where a client identity came from.

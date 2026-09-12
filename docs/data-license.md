@@ -2,12 +2,13 @@
 
 ## Current state: original 360-record dataset
 
-The repository ships with an **original 360-record dataset**
+The repository ships with an **original 360-record substitute dataset**
 (`datasets/original-sabian-symbols.json`): 360 unique records, one per zodiacal degree,
-every record with `licenseStatus: "project-owned-original"` and the project as the
-rights holder. These phrases were written for this project in 2026 and are not a
-third-party licensed or public-domain corpus. The symbolic phrases and editorial
-commentary are **not** historical Sabian wording. No Sabian book or website was transcribed.
+every record with the internal classification `licenseStatus: "project-owned-original"`.
+That classification means the project asserts that the material was created for this
+project and is not third-party licensed text; it is not, by itself, proof of copyright
+ownership or human authorship. The symbolic phrases and editorial commentary are **not**
+historical Sabian wording. No Sabian book or website was transcribed.
 
 The wording is **inspired by the degree-image tradition** associated with the Sabian
 Symbols, but it is a newly created substitute. It is not presented as an
@@ -22,9 +23,14 @@ authorized, canonical, or historical Sabian corpus.
 - The reading page shows a "Demo symbol dataset — placeholders, not licensed Sabian
   texts" badge only when the 120-record demo fixture is active.
 
-**This is the product's project-owned original degree-image system.** It does not claim
-to reproduce any historical author's rendering. If the product later promises historical
+**This is the product's project-controlled original degree-image system.** It does not
+claim to reproduce any historical author's rendering. Production approval is blocked until
+`npm run verify:rights` passes, which requires a 360/360 human editorial review plus a
+named, dated authorship or assignment record. If the product later promises historical
 wording, that separate corpus requires documented permission or public-domain evidence.
+
+The current rights manifest is `datasets/original-sabian-symbols.rights.json`. Software can
+verify its hash and completeness, but only a real person can supply the approval evidence.
 
 ## How the active dataset is resolved
 

@@ -2,74 +2,107 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui";
-
-interface PlaceOption {
-  id: string;
-  displayName: string;
-  region?: string;
-  country?: string;
-  timezone: string;
-}
-
-interface ReviewData {
-  place: {
-    displayName: string;
-    region?: string;
-    country?: string;
-    latitude: number;
-    longitude: number;
-    timezone: string;
-  };
-  utcIso: string | null;
-  referenceUtcIso?: string;
-  utcOffsetMinutes: number;
-  offsetLabel: string;
-  dstKind: "gap" | "overlap" | "unique";
-  overlapChoices?: { utcIso: string; utcOffsetMinutes: number; offsetLabel: string; label: string }[] | null;
-  overlapChosenLabel?: string | null;
-  timeKnown: boolean;
-  timeNotation: string | null;
-}
+import { PlaceCombobox, type PlaceOption } from "@/components/reading/place-combobox";
+import { Stepper, type StepDescriptor } from "@/components/reading/stepper";
+import { ValidationSummary, type ValidationIssue } from "@/components/reading/validation-summary";
+import { TechnicalReview, type ReviewData } from "@/components/reading/technical-review";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
-const STEPS: { n: Step; label: string }[] = [
-  { n: 1, label: "Name" },
-  { n: 2, label: "Birth date" },
-  { n: 3, label: "Birth time" },
-  { n: 4, label: "Birthplace" },
-  { n: 5, label: "Review" },
+const STEPS: StepDescriptor[] = [
+  { n: 1, label: "Name", purpose: "How this reading should address you. Not used in any calculation." },
+  { n: 2, label: "Birth date", purpose: "Anchors the positions of the Sun, Moon, and planets." },
+  { n: 3, label: "Birth time", purpose: "Tell us how exact the recorded time is. We never assume one." },
+  { n: 4, label: "Birthplace", purpose: "Resolves coordinates and the time zone that applied there on that date." },
+  { n: 5, label: "Review", purpose: "Check the record, then decide whether to create the reading." },
 ];
+
+const FIELD_ID = {
+  name: "displayName",
+  date: "birthDate",
+  time: "birthTime",
+  timeCertainty: "timeKnownYes",
+  placeDisclosure: "placeDisclosureAck",
+  place: "birthplace",
+  processingConsent: "processingConsent",
+} as const;
+
+const INPUT_CLASS =
+  "w-full min-h-[44px] rounded-lg border border-gold/25 bg-midnight-900 px-4 py-3 " +
+  "text-parchment-100 placeholder:text-silver-mist focus:border-gold focus:outline-none";
+
+const CHECKBOX_CLASS = "mt-0.5 h-5 w-5 shrink-0 accent-gold";
 
 export default function ReadingForm() {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
+
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
-  const [timeKnown, setTimeKnown] = useState(true);
-  const [time, setTime] = useState("12:00");
-  const [placeQuery, setPlaceQuery] = useState("");
-  const [places, setPlaces] = useState<PlaceOption[]>([]);
+  /**
+   * Birth-time certainty has NO default. `null` means the person has not yet
+   * said whether the time is known; the form refuses to advance until they do,
+   * and no placeholder time is ever stored or submitted.
+   */
+  const [timeKnown, setTimeKnown] = useState<boolean | null>(null);
+  const [time, setTime] = useState("");
+
+  /** Acknowledgement of the location-provider disclosure. Gates /api/places. */
+  const [placeDisclosureAck, setPlaceDisclosureAck] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<PlaceOption | null>(null);
-  const [consent, setConsent] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [searching, setSearching] = useState(false);
+  /**
+   * Consent to PROCESSING the birth details. Affirmed on the birthplace step,
+   * which is strictly before /api/reading/review is ever called.
+   */
+  const [processingConsent, setProcessingConsent] = useState(false);
+
+  const [issues, setIssues] = useState<ValidationIssue[]>([]);
+  const [showIssues, setShowIssues] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [review, setReview] = useState<ReviewData | null>(null);
   const [reviewError, setReviewError] = useState<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Deterministic review: resolve the selected date/time/place before
-  // submission and show the canonical place, coordinates, timezone,
-  // historical offset, and resolved UTC instant.
+  const headingRef = useRef<HTMLElement | null>(null);
+  const summaryRef = useRef<HTMLDivElement | null>(null);
+
+  // Move focus to the current step heading after a step change, so keyboard
+  // and screen-reader users land in the new content rather than at the top.
+  const firstRender = useRef(true);
   useEffect(() => {
-    if (step !== 5 || !selectedPlace || !date) return;
-    let cancelled = false;
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    headingRef.current?.focus();
+  }, [step]);
+
+  // Focus the error summary only after a failed attempt to advance or submit.
+  useEffect(() => {
+    if (showIssues && issues.length > 0) summaryRef.current?.focus();
+  }, [showIssues, issues]);
+
+  /**
+   * Deterministic pre-submission review.
+   *
+   * INVARIANT: this request carries the full birth record, so it is issued
+   * only when `processingConsent` is true. The consent checkbox lives on the
+   * birthplace step and gates advancing to review, so by construction no
+   * birth details reach /api/reading/review before the person has agreed.
+   */
+  useEffect(() => {
+    if (step !== 5) return;
+    if (!processingConsent) return;
+    if (!selectedPlace || !date || timeKnown === null) return;
+    if (timeKnown && !time) return;
+
+    const controller = new AbortController();
     fetch("/api/reading/review", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
       body: JSON.stringify({
         date,
         timeKnown,
@@ -79,7 +112,7 @@ export default function ReadingForm() {
     })
       .then(async (res) => {
         const raw = await res.text();
-        if (cancelled) return;
+        if (controller.signal.aborted) return;
         if (!raw) {
           setReview(null);
           setReviewError("Could not resolve this birth time.");
@@ -87,7 +120,7 @@ export default function ReadingForm() {
         }
         let data: { error?: string } & ReviewData;
         try {
-          data = JSON.parse(raw);
+          data = JSON.parse(raw) as { error?: string } & ReviewData;
         } catch {
           setReview(null);
           setReviewError("Could not resolve this birth time.");
@@ -102,82 +135,89 @@ export default function ReadingForm() {
         setReviewError(null);
       })
       .catch(() => {
-        if (!cancelled) {
-          setReview(null);
-          setReviewError("Could not resolve this birth time.");
-        }
+        if (controller.signal.aborted) return;
+        setReview(null);
+        setReviewError("Could not resolve this birth time.");
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [step, date, time, timeKnown, selectedPlace]);
 
-  useEffect(() => {
-    if (step !== 4) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!placeQuery.trim()) return;
-    debounceRef.current = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const res = await fetch(`/api/places?q=${encodeURIComponent(placeQuery.trim())}`);
-        const raw = await res.text();
-        if (!raw) {
-          setPlaces([]);
-          return;
-        }
-        const data = JSON.parse(raw) as { results: PlaceOption[] };
-        setPlaces(data.results ?? []);
-      } catch {
-        setPlaces([]);
-      } finally {
-        setSearching(false);
-      }
-    }, 250);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [placeQuery, step]);
+    return () => controller.abort();
+  }, [step, processingConsent, date, time, timeKnown, selectedPlace]);
 
-  const validateStep = useCallback((): string[] => {
-    const errs: string[] = [];
-    if (step === 1 && !name.trim()) errs.push("Please tell us what to call you — a nickname is welcome.");
+  const validateStep = useCallback((): ValidationIssue[] => {
+    const found: ValidationIssue[] = [];
+    if (step === 1 && !name.trim()) {
+      found.push({ fieldId: FIELD_ID.name, message: "Enter a name or nickname for this reading." });
+    }
     if (step === 2) {
-      if (!date) errs.push("Please choose your birth date.");
-      else {
-        const d = new Date(`${date}T00:00:00Z`);
-        if (Number.isNaN(d.getTime()) || d > new Date()) errs.push("Please choose a valid date in the past.");
+      if (!date) {
+        found.push({ fieldId: FIELD_ID.date, message: "Choose your birth date." });
+      } else {
+        const parsed = new Date(`${date}T00:00:00Z`);
+        if (Number.isNaN(parsed.getTime()) || parsed > new Date()) {
+          found.push({ fieldId: FIELD_ID.date, message: "Choose a real calendar date in the past." });
+        }
       }
     }
     if (step === 3) {
-      if (timeKnown && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) errs.push("Please enter a valid time in 24-hour HH:MM format.");
+      if (timeKnown === null) {
+        found.push({
+          fieldId: FIELD_ID.timeCertainty,
+          message: "Choose whether your birth time is known. We will not assume one.",
+        });
+      } else if (timeKnown && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+        found.push({
+          fieldId: FIELD_ID.time,
+          message: "Enter the recorded birth time in 24-hour HH:MM format.",
+        });
+      }
     }
-    if (step === 4 && !selectedPlace) errs.push("Please select a birthplace from the search results.");
-    if (step === 5 && !consent) errs.push("Please consent to processing your birth information to continue.");
-    if (step === 5 && reviewError) errs.push(reviewError);
-    return errs;
-  }, [step, name, date, timeKnown, time, selectedPlace, consent, reviewError]);
+    if (step === 4) {
+      if (!placeDisclosureAck) {
+        found.push({
+          fieldId: FIELD_ID.placeDisclosure,
+          message: "Acknowledge the place-search disclosure before searching.",
+        });
+      }
+      if (!selectedPlace) {
+        found.push({ fieldId: FIELD_ID.place, message: "Choose a birthplace from the search results." });
+      }
+      if (!processingConsent) {
+        found.push({
+          fieldId: FIELD_ID.processingConsent,
+          message: "Consent to processing your birth details before we resolve them.",
+        });
+      }
+    }
+    if (step === 5 && reviewError) found.push({ message: reviewError });
+    return found;
+  }, [step, name, date, timeKnown, time, placeDisclosureAck, selectedPlace, processingConsent, reviewError]);
 
   const next = () => {
-    const errs = validateStep();
-    if (errs.length) {
-      setErrors(errs);
+    const found = validateStep();
+    if (found.length) {
+      setIssues(found);
+      setShowIssues(true);
       return;
     }
-    setErrors([]);
+    setIssues([]);
+    setShowIssues(false);
     setStep((s) => Math.min(5, s + 1) as Step);
   };
 
   const back = () => {
-    setErrors([]);
+    setIssues([]);
+    setShowIssues(false);
     setStep((s) => Math.max(1, s - 1) as Step);
   };
 
   const submit = async () => {
-    const errs = validateStep();
-    if (errs.length) {
-      setErrors(errs);
+    const found = validateStep();
+    if (found.length) {
+      setIssues(found);
+      setShowIssues(true);
       return;
     }
+    if (!selectedPlace || timeKnown === null) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -187,29 +227,32 @@ export default function ReadingForm() {
         body: JSON.stringify({
           displayName: name.trim(),
           birthDate: date,
+          // Never a placeholder: when the time is unknown, no time is sent.
           birthTime: timeKnown ? time : undefined,
           timeKnown,
           overlapOffsetChoice:
             timeKnown && review?.dstKind === "overlap" && review.overlapChosenLabel?.match(/Standard/i)
               ? "standard"
               : "daylight",
-          placeId: selectedPlace!.id,
+          placeId: selectedPlace.id,
           consent: true,
         }),
       });
       const raw = await res.text();
       if (!res.ok || !raw) {
-        throw new Error(raw ? `Server error ${res.status}: ${raw}` : `Server returned empty response (status ${res.status}).`);
+        throw new Error(
+          raw
+            ? `Server error ${res.status}: ${raw}`
+            : `Server returned empty response (status ${res.status}).`
+        );
       }
       let data: { reading?: { id: string }; error?: string };
       try {
-        data = JSON.parse(raw);
+        data = JSON.parse(raw) as { reading?: { id: string }; error?: string };
       } catch {
-        throw new Error(`Server returned non-JSON response (status ${res.status}): ${raw.slice(0, 200)}`);
+        throw new Error(`Server returned non-JSON response (status ${res.status}).`);
       }
-      if (!data.reading) {
-        throw new Error(data.error ?? "Could not create your reading.");
-      }
+      if (!data.reading) throw new Error(data.error ?? "Could not create your reading.");
       router.push(`/reading/${data.reading.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -217,45 +260,29 @@ export default function ReadingForm() {
     }
   };
 
-  const inputCls =
-    "w-full rounded-lg border border-gold/25 bg-midnight-900 px-4 py-3 text-parchment-100 placeholder:text-silver-mist focus:border-gold focus:outline-none";
+  const stepHeading = (text: string) => (
+    <legend
+      ref={(node) => {
+        if (node) headingRef.current = node;
+      }}
+      tabIndex={-1}
+      className="font-display text-2xl font-medium text-parchment-100 focus-visible:outline-gold md:text-3xl"
+    >
+      {text}
+    </legend>
+  );
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      {/* Step indicator */}
-      <ol className="mb-10 flex items-center justify-between" aria-label="Progress">
-        {STEPS.map((s, i) => (
-          <li key={s.n} className="flex items-center gap-2">
-            <span
-              className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm ${
-                step >= s.n ? "border-gold bg-gold/15 text-gold-300" : "border-silver-mist/40 text-silver-mist"
-              }`}
-              aria-current={step === s.n ? "step" : undefined}
-            >
-              {s.n}
-            </span>
-            <span className={`hidden text-sm sm:inline ${step >= s.n ? "text-parchment-200" : "text-silver-mist"}`}>
-              {s.label}
-            </span>
-            {i < STEPS.length - 1 && <span className="h-px w-6 bg-gold/25 sm:w-10" aria-hidden="true" />}
-          </li>
-        ))}
-      </ol>
+      <Stepper steps={STEPS} current={step} />
 
-      {/* Error summary */}
-      {errors.length > 0 && (
-        <div role="alert" className="mb-6 rounded-xl border border-ember/50 bg-ember/10 p-4">
-          <h2 className="text-sm font-semibold text-ember">Please check the following:</h2>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-parchment-200">
-            {errors.map((e) => (
-              <li key={e}>{e}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {showIssues && <ValidationSummary ref={summaryRef} issues={issues} />}
 
       {submitError && (
-        <div role="alert" className="mb-6 rounded-xl border border-ember/50 bg-ember/10 p-4 text-sm text-parchment-200">
+        <div
+          role="alert"
+          className="mb-6 rounded-xl border border-ember/60 bg-ember/10 p-4 text-[15px] text-parchment-200"
+        >
           {submitError}
         </div>
       )}
@@ -263,17 +290,21 @@ export default function ReadingForm() {
       <div className="rounded-3xl border border-gold/20 bg-midnight-800/50 p-6 shadow-card md:p-10">
         {step === 1 && (
           <fieldset>
-            <legend className="font-display text-2xl font-medium text-parchment-100">What shall we call you?</legend>
-            <p className="mt-2 text-sm text-silver-moon">A nickname is perfectly welcome — this is how your story will address you.</p>
-            <label htmlFor="name" className="mt-6 block text-sm font-medium text-gold-300">
-              Display name
+            {stepHeading("What should this reading call you?")}
+            <p className="mt-3 text-[15px] leading-relaxed text-silver-moon">
+              A nickname is perfectly welcome. The display name personalises the reading and is not
+              used in any calculation.
+            </p>
+            <label htmlFor={FIELD_ID.name} className="mt-6 block text-sm font-medium text-gold-300">
+              Name or nickname
             </label>
             <input
-              id="name"
+              id={FIELD_ID.name}
               type="text"
-              className={`${inputCls} mt-2`}
+              className={`${INPUT_CLASS} mt-2`}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              maxLength={60}
+              onChange={(event) => setName(event.target.value)}
               placeholder="e.g. Alex"
               autoComplete="nickname"
             />
@@ -282,68 +313,101 @@ export default function ReadingForm() {
 
         {step === 2 && (
           <fieldset>
-            <legend className="font-display text-2xl font-medium text-parchment-100">When were you born?</legend>
-            <p className="mt-2 text-sm text-silver-moon">Your birth date anchors the positions of the Sun, Moon, and planets.</p>
-            <label htmlFor="birthDate" className="mt-6 block text-sm font-medium text-gold-300">
+            {stepHeading("When were you born?")}
+            <p className="mt-3 text-[15px] leading-relaxed text-silver-moon">
+              Your birth date anchors the positions of the Sun, Moon, and planets.
+            </p>
+            <label htmlFor={FIELD_ID.date} className="mt-6 block text-sm font-medium text-gold-300">
               Birth date
             </label>
             <input
-              id="birthDate"
+              id={FIELD_ID.date}
               type="date"
-              className={`${inputCls} mt-2`}
+              className={`${INPUT_CLASS} mt-2`}
               value={date}
               max={new Date().toISOString().slice(0, 10)}
-              onChange={(e) => setDate(e.target.value)}
+              aria-describedby={`${FIELD_ID.date}-hint`}
+              onChange={(event) => setDate(event.target.value)}
             />
+            <p id={`${FIELD_ID.date}-hint`} className="mt-2 text-[13px] text-silver-moon">
+              Year, month, and day. Any calendar date in the past.
+            </p>
           </fieldset>
         )}
 
         {step === 3 && (
           <fieldset>
-            <legend className="font-display text-2xl font-medium text-parchment-100">Your birth time</legend>
-            <p className="mt-2 text-sm text-silver-moon">
-              An exact time lets us calculate the Ascendant, Midheaven, and houses. Without it, we
-              respectfully omit them.
+            {stepHeading("How exact is the recorded time?")}
+            <p className="mt-3 text-[15px] leading-relaxed text-silver-moon">
+              There is no default here, and nothing is assumed. An exact time lets us calculate the
+              Ascendant, Midheaven, and houses. Without one we omit them rather than invent them.
             </p>
-            <div className="mt-6 space-y-4">
-              <label className="flex items-center gap-3 text-parchment-200">
+            <div className="mt-6 space-y-3" role="radiogroup" aria-label="Birth time certainty">
+              <label
+                className={`flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-parchment-200 transition ${
+                  timeKnown === true ? "border-gold bg-gold/10" : "border-gold/20 hover:border-gold/50"
+                }`}
+              >
                 <input
+                  id={FIELD_ID.timeCertainty}
                   type="radio"
                   name="timeKnown"
-                  checked={timeKnown}
+                  checked={timeKnown === true}
                   onChange={() => setTimeKnown(true)}
-                  className="h-4 w-4 accent-gold"
+                  className="mt-1 h-5 w-5 shrink-0 accent-gold"
                 />
-                I know my birth time
+                <span>
+                  <span className="block font-medium text-parchment-100">I know my birth time</span>
+                  <span className="block text-[13px] text-silver-moon">
+                    Use the recorded hour and minute.
+                  </span>
+                </span>
               </label>
-              {timeKnown && (
-                <div className="pl-7">
-                  <label htmlFor="birthTime" className="block text-sm font-medium text-gold-300">
-                    Exact local birth time
+
+              {timeKnown === true && (
+                <div className="pl-4">
+                  <label htmlFor={FIELD_ID.time} className="block text-sm font-medium text-gold-300">
+                    Recorded time
                   </label>
                   <input
-                    id="birthTime"
+                    id={FIELD_ID.time}
                     type="time"
-                    className={`${inputCls} mt-2 max-w-xs`}
+                    className={`${INPUT_CLASS} mt-2 max-w-xs`}
                     value={time}
-                    onChange={(e) => setTime(e.target.value)}
+                    onChange={(event) => setTime(event.target.value)}
                   />
                 </div>
               )}
-              <label className="flex items-center gap-3 text-parchment-200">
+
+              <label
+                className={`flex min-h-[44px] cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-parchment-200 transition ${
+                  timeKnown === false ? "border-gold bg-gold/10" : "border-gold/20 hover:border-gold/50"
+                }`}
+              >
                 <input
+                  id="timeKnownNo"
                   type="radio"
                   name="timeKnown"
-                  checked={!timeKnown}
-                  onChange={() => setTimeKnown(false)}
-                  className="h-4 w-4 accent-gold"
+                  checked={timeKnown === false}
+                  onChange={() => {
+                    setTimeKnown(false);
+                    setTime("");
+                  }}
+                  className="mt-1 h-5 w-5 shrink-0 accent-gold"
                 />
-                I don&apos;t know my exact birth time
+                <span>
+                  <span className="block font-medium text-parchment-100">I don&apos;t know it</span>
+                  <span className="block text-[13px] text-silver-moon">
+                    Angles and houses will be omitted rather than invented.
+                  </span>
+                </span>
               </label>
-              {!timeKnown && (
-                <p className="pl-7 text-sm text-silver-mist">
-                  We will calculate only the placements that do not depend on the time of day, and
-                  explain what an exact time would add.
+
+              {timeKnown === false && (
+                <p className="rounded-xl border border-gold/20 bg-midnight-900/60 px-4 py-3 text-[15px] leading-relaxed text-silver-moon">
+                  This is a complete reading, not a lesser one. The Sun, Moon, and planetary
+                  placements stay reliable; only the Ascendant, Midheaven, and houses are left out,
+                  because those genuinely depend on the hour.
                 </p>
               )}
             </div>
@@ -352,180 +416,156 @@ export default function ReadingForm() {
 
         {step === 4 && (
           <fieldset>
-            <legend className="font-display text-2xl font-medium text-parchment-100">Where were you born?</legend>
-            <p className="mt-2 text-sm text-silver-moon">
-              We resolve your birthplace to coordinates and the historical time zone that applied
-              there on your birth date.
-            </p>
-            <label htmlFor="placeQuery" className="mt-6 block text-sm font-medium text-gold-300">
-              Search for your birthplace
-            </label>
-            <input
-              id="placeQuery"
-              type="search"
-              className={`${inputCls} mt-2`}
-              value={placeQuery}
-              onChange={(e) => setPlaceQuery(e.target.value)}
-              placeholder="Type a city, e.g. London"
-              autoComplete="off"
-            />
-            {searching && <p className="mt-3 text-sm text-silver-mist">Searching…</p>}
-            {places.length > 0 && (
-              <ul className="mt-4 space-y-2" aria-label="Place search results">
-                {places.map((p) => (
-                  <li key={p.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedPlace(p)}
-                      className={`w-full rounded-xl border px-4 py-3 text-left transition ${
-                        selectedPlace?.id === p.id
-                          ? "border-gold bg-gold/10"
-                          : "border-gold/20 bg-midnight-900 hover:border-gold/50"
-                      }`}
-                    >
-                      <span className="block font-medium text-parchment-100">{p.displayName}</span>
-                      <span className="block text-sm text-silver-mist">
-                        {[p.region, p.country].filter(Boolean).join(", ")} · {p.timezone}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {places.length === 0 && placeQuery.trim() && !searching && (
-              <p className="mt-3 text-sm text-silver-mist">
-                No matching places in the demo index. Try &ldquo;London&rdquo;, &ldquo;New York&rdquo;, or &ldquo;Tokyo&rdquo;.
+            {stepHeading("Where were you born?")}
+
+            {/* Just-in-time disclosure, rendered and acknowledged BEFORE the
+                first /api/places request can be issued. */}
+            <div className="mt-6 rounded-2xl border border-gold/25 bg-midnight-900/60 p-5">
+              <p className="text-sm font-semibold text-gold-300">Before you search</p>
+              <p id="place-disclosure-copy" className="mt-2 text-[15px] leading-relaxed text-silver-moon">
+                To find the correct timezone and coordinates, your place search is processed by our
+                location service. It is not used for advertising. Only the text you type is sent —
+                never your name, birth date, or birth time.
               </p>
-            )}
-          </fieldset>
-        )}
+              <label
+                htmlFor={FIELD_ID.placeDisclosure}
+                className="mt-4 flex min-h-[44px] cursor-pointer items-start gap-3 py-1 text-[15px] text-parchment-200"
+              >
+                <input
+                  id={FIELD_ID.placeDisclosure}
+                  type="checkbox"
+                  checked={placeDisclosureAck}
+                  onChange={(event) => {
+                    setPlaceDisclosureAck(event.target.checked);
+                    if (!event.target.checked) setSelectedPlace(null);
+                  }}
+                  className={CHECKBOX_CLASS}
+                />
+                <span>I understand and want to search.</span>
+              </label>
+            </div>
 
-        {step === 5 && (
-          <fieldset>
-            <legend className="font-display text-2xl font-medium text-parchment-100">Review your birth record</legend>
-            <dl className="mt-6 space-y-3 rounded-2xl border border-gold/20 bg-midnight-900/60 p-5 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-silver-mist">Name</dt>
-                <dd className="text-right font-medium text-parchment-100">{name}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-silver-mist">Birth date</dt>
-                <dd className="text-right font-medium text-parchment-100">{date}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-silver-mist">Birth time</dt>
-                <dd className="text-right font-medium text-parchment-100">
-                  {timeKnown ? `${time} (local)` : "Unknown — time-independent placements only"}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-silver-mist">Birthplace</dt>
-                <dd className="text-right font-medium text-parchment-100">
-                  {selectedPlace?.displayName}
-                  {selectedPlace && (
-                    <span className="block text-xs font-normal text-silver-mist">
-                      {selectedPlace.timezone}
-                    </span>
-                  )}
-                </dd>
-              </div>
-            </dl>
+            <div className="mt-6">
+              <PlaceCombobox
+                id={FIELD_ID.place}
+                label="Birthplace"
+                disabled={!placeDisclosureAck}
+                selected={selectedPlace}
+                onSelect={setSelectedPlace}
+                describedBy="place-disclosure-copy"
+              />
+            </div>
 
-            {reviewError && (
-              <div role="alert" className="mt-4 rounded-xl border border-ember/50 bg-ember/10 p-4 text-sm text-parchment-200">
-                {reviewError}
-              </div>
-            )}
-
-            {review && (
-              <div className="mt-6 rounded-2xl border border-gold/25 bg-midnight-900/60 p-5 text-sm" aria-label="Resolved birth time details">
-                <p className="text-xs font-medium uppercase tracking-[0.25em] text-gold-400">
-                  Resolved before submission
-                </p>
-                <dl className="mt-3 space-y-2">
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-silver-mist">Canonical place</dt>
-                    <dd className="text-right font-medium text-parchment-100">
-                      {review.place.displayName}
-                      <span className="block text-xs font-normal text-silver-mist">
-                        {[review.place.region, review.place.country].filter(Boolean).join(", ")}
-                      </span>
-                    </dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-silver-mist">Coordinates</dt>
-                    <dd className="text-right font-medium text-parchment-100">
-                      {review.place.latitude.toFixed(4)}°, {review.place.longitude.toFixed(4)}°
-                    </dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-silver-mist">IANA time zone</dt>
-                    <dd className="text-right font-medium text-parchment-100">{review.place.timezone}</dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-silver-mist">Historical UTC offset</dt>
-                    <dd className="text-right font-medium text-parchment-100">{review.offsetLabel}</dd>
-                  </div>
-                  {timeKnown ? (
-                    <div className="flex justify-between gap-4">
-                      <dt className="text-silver-mist">Resolved UTC instant</dt>
-                      <dd className="text-right font-medium text-parchment-100">{review.utcIso}</dd>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex justify-between gap-4">
-                        <dt className="text-silver-mist">Actual UTC birth instant</dt>
-                        <dd className="text-right font-medium text-ember">Not known — no time was supplied</dd>
-                      </div>
-                      <div className="flex justify-between gap-4">
-                        <dt className="text-silver-mist">Disclosed reference instant</dt>
-                        <dd className="text-right font-medium text-parchment-100">{review.referenceUtcIso}</dd>
-                      </div>
-                      <p className="text-xs leading-relaxed text-silver-mist">
-                        {review.timeNotation}. This reference instant is used only for
-                        date-anchored placements; the Ascendant, Midheaven, and houses are never
-                        derived from it.
-                      </p>
-                    </>
-                  )}
-                  {review.dstKind === "overlap" && review.overlapChosenLabel && (
-                    <p className="rounded-lg bg-gold/10 p-2 text-xs leading-relaxed text-gold-300">
-                      This local time occurred twice (DST fall-back). Using the {review.overlapChosenLabel}.
-                    </p>
-                  )}
-                </dl>
-              </div>
-            )}
-
-            <label className="mt-6 flex items-start gap-3 text-sm text-parchment-200">
+            {/* Processing consent. This gates Continue, and therefore gates the
+                /api/reading/review request that carries the full record. */}
+            <label
+              htmlFor={FIELD_ID.processingConsent}
+              className="mt-8 flex min-h-[44px] cursor-pointer items-start gap-3 rounded-2xl border border-gold/25 bg-midnight-900/60 p-5 text-[15px] leading-relaxed text-parchment-200"
+            >
               <input
+                id={FIELD_ID.processingConsent}
                 type="checkbox"
-                checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-gold"
+                checked={processingConsent}
+                onChange={(event) => setProcessingConsent(event.target.checked)}
+                className={CHECKBOX_CLASS}
               />
               <span>
-                I consent to this experience processing my birth date, time, and place to calculate
-                my chart and generate a reading. Readings are kept for a limited retention period
-                (configurable; currently 90 days) and I can delete my reading at any time. This
-                experience is for reflection and entertainment.
+                I consent to processing my birth date, time, and place to calculate my chart and
+                resolve the exact time zone. Nothing is stored yet — the next step shows what was
+                resolved, and you decide whether to create the reading.
               </span>
             </label>
           </fieldset>
         )}
 
-        <div className="mt-10 flex items-center justify-between">
+        {step === 5 && (
+          <fieldset>
+            {stepHeading("Review your birth record")}
+            <p className="mt-3 text-[15px] leading-relaxed text-silver-moon">
+              This is what we resolved from what you told us. Nothing has been stored.
+            </p>
+
+            <dl className="mt-6 space-y-3 rounded-2xl border border-gold/20 bg-midnight-900/60 p-5 text-[15px]">
+              <div className="flex justify-between gap-4">
+                <dt className="text-silver-moon">Name</dt>
+                <dd className="text-right font-medium text-parchment-100">{name.trim()}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-silver-moon">Birth date</dt>
+                <dd className="text-right font-medium text-parchment-100">{date}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-silver-moon">Birth time</dt>
+                <dd className="text-right font-medium text-parchment-100">
+                  {timeKnown ? `${time} (local)` : "Unknown — time-independent placements only"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-silver-moon">Birthplace</dt>
+                <dd className="text-right font-medium text-parchment-100">
+                  {selectedPlace?.displayName}
+                  {selectedPlace &&
+                    [selectedPlace.region, selectedPlace.country].filter(Boolean).length > 0 && (
+                      <span className="block text-[13px] font-normal text-silver-moon">
+                        {[selectedPlace.region, selectedPlace.country].filter(Boolean).join(", ")}
+                      </span>
+                    )}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-silver-moon">Time zone</dt>
+                <dd className="text-right font-medium text-parchment-100">
+                  {review?.place.timezone ?? selectedPlace?.timezone}
+                </dd>
+              </div>
+            </dl>
+
+            {!review && !reviewError && (
+              <p className="mt-4 text-[15px] text-silver-moon" role="status">
+                Resolving the exact time zone…
+              </p>
+            )}
+
+            {reviewError && (
+              <div
+                role="alert"
+                className="mt-4 rounded-xl border border-ember/60 bg-ember/10 p-4 text-[15px] text-parchment-200"
+              >
+                {reviewError}
+              </div>
+            )}
+
+            {review && <TechnicalReview review={review} />}
+          </fieldset>
+        )}
+
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
           <Button variant="ghost" onClick={back} className={step === 1 ? "invisible" : ""}>
             Back
           </Button>
           {step < 5 ? (
             <Button onClick={next}>Continue</Button>
           ) : (
-            <Button onClick={submit} disabled={submitting}>
-              {submitting ? "Creating your reading…" : "Generate My Reading"}
+            <Button onClick={submit} disabled={submitting || !review}>
+              {submitting ? "Creating your reading…" : "Create My Reading"}
             </Button>
           )}
         </div>
+
+        {step === 5 && (
+          <p className="mt-5 text-[13px] leading-relaxed text-silver-moon">
+            Creating the reading stores this record under a private, high-entropy identifier for the
+            retention period described in the{" "}
+            <Link
+              href="/privacy"
+              className="inline-block min-h-[24px] py-0.5 text-gold-300 underline underline-offset-4 hover:text-gold-400"
+            >
+              privacy statement
+            </Link>
+            . There is a visible Delete reading action on every reading page, and deleting it
+            removes the stored birth data immediately.
+          </p>
+        )}
       </div>
     </div>
   );

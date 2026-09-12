@@ -9,32 +9,36 @@ test("unknown-time reading omits Ascendant, Midheaven, and houses", async ({ pag
   await page.goto("/reading/new");
 
   // Step 1: name.
-  await page.getByLabel("Display name").fill("Morgan Unknown");
+  await page.getByLabel("Name or nickname").fill("Morgan Unknown");
   await page.getByRole("button", { name: "Continue" }).click();
 
   // Step 2: date.
   await page.getByLabel("Birth date").fill("1985-03-14");
   await page.getByRole("button", { name: "Continue" }).click();
 
-  // Step 3: unknown time.
-  await page.getByLabel("I don't know my exact birth time").check();
+  // Step 3: unknown time. There is no default, so this is a real choice.
+  await page.getByLabel("I don't know it").check();
+  await expect(page.getByText("This is a complete reading, not a lesser one.")).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
 
-  // Step 4: birthplace.
-  await page.getByLabel("Search for your birthplace").fill("New York");
-  await expect(page.getByRole("button", { name: /New York City/ }).first()).toBeVisible({ timeout: 15_000 });
-  await page.getByRole("button", { name: /New York City/ }).first().click();
+  // Step 4: birthplace, behind the disclosure and the processing consent.
+  await page.getByLabel("I understand and want to search.").check();
+  await page.getByLabel("Birthplace", { exact: true }).fill("New York");
+  await expect(page.getByRole("option", { name: /New York City/ }).first()).toBeVisible({ timeout: 15_000 });
+  await page.getByRole("option", { name: /New York City/ }).first().click();
+  await page.getByLabel(/I consent to processing my birth date/).check();
   await page.getByRole("button", { name: "Continue" }).click();
 
-  // Step 5: review shows the unknown-time disclosure and the reference
-  // instant — with the actual UTC birth instant clearly marked unknown.
+  // Step 5: the human summary states the time is unknown; the reference
+  // instant and the explicit "not known" UTC instant live in the technical
+  // disclosure, which is closed until asked for.
   await expect(page.getByText("Unknown — time-independent placements only")).toBeVisible();
+  await page.locator("summary").filter({ hasText: "Technical details" }).click();
   await expect(page.getByText("Actual UTC birth instant")).toBeVisible();
   await expect(page.getByText("Not known — no time was supplied")).toBeVisible();
   await expect(page.getByText("Disclosed reference instant", { exact: true })).toBeVisible();
   await expect(page.getByText("1985-03-14T05:00:00.000Z")).toBeVisible(); // NY EST midnight reference
-  await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Generate My Reading" }).click();
+  await page.getByRole("button", { name: "Create My Reading" }).click();
 
   // Reading ready.
   await expect(page.getByRole("heading", { name: /Morgan Unknown/ })).toBeVisible({ timeout: 30_000 });

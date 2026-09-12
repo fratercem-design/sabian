@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "dataset": "datasets/original-sabian-symbols.json",
+  "datasetSha256": "BDFCB51770D4B7EB9F9184FC5E2B77493F5FD94FBBC08C363A50C64368A129A7",
+  "recordCount": 360,
+  "rightsBasis": "project-original",
+  "historicalSabianWordingIncluded": false,
+  "status": "pending-human-attestation",
+  "approvedBy": null,
+  "approvedAt": null,
+  "evidence": {
+    "firstTrackedCommit": "67191eae4a76a868fd9d1c8d9b2a3c519ae3b168",
+    "generator": "scripts/generate-original-sabian-dataset.ts",
+    "automatedValidation": "npm run validate:symbols",
+    "humanEditorialReviewCount": 0,
+    "contributorAssignmentOrAuthorshipRecord": null,
+    "outsideCounselReview": null
+  },
+  "notes": [
+    "This manifest covers the project's substitute degree-image corpus, not Marc Edmund Jones, Elsie Wheeler, Dane Rudhyar, or another historical rendering.",
+    "Do not change status to approved until all 360 records are human-reviewed and the contributor authorship or assignment evidence is attached.",
+    "Approval records should identify an actual person and date; they must never be generated or inferred by software."
+  ]
+}

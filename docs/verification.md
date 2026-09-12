@@ -215,12 +215,13 @@ unavailable.
 - **Optional historical Sabian wording** — the active 360-image corpus is
   project-owned original material. No historical third-party rendering has
   been activated or tested.
-- **PostgreSQL** — the runtime repository and migration path are implemented
-  with parameterized SQL and local contract tests, but a real PostgreSQL schema,
-  TLS connection, CRUD/cleanup smoke test, backup, or restore must be exercised
-  with `npm run smoke:postgres -- --apply`.
-- **Production deployment** — verified locally only; no hosting, TLS, backups,
-  or load behavior tested.
-- **npm audit claims** — current full and production-only counts are unavailable
-  because the npm registry security endpoint timed out. Earlier zero-count audits do
-  not certify the current run.
+- **PostgreSQL** — the Vercel Prisma Postgres resource is provisioned and connected to
+  Preview/Production, but the repository smoke script could not authenticate because Vercel
+  does not export the protected connection secret. TLS, schema, CRUD/cleanup, backup, and
+  disposable restore evidence remain open.
+- **Production deployment** — Vercel project configuration and a protected Preview boundary
+  were inspected. Preview returns HTTP 302 to Vercel SSO with `X-Robots-Tag: noindex`; the
+  public production alias returns HTTP 200 with security headers. This is deployment evidence,
+  not a production release approval.
+- **Dependency security** — the current full audit and production-only audit both pass with
+  zero vulnerabilities after the dependency remediation run.

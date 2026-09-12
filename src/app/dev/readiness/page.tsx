@@ -43,7 +43,7 @@ export default function ReadinessPage() {
     { label: "Astrology (Chart)", status: matrix.astrology },
     { label: "Birthplace Geocoding", status: matrix.geocoding },
     { label: "Historical Timezone", status: matrix.timezone },
-    { label: "Sabian Dataset", status: matrix.sabian },
+    { label: "Psyche Dataset", status: matrix.sabian },
     { label: "Story Generation", status: matrix.story },
     { label: "Artwork Generation", status: matrix.image },
   ];

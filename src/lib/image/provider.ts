@@ -111,7 +111,7 @@ export class MockImageGenerationProvider implements ImageGenerationProvider {
       key: cacheKey,
       imageUrl: generateDemoSvg(prompt, seed),
       source: "placeholder" as const,
-      altText: "Original demo emblem artwork representing this Sabian symbol",
+      altText: "Original demo emblem artwork representing this Psyche symbol",
       prompt,
     };
     cache.set(cacheKey, artwork);

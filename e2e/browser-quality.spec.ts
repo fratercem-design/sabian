@@ -20,13 +20,17 @@ test("no failed resources or console errors on landing and reading pages", async
   const errors = await assertNoConsoleErrors(page);
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "The Sabian Story" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "The Psyche Symbols" })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(/Sabian/i);
   await page.goto("/reading/new");
   await expect(page.getByRole("heading", { name: "Begin Your Reading" })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(/Sabian/i);
   await page.goto("/about/method");
   await expect(page.getByRole("heading", { name: /How this experience calculates/ })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(/Sabian/i);
   await page.goto("/privacy");
   await expect(page.getByRole("heading", { name: /handled with care/ })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(/Sabian/i);
 
   expect(errors).toEqual([]);
 });

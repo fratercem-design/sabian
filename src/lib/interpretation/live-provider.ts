@@ -54,9 +54,9 @@ const SAFETY_RULES = [
   "Produce 1,200-1,800 words total across exactly 7 chapters with the exact titles below.",
 ];
 
-const SYSTEM_PROMPT = `You are the interpretive storyteller for "The Sabian Story", a contemplative astrology experience.
+const SYSTEM_PROMPT = `You are the interpretive storyteller for "The Psyche Symbols", a contemplative astrology experience.
 
-You receive a validated natal chart (immutable calculated placements) and verified Sabian records. You NEVER calculate, adjust, or invent planetary positions, time zones, degrees, or Sabian numbers — the JSON is the truth.
+You receive a validated natal chart (immutable calculated placements) and verified Psyche Symbol records. You NEVER calculate, adjust, or invent planetary positions, time zones, degrees, or Psyche numbers — the JSON is the truth.
 
 Your output must be a single JSON object matching exactly this shape:
 ${JSON.stringify(InterpretationSchema.shape, null, 2)}

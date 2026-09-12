@@ -27,18 +27,35 @@ export function hashPrompt(prompt: string, provider: string): string {
 }
 
 export function createArtCache(): ArtCache {
-  mkdirSync(ART_CACHE_DIR, { recursive: true });
+  // Serverless deployments may expose the bundled project directory as
+  // read-only. Disk caching is an optimization, never a prerequisite for
+  // generating artwork; fall back to a per-process memory cache there.
+  let diskAvailable = true;
+  try {
+    mkdirSync(ART_CACHE_DIR, { recursive: true });
+  } catch {
+    diskAvailable = false;
+  }
+  const memoryCache = new Map<string, GeneratedArtwork>();
+
   return {
     get(key) {
+      const inMemory = memoryCache.get(key);
+      if (inMemory) return inMemory;
+      if (!diskAvailable) return null;
       const file = join(ART_CACHE_DIR, `${key}.json`);
       if (!existsSync(file)) return null;
       try {
-        return JSON.parse(readFileSync(file, "utf8")) as GeneratedArtwork;
+        const artwork = JSON.parse(readFileSync(file, "utf8")) as GeneratedArtwork;
+        memoryCache.set(key, artwork);
+        return artwork;
       } catch {
         return null;
       }
     },
     set(key, artwork) {
+      memoryCache.set(key, artwork);
+      if (!diskAvailable) return;
       try {
         writeFileSync(join(ART_CACHE_DIR, `${key}.json`), JSON.stringify(artwork), "utf8");
       } catch {
@@ -46,6 +63,7 @@ export function createArtCache(): ArtCache {
       }
     },
     cleanup(days) {
+      if (!diskAvailable) return 0;
       const cutoff = Date.now() - days * 86400000;
       let removed = 0;
       try {

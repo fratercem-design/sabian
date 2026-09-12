@@ -4,7 +4,7 @@
 
 The Psyche Symbols are a project-owned original 360-degree symbolic system for the Cult of Psyche. They use the zodiac's twelve signs and thirty degrees as an organizing vessel, but they do not reproduce or claim to replace historical Sabian wording.
 
-Read each image as psychology in symbolic dress. It may open a question, name a tension, or catch a truth at the edge of speech. It does not predict fate. The symbol is a Mirror, not a verdict.
+Read each image as psychology in symbolic dress. It may open a question, name a tension, or catch a truth at the edge of speech. It does not predict fate. The symbol offers a Mirror and leaves the verdict to you.
 
 ---
 

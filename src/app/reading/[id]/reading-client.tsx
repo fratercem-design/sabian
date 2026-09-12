@@ -7,7 +7,7 @@ const STAGES: Array<{ key: string; label: string }> = [
   { key: "resolving-place", label: "Resolving birthplace" },
   { key: "converting-time", label: "Converting historical time" },
   { key: "calculating-chart", label: "Calculating the natal chart" },
-  { key: "finding-symbols", label: "Finding the relevant Sabian Symbols" },
+  { key: "finding-symbols", label: "Finding the relevant Psyche Symbols" },
   { key: "composing-interpretation", label: "Composing the interpretation" },
   { key: "creating-artwork", label: "Creating symbolic artwork" },
   { key: "weaving-story", label: "Weaving the personal story" },

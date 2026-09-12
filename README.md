@@ -204,17 +204,14 @@ caches. Exact commands and counts are in
       not claimed as historical Sabian wording
 
 What remains unproven — live AI, live image generation, any optional historical
-Sabian corpus, a controlled live PostgreSQL/schema/retention check, and production deployment —
-is stated precisely in docs/verification.md. Human editorial approval of the
-generated corpus remains separate from its automated checks. Current dependency
-vulnerability counts are unavailable while the npm security endpoint times out.
+Sabian corpus, a controlled live PostgreSQL/schema/retention check, and a production release —
+is stated precisely in docs/verification.md. A Vercel private Preview boundary and public
+production response are now observed, but that is not a release approval. Human editorial
+approval of the generated corpus remains separate from its automated checks.
 
 ## Decisions required before monetization
 
-See [docs/entitlements.md](docs/entitlements.md) for the full list, including: whether
-to retain the project-owned imagery or license an optional historical corpus; which live text/image providers to integrate; how
-place search should work in production (geocoding provider, quotas); the PostgreSQL
-migration; retention policy tuning; and payment/entitlement enforcement choices.
+See [docs/entitlements.md](docs/entitlements.md), [docs/decisions/0001-production-platform-and-providers.md](docs/decisions/0001-production-platform-and-providers.md), and [docs/monetization-decision-record.md](docs/monetization-decision-record.md) for the remaining gates: rights attestation, controlled live provider calls, PostgreSQL backup/restore evidence, deployed Blob persistence verification, and payment/entitlement enforcement choices.
 
 ## License
 

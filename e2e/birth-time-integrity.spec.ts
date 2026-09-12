@@ -10,10 +10,8 @@ import { test, expect } from "@playwright/test";
  */
 
 test.describe("API birth-time validation", () => {
-  const base = "http://localhost:3100";
-
   test("timeKnown=true without birthTime is rejected with 400", async ({ request }) => {
-    const res = await request.post(`${base}/api/readings`, {
+    const res = await request.post("/api/readings", {
       data: {
         displayName: "No Time",
         birthDate: "1990-06-15",
@@ -28,7 +26,7 @@ test.describe("API birth-time validation", () => {
   });
 
   test("timeKnown=false with a birthTime is rejected with 400", async ({ request }) => {
-    const res = await request.post(`${base}/api/readings`, {
+    const res = await request.post("/api/readings", {
       data: {
         displayName: "Contradictory",
         birthDate: "1990-06-15",
@@ -42,7 +40,7 @@ test.describe("API birth-time validation", () => {
   });
 
   test("invalid calendar date (Feb 30) is rejected with 400", async ({ request }) => {
-    const res = await request.post(`${base}/api/readings`, {
+    const res = await request.post("/api/readings", {
       data: {
         displayName: "Bad Date",
         birthDate: "2024-02-30",
@@ -58,7 +56,7 @@ test.describe("API birth-time validation", () => {
   });
 
   test("DST spring-forward gap time is rejected with 400", async ({ request }) => {
-    const res = await request.post(`${base}/api/readings`, {
+    const res = await request.post("/api/readings", {
       data: {
         displayName: "Gap Time",
         birthDate: "2024-03-10",
@@ -75,7 +73,7 @@ test.describe("API birth-time validation", () => {
 
   test("DST fall-back overlap exposes both offset choices", async ({ request }) => {
     // 2024-11-03 01:30 occurred twice in New York.
-    const daylight = await request.post(`${base}/api/readings`, {
+    const daylight = await request.post("/api/readings", {
       data: {
         displayName: "Overlap Daylight",
         birthDate: "2024-11-03",
@@ -90,7 +88,7 @@ test.describe("API birth-time validation", () => {
     const day = (await daylight.json()) as { reading: { chart: { utcIso: string } } };
     expect(day.reading.chart.utcIso).toBe("2024-11-03T05:30:00.000Z");
 
-    const standard = await request.post(`${base}/api/readings`, {
+    const standard = await request.post("/api/readings", {
       data: {
         displayName: "Overlap Standard",
         birthDate: "2024-11-03",
@@ -107,7 +105,7 @@ test.describe("API birth-time validation", () => {
   });
 
   test("unknown-time reading contains no Ascendant, Midheaven, or houses", async ({ request }) => {
-    const res = await request.post(`${base}/api/readings`, {
+    const res = await request.post("/api/readings", {
       data: {
         displayName: "No Time Person",
         birthDate: "1985-03-14",

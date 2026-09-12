@@ -56,3 +56,4 @@ sabian-story-tests/
 /verification-manifest.json
 
 .vercel
+.env*

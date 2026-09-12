@@ -312,6 +312,27 @@ describe("LivePlaceSearchProvider (Task 7)", () => {
     expect(capturedHeaders!["X-Api-Key"]).toBeUndefined();
   });
 
+  it("passes an Open-Meteo commercial key using the documented query parameter", async () => {
+    let capturedUrl = "";
+    const fetchImpl = async (url: string) => {
+      capturedUrl = url;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ results: [] }),
+      } as unknown as Response;
+    };
+    const provider = new LivePlaceSearchProvider({
+      provider: "open-meteo",
+      apiUrl: "https://customer-geocoding-api.open-meteo.com/v1/search",
+      apiKey: "commercial-key",
+      fetchImpl,
+    });
+
+    await provider.search("London");
+    expect(new URL(capturedUrl).searchParams.get("apikey")).toBe("commercial-key");
+  });
+
   it("retries once on 5xx error before failing", async () => {
     const openMeteoResponse = {
       results: [

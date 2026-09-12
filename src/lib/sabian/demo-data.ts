@@ -38,10 +38,10 @@ function demoEntry(sign: Sign, degree: number): SabianSymbol {
     title,
     sourceVersion: "demo-fixture-2",
     sourceAttribution:
-      "Original demo fixture written for The Sabian Story (fictional placeholder; not a Sabian symbol text)",
+      "Original demo fixture written for The Psyche Symbols (fictional placeholder; not a Psyche symbol text)",
     licenseStatus: "demo-fixture",
     licensedSourceText: "",
-    originalEditorialInterpretation: `This is a demo placeholder for the Sabian degree ${sign} ${degree}. It deliberately carries no canonical or published meaning; it exists only to exercise the reading interface until an authorized dataset is imported.`,
+    originalEditorialInterpretation: `This is a demo placeholder for the Psyche degree ${sign} ${degree}. It deliberately carries no canonical or published meaning; it exists only to exercise the reading interface until an authorized dataset is imported.`,
     keywords: ["demo", "placeholder"],
     lightExpression: "A neutral demo placeholder with no interpretive claim.",
     shadowExpression: "A neutral demo placeholder with no interpretive claim.",

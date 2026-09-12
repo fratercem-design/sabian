@@ -9,9 +9,24 @@ import SaveDeleteButtons from "./save-delete-buttons";
 
 export const metadata: Metadata = {
   title: "Your Reading",
+  // A reading is personal. It is never indexed, never followed, never
+  // archived, and never carries social preview metadata that could leak a
+  // reading identifier. The matching Cache-Control and X-Robots-Tag headers
+  // are set for /reading/:path* in next.config.mjs.
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false, noarchive: true, nosnippet: true },
+  },
+  alternates: { canonical: null },
+  openGraph: undefined,
+  twitter: undefined,
 };
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export default async function ReadingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -58,7 +73,7 @@ function ReadyReading({ reading }: { reading: Reading }) {
           <div>
             <TestingBadge />
             <h1 className="mt-3 font-display text-3xl font-medium text-parchment-100 md:text-4xl">
-              {reading.displayName}&rsquo;s Sabian Story
+              {reading.displayName}&rsquo;s Psyche Story
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -198,10 +213,10 @@ function ReadyReading({ reading }: { reading: Reading }) {
         </div>
       </section>
 
-      {/* Your Sabian Story */}
+      {/* Your Psyche Story */}
       <section className="mx-auto max-w-3xl px-5 py-16" aria-labelledby="story">
         <div className="text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.25em] text-gold-400">Your Sabian Story</p>
+          <p className="text-xs font-medium uppercase tracking-[0.25em] text-gold-400">Your Psyche Story</p>
           <h2 id="story" className="mt-2 font-display text-3xl font-medium text-parchment-100">
             A story in seven images
           </h2>
@@ -316,7 +331,7 @@ function GatePanel({
           {question}
         </p>
         <p className="mt-4 text-xs leading-relaxed text-silver-mist">
-          Calculated position and Sabian degree are shown above; the interpretation is a generated
+          Calculated position and Psyche degree are shown above; the interpretation is a generated
           reflection, not a statement of fact.
         </p>
       </div>
@@ -431,7 +446,7 @@ function ChartFacts({ reading }: { reading: Reading }) {
       <ul className="mt-4 grid gap-2 sm:grid-cols-2">
         {reading.chart.placements.map((p) => (
           <li key={p.key} className="rounded-lg border border-gold/15 bg-midnight-900/60 px-4 py-2 text-sm">
-            <span className="text-gold-300">{p.name}:</span> {formatPlacement(p)} · Sabian {p.sabianDegree}
+            <span className="text-gold-300">{p.name}:</span> {formatPlacement(p)} · Psyche {p.sabianDegree}
           </li>
         ))}
       </ul>

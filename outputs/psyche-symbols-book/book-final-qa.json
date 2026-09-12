@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "entries": 360,
+  "docx": {
+    "heading_count": 360,
+    "heading_order_ok": true,
+    "source_images_present": 360,
+    "label_counts": {
+      "INTERPRETATION": 360,
+      "SIGNAL": 360,
+      "SHADOW": 360,
+      "MIRROR": 360,
+      "PRACTICE": 360
+    },
+    "title_metadata": "The Psyche Symbols",
+    "author_metadata": "Cult of Psyche",
+    "sections": 1
+  },
+  "pdf": {
+    "pages": 219,
+    "page_sizes_points": [
+      "432x648"
+    ],
+    "blank_pages": [],
+    "symbol_headings_found": 360,
+    "source_images_found": 360,
+    "interpretation_labels": 360,
+    "signal_labels": 360,
+    "shadow_labels": 360,
+    "mirror_labels": 360,
+    "practice_labels": 360,
+    "edge_violations": []
+  },
+  "images": {
+    "rendered_pages": 219,
+    "unique_render_sizes": [
+      "540x810"
+    ],
+    "blank_or_low_variance_pages": [],
+    "ink_on_outermost_3px_pages": []
+  },
+  "contact_sheets": [
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-001-020.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-021-040.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-041-060.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-061-080.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-081-100.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-101-120.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-121-140.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-141-160.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-161-180.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-181-200.png",
+    "C:\\Users\\johnb\\sabian\\tmp\\psyche-symbols-render\\contact-201-219.png"
+  ]
+}

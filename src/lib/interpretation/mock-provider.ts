@@ -52,7 +52,7 @@ function gateText(input: InterpretationInput, key: "sun" | "moon" | "ascendant",
   const symbolText = symbol?.symbolText?.trim() || title;
   return {
     title,
-    placement: `${placement?.sign} ${placement?.degree}°${String(placement?.minute ?? 0).padStart(2, "0")}′ — Sabian ${placement?.sabianDegree}`,
+    placement: `${placement?.sign} ${placement?.degree}°${String(placement?.minute ?? 0).padStart(2, "0")}′ — Psyche ${placement?.sabianDegree}`,
     symbol: symbolText,
     interpretation: `The image "${symbolText}" speaks to a ${nature.quality} quality within you — ${nature.image}. This symbol may suggest that your ${key === "sun" ? "conscious purpose" : key === "moon" ? "emotional nature" : "approach to the world"} is touched by ${pick(rand, ["a slow unfolding", "a sudden recognition", "a quiet insistence", "an unexpected lightness"])}.`,
     light: `In its lighter expression, this degree can support ${pick(rand, ["clarity of intent", "gentle persistence", "an open hand", "a steady gaze"])}.`,

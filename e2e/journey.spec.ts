@@ -21,28 +21,37 @@ const KNOWN_TIME_READING = {
 async function fillBirthForm(page: Page, input: typeof KNOWN_TIME_READING, unknownTime = false) {
   await page.goto("/reading/new");
 
-  await page.getByLabel("Display name").fill(input.name);
+  await page.getByLabel("Name or nickname").fill(input.name);
   await page.getByRole("button", { name: "Continue" }).click();
 
   await page.getByLabel("Birth date").fill(input.date);
   await page.getByRole("button", { name: "Continue" }).click();
 
   if (unknownTime) {
-    await page.getByLabel("I don't know my exact birth time").check();
+    await page.getByLabel("I don't know it").check();
   } else {
     await page.getByLabel("I know my birth time").check();
-    await page.getByLabel("Exact local birth time").fill(input.time);
+    await page.getByLabel("Recorded time").fill(input.time);
   }
   await page.getByRole("button", { name: "Continue" }).click();
 
-  await page.getByLabel("Search for your birthplace").fill(input.place);
-  await expect(page.getByRole("button", { name: /London/ }).first()).toBeVisible({ timeout: 15_000 });
-  await page.getByRole("button", { name: /London/ }).first().click();
+  // Step 4: the location-provider disclosure is acknowledged BEFORE any place
+  // query can be issued, and processing consent is given BEFORE the review
+  // endpoint receives the birth record.
+  await page.getByLabel("I understand and want to search.").check();
+  await page.getByLabel("Birthplace", { exact: true }).fill(input.place);
+  await expect(page.getByRole("option", { name: /London/ }).first()).toBeVisible({ timeout: 15_000 });
+  await page.getByRole("option", { name: /London/ }).first().click();
+  await page.getByLabel(/I consent to processing my birth date/).check();
   await page.getByRole("button", { name: "Continue" }).click();
 
   await expect(page.getByText("Review your birth record")).toBeVisible();
-  await page.getByRole("checkbox").check();
   return page;
+}
+
+/** Open the closed "Technical details" disclosure on the review step. */
+async function openTechnicalDetails(page: Page) {
+  await page.locator("summary").filter({ hasText: "Technical details" }).click();
 }
 
 type SavedReading = {
@@ -81,7 +90,7 @@ function uiPlacement(p: SavedReading["chart"]["placements"][number]): string {
 test("complete journey with saved-data comparison: landing → reading → reload → delete", async ({ page, request }) => {
   // 1. Landing page.
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "The Sabian Story" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "The Psyche Symbols" })).toBeVisible();
   await expect(page.getByText("Testing Preview").first()).toBeVisible();
 
   // 2. Begin a reading.
@@ -91,7 +100,10 @@ test("complete journey with saved-data comparison: landing → reading → reloa
   // 3. Fill the known birth record.
   await fillBirthForm(page, KNOWN_TIME_READING);
 
-  // 4. Review shows canonical place, coordinates, timezone, offset, UTC BEFORE submission.
+  // 4. Review shows canonical place, coordinates, timezone, offset, UTC BEFORE
+  //    submission — the human summary first, the evidence one click away.
+  await expect(page.getByText("Time zone", { exact: true })).toBeVisible();
+  await openTechnicalDetails(page);
   await expect(page.getByText("Resolved before submission")).toBeVisible();
   await expect(page.getByText("51.5074°, -0.1278°")).toBeVisible(); // London lat/lon
   await expect(page.getByLabel("Resolved birth time details").getByText("Europe/London")).toBeVisible();
@@ -99,8 +111,8 @@ test("complete journey with saved-data comparison: landing → reading → reloa
   await expect(page.getByText("1990-06-15T13:30:00.000Z")).toBeVisible(); // resolved UTC instant
   await expect(page.getByText("Daylight-saving occurrence", { exact: false })).toHaveCount(0); // unique time
 
-  // 5. Generate.
-  await page.getByRole("button", { name: "Generate My Reading" }).click();
+  // 5. Create. The final action is a distinct confirmation, not a checkbox.
+  await page.getByRole("button", { name: "Create My Reading" }).click();
 
   // 6. Wait for the reading to be ready.
   await expect(page.getByRole("heading", { name: /Avery Testington/ })).toBeVisible({ timeout: 30_000 });
@@ -142,7 +154,7 @@ test("complete journey with saved-data comparison: landing → reading → reloa
     // The Three Gates show the exact position AND the Sabian degree together.
     if (gateKeys.includes(key)) {
       await expect(
-        page.getByText(new RegExp(`${p.sign} ${p.degree}°.*Sabian ${p.sabianDegree}`)).first()
+        page.getByText(new RegExp(`${p.sign} ${p.degree}°.*Psyche ${p.sabianDegree}`)).first()
       ).toBeVisible();
     }
   }

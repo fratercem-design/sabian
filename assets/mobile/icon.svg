@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">The Psyche Symbols signal mark</title>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0" stop-color="#2A1740"/>
+      <stop offset="0.58" stop-color="#130B1F"/>
+      <stop offset="1" stop-color="#07060A"/>
+    </radialGradient>
+    <filter id="signal" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="210" fill="url(#bg)"/>
+  <g fill="none" stroke="#C9A227">
+    <circle cx="512" cy="512" r="318" stroke-width="8" opacity="0.5"/>
+    <circle cx="512" cy="512" r="232" stroke-width="12"/>
+    <circle cx="512" cy="512" r="139" stroke-width="7" opacity="0.78"/>
+  </g>
+  <g fill="#D8BD68">
+    <circle cx="512" cy="194" r="14"/><circle cx="671" cy="237" r="14"/><circle cx="787" cy="353" r="14"/>
+    <circle cx="830" cy="512" r="14"/><circle cx="787" cy="671" r="14"/><circle cx="671" cy="787" r="14"/>
+    <circle cx="512" cy="830" r="14"/><circle cx="353" cy="787" r="14"/><circle cx="237" cy="671" r="14"/>
+    <circle cx="194" cy="512" r="14"/><circle cx="237" cy="353" r="14"/><circle cx="353" cy="237" r="14"/>
+  </g>
+  <circle cx="512" cy="512" r="42" fill="#62E4C8" filter="url(#signal)"/>
+</svg>

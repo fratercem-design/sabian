@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0B1020" />
+    <title>The Psyche Symbols — Offline</title>
+    <style>
+      :root { color-scheme: dark; font-family: Georgia, serif; background: #0b1020; color: #f4ead7; }
+      body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 32px; box-sizing: border-box; }
+      main { max-width: 34rem; text-align: center; }
+      .mark { width: 112px; height: 112px; margin: 0 auto 28px; border: 1px solid #c9a227; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 20px #130b1f; }
+      .mark::after { content: ""; width: 18px; height: 18px; border-radius: 50%; background: #62e4c8; box-shadow: 0 0 26px #62e4c8; }
+      h1 { margin: 0; font-size: 2rem; font-weight: 500; }
+      p { color: #a9b4c4; line-height: 1.6; }
+      button { min-height: 48px; margin-top: 18px; padding: 0 24px; border: 1px solid #c9a227; border-radius: 6px; background: #c9a227; color: #0b1020; font: 700 1rem system-ui, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true"></div>
+      <h1>The signal is quiet.</h1>
+      <p>The app cannot reach the reading service. Your birth details have not been sent. Reconnect, then try again.</p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+  </body>
+</html>

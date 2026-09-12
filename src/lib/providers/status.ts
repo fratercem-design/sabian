@@ -177,7 +177,7 @@ function imageStatus(): ProviderStatus {
       interfaceName: "ImageGenerationProvider",
       implementation: "MockImageGenerationProvider (deterministic SVG)",
       kind: "mock",
-      envVars: ["IMAGE_PROVIDER", "IMAGE_API_KEY", "IMAGE_MODEL"],
+      envVars: ["IMAGE_PROVIDER", "IMAGE_API_KEY", "IMAGE_MODEL", "IMAGE_ASSET_STORAGE"],
       externalData: "None.",
       readinessNote: "Deterministic mock; set IMAGE_PROVIDER + IMAGE_API_KEY to go live.",
     };
@@ -187,7 +187,7 @@ function imageStatus(): ProviderStatus {
       interfaceName: "ImageGenerationProvider",
       implementation: `LiveImageGenerationProvider (${env.IMAGE_PROVIDER})`,
       kind: "unavailable",
-      envVars: ["IMAGE_PROVIDER", "IMAGE_API_KEY", "IMAGE_MODEL"],
+      envVars: ["IMAGE_PROVIDER", "IMAGE_API_KEY", "IMAGE_MODEL", "IMAGE_ASSET_STORAGE"],
       externalData: "None until configured.",
       readinessNote: "Live provider selected but IMAGE_API_KEY is missing.",
     };
@@ -196,9 +196,20 @@ function imageStatus(): ProviderStatus {
     interfaceName: "ImageGenerationProvider",
     implementation: `LiveImageGenerationProvider (${env.IMAGE_PROVIDER})`,
     kind: "configured-untested",
-    envVars: ["IMAGE_PROVIDER", "IMAGE_API_KEY", "IMAGE_MODEL"],
+    envVars: [
+      "IMAGE_PROVIDER",
+      "IMAGE_API_KEY",
+      "IMAGE_MODEL",
+      "IMAGE_ASSET_STORAGE",
+      "BLOB_STORE_ID",
+      "VERCEL_OIDC_TOKEN",
+      "BLOB_READ_WRITE_TOKEN",
+    ],
     externalData: "Sanitized visual prompt only; never the visitor's name or birthplace.",
-    readinessNote: "Configured but not yet verified with a controlled live call.",
+    readinessNote:
+      env.IMAGE_ASSET_STORAGE === "vercel-blob"
+        ? "Configured with durable Vercel Blob storage but not yet verified with a controlled live call."
+        : "Configured with inline image storage; use Vercel Blob before production and verify with a controlled live call.",
   };
 }
 

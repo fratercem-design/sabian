@@ -29,6 +29,7 @@ const MAX_RETRIES = 1;
 export interface LivePlaceSearchOptions {
   apiUrl?: string;
   apiKey?: string;
+  provider?: string;
   timeoutMs?: number;
   fetchImpl?: HttpClient;
 }
@@ -65,12 +66,14 @@ export class LivePlaceSearchProvider implements PlaceSearchProvider {
   readonly name: string;
   private apiUrl: string | undefined;
   private apiKey: string | undefined;
+  private providerId: string | undefined;
   private timeoutMs: number;
   private fetchImpl: HttpClient;
 
   constructor(opts: LivePlaceSearchOptions = {}) {
     this.apiUrl = opts.apiUrl ?? env.GEOCODING_API_URL;
     this.apiKey = opts.apiKey ?? env.GEOCODING_API_KEY;
+    this.providerId = opts.provider ?? env.GEOCODING_PROVIDER;
     this.timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.fetchImpl = opts.fetchImpl ?? ((url, init) => fetch(url, init));
     this.name = `live (${this.apiUrl ?? "unconfigured"})`;
@@ -97,7 +100,13 @@ export class LivePlaceSearchProvider implements PlaceSearchProvider {
       Accept: "application/json",
     };
     if (this.apiKey) {
-      headers["Authorization"] = `Bearer ${this.apiKey}`;
+      if (this.providerId === "open-meteo") {
+        // Open-Meteo's commercial endpoint expects the credential as the
+        // documented `apikey` query parameter, not a bearer token.
+        url.searchParams.set("apikey", this.apiKey);
+      } else {
+        headers["Authorization"] = `Bearer ${this.apiKey}`;
+      }
     }
 
     let lastError: Error | null = null;

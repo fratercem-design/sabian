@@ -88,6 +88,17 @@ describe("LiveImageGenerationProvider (Task 6)", () => {
     expect(again.imageUrl).toBe(art.imageUrl);
   });
 
+  it("turns OpenAI base64 output into a browser-safe data URL in inline mode", async () => {
+    const provider = new LiveImageGenerationProvider({
+      provider: "openai",
+      apiKey: "k",
+      assetStorage: "inline",
+      fetchImpl: fakeFetch({ data: [{ b64_json: "aGVsbG8=" }] }),
+    });
+    const art = await generate(provider, "sun", ["amber comet"], "Demo image for Aries 2");
+    expect(art.imageUrl).toBe("data:image/png;base64,aGVsbG8=");
+  });
+
   it("retries ONE failed image without regenerating siblings", async () => {
     const fetchImpl = fakeFetch({ data: [{ url: "https://img.example/y.png" }] }, 200, 0, true);
     const provider = new LiveImageGenerationProvider({ provider: "openai", apiKey: "k", fetchImpl });

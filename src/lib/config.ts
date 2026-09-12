@@ -17,8 +17,8 @@
 import { z } from "zod";
 
 export const brand = {
-  name: "The Sabian Story",
-  shortName: "Sabian Story",
+  name: "The Psyche Symbols",
+  shortName: "Psyche Symbols",
   tagline: "Every degree contains an image. Every life unfolds a story.",
   testingBadge: "Testing Preview",
   heroStatement:
@@ -38,6 +38,26 @@ export const brand = {
     },
   ],
 } as const;
+
+/**
+ * Canonical public origin, used for `metadataBase`, canonical URLs, the
+ * sitemap, and the robots sitemap reference.
+ *
+ * Static by design, for the same reason as the rest of the brand block: a
+ * canonical URL that varies by environment produces canonical tags that point
+ * at preview deployments. Deployment configuration is unaffected by this
+ * value; it only shapes metadata output.
+ */
+export const siteUrl = "https://www.psychesymbols.xyz";
+
+/** Routes that may be indexed. Everything else is explicitly excluded. */
+export const publicRoutes = ["/", "/about/method", "/privacy"] as const;
+
+/**
+ * Routes that must never be indexed: the intake form and personal readings
+ * carry birth details, and the readiness dashboard is a development surface.
+ */
+export const noIndexRoutes = ["/reading/", "/api/", "/dev/"] as const;
 
 export const designTokens = {
   /** Midnight blue — primary background. */
@@ -91,11 +111,11 @@ export const sabianConvention = {
   id: "degree-to-next",
   label: "Degree-to-next convention",
   rule:
-    "A position within a degree corresponds to the NEXT numbered Sabian degree. A position at exactly the boundary (0°00′00″ of a sign) corresponds to that sign's first degree (degree 1) — the leading edge convention.",
+    "A position within a degree corresponds to the NEXT numbered Psyche degree. A position at exactly the boundary (0°00′00″ of a sign) corresponds to that sign's first degree (degree 1) — the leading edge convention.",
   boundaries: {
-    exactSignStart: "0°00′00″ of a sign → Sabian degree 1 of that sign (leading edge).",
-    fraction: "0°00′01″ of a sign → Sabian degree 1 of that sign (within the first degree).",
-    lastInstant: "29°59′59″ of a sign → Sabian degree 30 of that sign.",
+    exactSignStart: "0°00′00″ of a sign → Psyche degree 1 of that sign (leading edge).",
+    fraction: "0°00′01″ of a sign → Psyche degree 1 of that sign (within the first degree).",
+    lastInstant: "29°59′59″ of a sign → Psyche degree 30 of that sign.",
     globalWrap: "360.0000° (exactly 0° Aries) → global index 360, which is the same as Aries 1 via the 360≡1 boundary.",
   },
 } as const;
@@ -139,6 +159,10 @@ const envSchema = z.object({
   IMAGE_PROVIDER: z.string().default("mock"),
   IMAGE_API_KEY: z.string().optional(),
   IMAGE_MODEL: z.string().optional(),
+  IMAGE_ASSET_STORAGE: z.enum(["inline", "vercel-blob"]).default("inline"),
+  BLOB_READ_WRITE_TOKEN: z.string().optional(),
+  BLOB_STORE_ID: z.string().optional(),
+  VERCEL_OIDC_TOKEN: z.string().optional(),
   GEOCODING_API_URL: z.string().optional(),
   GEOCODING_API_KEY: z.string().optional(),
   GEOCODING_PROVIDER: z.string().optional(),
@@ -169,6 +193,20 @@ const envSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["PLACE_TOKEN_SECRET"],
       message: "A unique PLACE_TOKEN_SECRET is required for live geocoding in production",
+    });
+  }
+  if (
+    value.IMAGE_PROVIDER !== "mock" &&
+    value.IMAGE_ASSET_STORAGE === "vercel-blob" &&
+    !value.BLOB_READ_WRITE_TOKEN &&
+    !(value.VERCEL_OIDC_TOKEN && value.BLOB_STORE_ID)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["BLOB_READ_WRITE_TOKEN"],
+      message:
+        "Vercel Blob credentials are required when IMAGE_ASSET_STORAGE=vercel-blob: " +
+        "use BLOB_READ_WRITE_TOKEN, or the Vercel OIDC pair VERCEL_OIDC_TOKEN + BLOB_STORE_ID",
     });
   }
 });

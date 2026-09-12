@@ -2,7 +2,7 @@
   "name": "the-sabian-story",
   "version": "0.1.0",
   "private": true,
-  "description": "The Sabian Story — a contemplative astrology experience centered on the 360 Sabian Symbols. Testing-phase MVP.",
+  "description": "The Psyche Symbols — a contemplative astrology experience centered on 360 original degree images. Testing-phase MVP.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.mts",
     "validate:symbols": "tsx scripts/validate-symbols.ts",
+    "verify:rights": "tsx scripts/verify-corpus-rights.ts",
     "import:symbols": "tsx scripts/import-symbols.ts",
     "goldmaster:generate": "node scripts/generate-goldmaster.mjs",
     "cleanup:readings": "tsx scripts/cleanup-readings.ts",
@@ -25,14 +26,34 @@
     "scan:client-secrets": "node scripts/scan-client-secrets.mjs",
     "assert:build-trace": "node scripts/assert-build-trace.mjs",
     "e2e": "playwright test",
+    "mobile:build": "vite build --config vite.mobile.config.mjs",
+    "mobile:dev": "vite --config vite.mobile.config.mjs --host 127.0.0.1 --port 4174",
+    "mobile:sync": "npm run mobile:build && cap sync",
+    "mobile:assets": "node scripts/generate-mobile-assets.mjs",
+    "mobile:e2e": "playwright test --config playwright.mobile.config.ts",
+    "mobile:verify": "npm run mobile:build && npm run mobile:assets && node scripts/verify-store-readiness.mjs && npm run mobile:e2e",
+    "mobile:android:debug": "npm run mobile:sync && cd android && gradlew.bat assembleDebug",
+    "mobile:android:bundle": "npm run mobile:sync && cd android && gradlew.bat bundleRelease",
+    "mobile:ios:open": "npm run mobile:sync && cap open ios",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run test:integration && npm run validate:symbols && npm run build",
     "verify:full": "npm run verify && npm run e2e && npm run scan:client-secrets && npm run assert:build-trace",
     "verify:manifest": "tsx scripts/write-verification-manifest.ts"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.1",
+    "@capacitor/network": "^8.0.1",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@fontsource/cormorant-garamond": "^5.0.0",
     "@fontsource/inter": "^5.0.0",
     "@fontsource/source-sans-3": "^5.0.0",
+    "@vercel/blob": "^2.8.0",
     "astronomy-engine": "^2.1.19",
     "lucide-react": "^1.33.0",
     "moment": "^2.30.1",
@@ -45,6 +66,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.0",
     "@playwright/test": "^1.47.2",
     "@types/node": "^20.14.0",
     "@types/pg": "^8.23.1",
@@ -58,6 +80,7 @@
     "tailwindcss": "^3.4.6",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3",
+    "vite": "^8.2.2",
     "vitest": "^4.1.11"
   }
 }

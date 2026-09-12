@@ -1,6 +1,6 @@
 import { describe, expect, it, afterEach } from "vitest";
 import type { NextRequest } from "next/server";
-import { getClientKey } from "@/proxy";
+import { allowedMobileOrigin, getClientKey, proxy } from "@/proxy";
 
 /** A real Request — getClientKey only reads headers, but keep it faithful. */
 function req(headers: Record<string, string>): NextRequest {
@@ -99,5 +99,49 @@ describe("getClientKey", () => {
       "x-forwarded-for": "1.1.1.1, 2.2.2.2",
     });
     expect(getClientKey(r).key).toBe("203.0.113.7");
+  });
+});
+
+describe("mobile app CORS", () => {
+  it("allows only the exact production Capacitor origins", () => {
+    expect(allowedMobileOrigin("capacitor://localhost", "production")).toBe("capacitor://localhost");
+    expect(allowedMobileOrigin("https://localhost", "production")).toBe("https://localhost");
+    expect(allowedMobileOrigin("https://localhost.evil.example", "production")).toBeNull();
+    expect(allowedMobileOrigin("https://www.psychesymbols.xyz", "production")).toBeNull();
+  });
+
+  it("keeps local Vite origins development-only", () => {
+    expect(allowedMobileOrigin("http://127.0.0.1:4174", "development")).toBe("http://127.0.0.1:4174");
+    expect(allowedMobileOrigin("http://127.0.0.1:4174", "production")).toBeNull();
+  });
+
+  it("answers an allowed preflight without consuming the API route", () => {
+    const request = new Request("https://www.psychesymbols.xyz/api/readings", {
+      method: "OPTIONS",
+      headers: { origin: "capacitor://localhost", "access-control-request-method": "POST" },
+    }) as unknown as NextRequest;
+    const response = proxy(request);
+    expect(response.status).toBe(204);
+    expect(response.headers.get("access-control-allow-origin")).toBe("capacitor://localhost");
+    expect(response.headers.get("access-control-allow-methods")).toContain("DELETE");
+  });
+
+  it("rejects untrusted preflight origins", () => {
+    const request = new Request("https://www.psychesymbols.xyz/api/readings", {
+      method: "OPTIONS",
+      headers: { origin: "https://evil.example", "access-control-request-method": "POST" },
+    }) as unknown as NextRequest;
+    expect(proxy(request).status).toBe(403);
+  });
+});
+
+describe("private reading headers", () => {
+  it("sets no-store and noindex headers on personal reading pages", () => {
+    const request = new Request("https://www.psychesymbols.xyz/reading/private-id") as unknown as NextRequest;
+    const response = proxy(request);
+    expect(response.headers.get("cache-control")).toContain("private");
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(response.headers.get("x-robots-tag")).toContain("noindex");
+    expect(response.headers.get("x-robots-tag")).toContain("noarchive");
   });
 });

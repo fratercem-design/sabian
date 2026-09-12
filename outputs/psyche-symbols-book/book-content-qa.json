@@ -1,0 +1,42 @@
+{
+  "entries": 360,
+  "sequence_ok": true,
+  "sign_counts": {
+    "Aries": 30,
+    "Taurus": 30,
+    "Gemini": 30,
+    "Cancer": 30,
+    "Leo": 30,
+    "Virgo": 30,
+    "Libra": 30,
+    "Scorpio": 30,
+    "Sagittarius": 30,
+    "Capricorn": 30,
+    "Aquarius": 30,
+    "Pisces": 30
+  },
+  "all_sign_counts_30": true,
+  "unique_headings": 360,
+  "unique_titles": 360,
+  "unique_source_images": 360,
+  "unique_interpretive_sections": 360,
+  "field_uniqueness": {
+    "reading": 360,
+    "signal": 360,
+    "shadow": 360,
+    "mirror": 360,
+    "practice": 360
+  },
+  "repeated_interpretive_sentences": {},
+  "stock_phrase_hits": {},
+  "source_scene_word_range": [
+    8,
+    16
+  ],
+  "source_scenes_are_sentences": true,
+  "entries_with_all_fields": 360,
+  "banned_word_hits": [],
+  "markdown_path": "C:\\Users\\johnb\\sabian\\outputs\\psyche-symbols-book\\The-Psyche-Symbols-Manuscript.md",
+  "docx_path": "C:\\Users\\johnb\\sabian\\outputs\\psyche-symbols-book\\The-Psyche-Symbols.docx",
+  "pdf_path": "C:\\Users\\johnb\\sabian\\outputs\\psyche-symbols-book\\The-Psyche-Symbols.pdf"
+}

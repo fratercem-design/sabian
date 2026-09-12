@@ -261,7 +261,7 @@ export class AstronomyEngineChartProvider implements ChartCalculationProvider {
 
 export const NODE_MODE_LABELS: Record<NodeMode, string> = {
   osculating:
-    "Osculating ascending node (default) — instantaneous node computed from the Moon's state vectors. This is an approximation, not the Swiss Ephemeris 'true node': it can differ by up to ~1.5°, which changes the Sabian degree in 4 of the 14 gold-master fixtures.",
+    "Osculating ascending node (default) — instantaneous node computed from the Moon's state vectors. This is an approximation, not the Swiss Ephemeris 'true node': it can differ by up to ~1.5°, which changes the Psyche degree in 4 of the 14 gold-master fixtures.",
   mean: "Mean node — Meeus polynomial; closely matches the Swiss Ephemeris mean node.",
 };
 
